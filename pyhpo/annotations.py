@@ -33,6 +33,15 @@ class Gene:
     def __hash__(self):
         return self.id
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return 'Gene(["", "", {}, "{}"])'.format(
+            self.id,
+            self.name
+        )
+
 
 class Omim:
     def __init__(self, cols):
@@ -55,6 +64,15 @@ class Omim:
 
     def __hash__(self):
         return self.id
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return 'Omim(["", {}, "{}"])'.format(
+            self.id,
+            self.name
+        )
 
 
 class HPO_Gene(dict):
