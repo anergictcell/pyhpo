@@ -48,6 +48,11 @@ class HPOTerm():
         self._parents = []
         self._children = []
 
+        # External annotations
+        self.genes = set()
+        self.omim_diseases = set()
+        self.omim_excluded_diseases = set()
+
     def add_line(self, line):
         if line == '':
             return
