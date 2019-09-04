@@ -71,32 +71,7 @@ class Ontology():
     def path(self, query1, query2):
         term1 = self.get_hpo_object(query1)
         term2 = self.get_hpo_object(query2)
-
-        # set of all parents for term-1
-        parents1 = set()
-        for path in term1.hierarchy():
-            parents1.update(path)
-
-        # set of all parents for term-2
-        parents2 = set()
-        for path in term2.hierarchy():
-            parents2.update(path)
-
-        # common ancestors
-        common = parents1 & parents2
-
-        paths = []
-        for term in common:
-            path1 = term1.shortest_path_to_parent(term)
-            path2 = term2.shortest_path_to_parent(term)
-            total_path = path1[1] + tuple(reversed(path2[1]))[1:]
-            paths.append((
-                path1[0] + path2[0],
-                total_path,
-                path1[0],
-                path2[0]
-            ))
-        return sorted(paths, key=lambda x: x[0])[0]
+        return term1.path_to_other(term2)
 
     def get_hpo_object(self, query):
         if isinstance(query, str):

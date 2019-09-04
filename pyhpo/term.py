@@ -287,6 +287,33 @@ class HPOTerm():
         else:
             return level
 
+    def path_to_other(self, other):
+        # set of all parents for self
+        parents1 = set()
+        for path in self.hierarchy():
+            parents1.update(path)
+
+        # set of all parents for other
+        parents2 = set()
+        for path in other.hierarchy():
+            parents2.update(path)
+
+        # common ancestors
+        common = parents1 & parents2
+
+        paths = []
+        for term in common:
+            path1 = self.shortest_path_to_parent(term)
+            path2 = other.shortest_path_to_parent(term)
+            total_path = path1[1] + tuple(reversed(path2[1]))[1:]
+            paths.append((
+                path1[0] + path2[0],
+                total_path,
+                path1[0],
+                path2[0]
+            ))
+        return sorted(paths, key=lambda x: x[0])[0]
+
     @staticmethod
     def id_from_string(hpo_string):
         # removes the term (if present)
