@@ -151,6 +151,16 @@ class HPOTerm():
     def children(self, hpo):
         self._children.append(hpo)
 
+    def is_parent(self, other):
+        return other.is_child_of(self)
+
+    def is_child_of(self, other):
+        if self == other:
+            raise RuntimeError('An HPO term cannot be parent/child of itself')
+
+        path = self.shortest_path_to_parent(other)
+        return path[0] != float('inf') and path[1] is not None
+
     def parent_ids(self):
         """
         List of IDs of parent HPO Terms
