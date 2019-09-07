@@ -18,6 +18,13 @@ class Gene:
         HGNC id
     name: str
         HGNC gene synbol
+    symbol: str
+        HGNC gene symbol (alias of ``name``)
+
+    Parameters
+    ----------
+    columns: list
+        [None, None, id, name]
     """
     def __init__(self, columns):
         self.id = int(columns[2])
@@ -55,6 +62,21 @@ class Gene:
 
 
 class Omim:
+    """
+    Representation of an OMIM disease
+
+    Attributes
+    ----------
+    id: int
+        OMIM id
+    name: str
+        OMIM disease name
+
+    Parameters
+    ----------
+    columns: list
+        [None, id, name]
+    """
     def __init__(self, cols):
         self.id = int(cols[1])
         self.name = cols[2]
@@ -87,6 +109,18 @@ class Omim:
 
 
 class HPO_Gene(dict):
+    """
+    Associative ``dict`` to link an HPO term to a ``Gene``
+
+    Parameters
+    ----------
+    filename: str
+        Filename of HPO-Gene association file.
+        Defaults to filename from HPO
+    path: str
+        Path to data files.
+        Defaults to './'
+    """
     def __init__(self, filename=None, path='./'):
         if filename is None:
             filename = os.path.join(path, FILENAMES['HPO_GENE'])
@@ -107,6 +141,18 @@ class HPO_Gene(dict):
 
 
 class HPO_Omim(dict):
+    """
+    Associative ``dict`` to link an HPO term to an ``Omim`` disease
+
+    Parameters
+    ----------
+    filename: str
+        Filename of HPO-Omim Disease association file.
+        Defaults to filename from HPO
+    path: str
+        Path to data files.
+        Defaults to './'
+    """
     def __init__(self, filename=None, path='./'):
         if filename is None:
             filename = os.path.join(path, FILENAMES['HPO_PHENO'])
@@ -127,6 +173,18 @@ class HPO_Omim(dict):
 
 
 class HPO_negative_Omim(dict):
+    """
+    Associative ``dict`` to link an HPO term to an excluded ``Omim`` disease
+
+    Parameters
+    ----------
+    filename: str
+        Filename of HPO-Excluded Omim Disease association file.
+        Defaults to filename from HPO
+    path: str
+        Path to data files.
+        Defaults to './'
+    """
     def __init__(self, filename=None, path='./'):
         if filename is None:
             filename = os.path.join(path, FILENAMES['HPO_NEGATIVE_PHENO'])
