@@ -8,21 +8,34 @@ class HPOTerm():
 
     Attributes
     ----------
-    name: str
-        HPO Term name
-        Example: Abnormality of body heigh
+    children: list(HPOTerm)
+        List of direct children HPOTerms
+    comment: str
+        Comments from HPO Team
+        Example: Multicystic kidney dysplasia is the result of
+        abnormal fetal renal development in which the affected kidney
+        is replaced by multiple cysts and has little or no residual function.
+        The vast majority of multicystic kidneys are unilateral.
+        Multicystic kidney can be diagnosed on prenatal ultrasound.
+    definition: str
+        HPO Term Definition
+        Example: "Multicystic dysplasia of the kidney is characterized by
+        multiple cysts of varying size in the kidney and the absence of a
+        normal pelvicaliceal system. The condition is associated with ureteral
+        or ureteropelvic atresia, and the affected kidney is nonfunctional."
+        [HPO:curators]
     id: str
         HPO Term ID
         Example: HP:0000003
-    definition: str
-        HPO Term Definition
-        Example: "Multicystic dysplasia of the kidney is characterized by multiple cysts of varying size in the kidney and the absence of a normal pelvicaliceal system. The condition is associated with ureteral or ureteropelvic atresia, and the affected kidney is nonfunctional." [HPO:curators]
-    comment: str
-        Comments from HPO Team
-        Example: Multicystic kidney dysplasia is the result of abnormal fetal renal development in which the affected kidney is replaced by multiple cysts and has little or no residual function. The vast majority of multicystic kidneys are unilateral. Multicystic kidney can be diagnosed on prenatal ultrasound.
+    name: str
+        HPO Term name
+        Example: Abnormality of body heigh
+    parents: list(HPOTerm)
+        List of direct parent HPOTerms
     synonym: list(str)
         List of synonymous names
-        Example: ['Multicystic dysplastic kidney', 'Multicystic kidneys', 'Multicystic renal dysplasia']
+        Example: ['Multicystic dysplastic kidney', 'Multicystic kidneys',
+        'Multicystic renal dysplasia']
     xref: list
         List of xref attributes
     is_a: list(str)
@@ -55,6 +68,16 @@ class HPOTerm():
         self.omim_excluded_diseases = set()
 
     def add_line(self, line):
+        """
+        Adds one line of information to ``self``.
+
+        Use this function for parsing ``obo`` files line by line
+
+        Parameters
+        ----------
+        line: str
+            One line of an HPO obo file belonging to this HPO term
+        """
         if line == '':
             return
         key, *values = line.split(': ')
@@ -62,35 +85,6 @@ class HPOTerm():
         if key == 'def':
             key = 'definition'
         self.__setattr__(key, value)
-
-    def __index__(self):
-        return self._index
-
-    __int__ = __index__
-
-    __hash__ = __index__
-
-    def __eq__(self, other):
-        return isinstance(other, HPOTerm) and self.__hash__() == other.__hash__()
-
-    def __lt__(self, other):
-        return self.__int__() < int(other)
-
-    def __str__(self):
-        return '{} | {}'.format(self._id, self.name)
-
-    def __repr__(self):
-        return '\n'.join([
-            '\n[Term]',
-            'id: {}'.format(self._id),
-            'name: {}'.format(self.name),
-            'def: {}'.format(self.definition),
-            'comment: {}'.format(self.comment),
-            '\n'.join('synonym: {}'.format(item) for item in self._synonym),
-            '\n'.join('xref: {}'.format(item) for item in self._xref),
-            '\n'.join('is_a: {}'.format(item) for item in self._is_a),
-            '\n'
-        ])
 
     @property
     def id(self):
@@ -153,9 +147,35 @@ class HPOTerm():
         self._children.append(hpo)
 
     def is_parent(self, other):
+        """
+        Checks if ``self`` is a direct or indirect parent of ``other``.
+
+        Parameters
+        ----------
+        other: HPOTerm
+            HPOTerm to check for lineage dependency
+
+        Returns
+        -------
+        bool
+            Is the HPOTerm a direct or indirect parent of another HPOTerms
+        """
         return other.is_child_of(self)
 
     def is_child_of(self, other):
+        """
+        Checks if ``self`` is a direct or indirect child of ``other``.
+
+        Parameters
+        ----------
+        other: HPOTerm
+            HPOTerm to check for lineage dependency
+
+        Returns
+        -------
+        bool
+            Is the HPOTerm a direct or indirect child of another HPOTerms
+        """
         if self == other:
             raise RuntimeError('An HPO term cannot be parent/child of itself')
 
@@ -408,3 +428,32 @@ class HPOTerm():
             e.g.: Multicystic dysplastic kidney
         """
         return synonym.split('"')[1]
+
+    def __index__(self):
+        return self._index
+
+    __int__ = __index__
+
+    __hash__ = __index__
+
+    def __eq__(self, other):
+        return isinstance(other, HPOTerm) and self.__hash__() == other.__hash__()
+
+    def __lt__(self, other):
+        return self.__int__() < int(other)
+
+    def __str__(self):
+        return '{} | {}'.format(self._id, self.name)
+
+    def __repr__(self):
+        return '\n'.join([
+            '\n[Term]',
+            'id: {}'.format(self._id),
+            'name: {}'.format(self.name),
+            'def: {}'.format(self.definition),
+            'comment: {}'.format(self.comment),
+            '\n'.join('synonym: {}'.format(item) for item in self._synonym),
+            '\n'.join('xref: {}'.format(item) for item in self._xref),
+            '\n'.join('is_a: {}'.format(item) for item in self._is_a),
+            '\n'
+        ])
