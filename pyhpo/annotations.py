@@ -9,6 +9,16 @@ FILENAMES = {
 
 
 class Gene:
+    """
+    Representation of a Gene
+
+    Attributes
+    ----------
+    id: int
+        HGNC id
+    name: str
+        HGNC gene synbol
+    """
     def __init__(self, columns):
         self.id = int(columns[2])
         self.name = columns[3]

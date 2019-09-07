@@ -14,9 +14,6 @@ class HPOTerm():
     id: str
         HPO Term ID
         Example: HP:0000003
-    _index: int
-        Integer representation of ID
-        Example: 3
     definition: str
         HPO Term Definition
         Example: "Multicystic dysplasia of the kidney is characterized by multiple cysts of varying size in the kidney and the absence of a normal pelvicaliceal system. The condition is associated with ureteral or ureteropelvic atresia, and the affected kidney is nonfunctional." [HPO:curators]
@@ -31,6 +28,9 @@ class HPOTerm():
     is_a: list(str)
         List of parent HPO terms
         Example: ['HP:0000107 ! Renal cyst']
+    _index: int
+        Integer representation of ID
+        Example: 3
 
     """
     def __init__(self):
@@ -47,6 +47,7 @@ class HPOTerm():
         self._is_a = []
         self._parents = []
         self._children = []
+        self._hierarchy = None
 
         # External annotations
         self.genes = set()
@@ -165,10 +166,10 @@ class HPOTerm():
         """
         List of IDs of parent HPO Terms
 
-        Returns:
-        --------
+        Returns
+        -------
         list(int)
-            Example: [107]
+            All ids of the direct parents
         """
         return [
             HPOTerm.id_from_string(val) for val in self.is_a
@@ -269,12 +270,18 @@ class HPOTerm():
         Parameters
         ----------
         other: HPOTerm
-            Other HPO Term
+            parent HPOTerm instance
 
         Returns
         -------
         int
             Minimum number of nodes until the specified HPOTerm
+
+            (float('inf') if ``other`` is not a parent.)
+        list
+            List of all HPOTerm instances on the path
+
+            (``None`` if ``other`` is not a parent)
         """
         steps = float('inf')
         shortest_path = None
@@ -287,6 +294,21 @@ class HPOTerm():
         return (steps, shortest_path)
 
     def longest_path_to_bottom(self, level=0):
+        """
+        Calculates how far the most distant child is apart
+
+        Parameters
+        ----------
+        level: int
+            Offset level to indicate for calculation
+            Default: 0
+
+        Returns
+        -------
+        int:
+            Number of steps to most distant child
+
+        """
         if len(self.children):
             return max([
                 child.longest_path_to_bottom(level + 1) for child in self.children
@@ -295,6 +317,28 @@ class HPOTerm():
             return level
 
     def path_to_other(self, other):
+        """
+        Identifies the shortest connection between
+        two HPO terms
+
+        Parameters
+        ----------
+        other: HPOTerm
+            Target HPO term for path finding
+
+        Returns
+        -------
+        int
+            Length of path
+        tuple
+            Tuple of HPOTerms in the path
+        int
+            Number of steps from term-1 to the common parent
+        int
+            Number of steps from term-2 to the common parent
+
+        """
+
         # set of all parents for self
         parents1 = set()
         for path in self.hierarchy():
@@ -323,10 +367,44 @@ class HPOTerm():
 
     @staticmethod
     def id_from_string(hpo_string):
-        # removes the term (if present)
+        """
+        Formats the HPO-type Term-ID into an integer id
+
+        Parameters
+        ----------
+        hpo_string: str
+            HPO term ID.
+
+            (e.g.: HP:000001)
+
+        Returns
+        -------
+        int
+            Integer representation of provided HPO ID
+
+            (e.g.: 1)
+
+        """
         idx = hpo_string.split('!')[0].strip()
         return int(idx.split(':')[1].strip())
 
     @staticmethod
     def parse_synonym(synonym):
+        """
+        Extracts the synonym from the synonym data line in the obo file format
+
+        Parameters
+        ----------
+        synonym: str
+            value part of synonym-data line of obo file
+
+            e.g: "Multicystic dysplastic kidney" EXACT []
+
+        Returns
+        -------
+        str
+            Actual synonym title
+
+            e.g.: Multicystic dysplastic kidney
+        """
         return synonym.split('"')[1]
