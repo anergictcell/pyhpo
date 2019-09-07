@@ -210,34 +210,31 @@ class HPOTerm():
         for parent in self.parents:
             parent.print_hierarchy(indent + indent_increase, indent_increase)
 
-    def hierarchy(self, root=None, paths=None):
+    def hierarchy(self):
         """
         Calculates all paths from current term to Root term
         and returns each path as a Tuple of HPOTerms
-
-        Parameters
-        ----------
-        root: list
-            List of children HPO Terms
-
-        paths: list
-            List of all possible paths from base to the root HPOTerm
 
         Returns
         -------
         tuple
             Tuple of paths. Each path is another tuple made up of HPOTerms
         """
-        if root is None:
-            root = []
-        if paths is None:
-            paths = []
-        local_root = root + [self]
-        for parent in self.parents:
-            parent.hierarchy(local_root, paths)
+
+        if self._hierarchy:
+            return self._hierarchy
+
         if not self.parents:
-            paths.append(tuple(local_root))
-        return tuple(paths)
+            self._hierarchy = [[self]]
+            return self._hierarchy
+
+        paths = []
+        for parent in self.parents:
+            for path in parent.hierarchy():
+                paths.append([self] + path)
+
+        self._hierarchy = paths
+        return self._hierarchy
 
     def longest_path_to_root(self):
         """
