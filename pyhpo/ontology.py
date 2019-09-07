@@ -1,14 +1,23 @@
+import os
 from pyhpo.term import HPOTerm
+from pyhpo.annotations import HPO_Gene, HPO_Omim, HPO_negative_Omim
 
 
 class Ontology():
-    def __init__(self, filename=None):
+    def __init__(self, filename='hp.obo', data_folder='./'):
         self._map = {}
+        self._genes = set()
+        self._omim_diseases = set()
+        self._omim_excluded_diseases = set()
+        self._data_folder = data_folder
 
         if filename:
-            self.load_from_file(filename)
+            self._load_from_file(os.path.join(
+                data_folder,
+                filename
+            ))
 
-    def load_from_file(self, filename):
+    def _load_from_file(self, filename):
         term = None
         with open(filename) as fh:
             for line in fh:
@@ -32,6 +41,44 @@ class Ontology():
             for parent in term.parent_ids():
                 term.parents = self._map[parent]
                 self._map[parent].children = term
+
+    def add_annotations(self, data_folder=None):
+        """
+        Add secondary annotations to each HPO Term.
+        They currently include:
+        - Genes
+        - OMIIM diseases
+        - excluded OMIM diseases
+
+        It only works with properly named annotation files
+        from the HPO source
+
+        Parameters
+        ----------
+        path_to_annotations: str
+            Path to location where annotation files are stored
+
+        Returns
+        -------
+        None
+        """
+
+        if data_folder is None:
+            data_folder = self._data_folder
+
+        genes = HPO_Gene(path=data_folder)
+        omim_diseases = HPO_Omim(path=data_folder)
+        omim_excluded_diseases = HPO_negative_Omim(path=data_folder)
+        for term in self:
+            if term._index in genes:
+                term.genes = genes[term._index]
+                self._genes.update(genes[term._index])
+            if term._index in omim_diseases:
+                term.omim_diseases = omim_diseases[term._index]
+                self._omim_diseases.update(omim_diseases[term._index])
+            if term._index in omim_excluded_diseases:
+                term.omim_excluded_diseases = omim_excluded_diseases[term._index]
+                self._omim_excluded_diseases.update(omim_excluded_diseases[term._index])
 
     def search(self, query):
         for term in self:
@@ -84,6 +131,18 @@ class Ontology():
             type(query)
         ))
 
+    @property
+    def genes(self):
+        return self._genes
+
+    @property
+    def omim_diseases(self):
+        return self._omim_diseases
+
+    @property
+    def omim_excluded_diseases(self):
+        return self._omim_excluded_diseases
+
     def __getitem__(self, key):
         if key in self._map:
             return self._map[key]
@@ -95,11 +154,3 @@ class Ontology():
 
     def __iter__(self):
         return iter(self._map.values())
-
-
-# o = Ontology()
-# for term in terms:
-#     o.append(term)
-# o.connect_all()
-# 
-# 

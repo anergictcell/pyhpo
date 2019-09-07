@@ -1,3 +1,4 @@
+import os
 from pyhpo.term import HPOTerm
 
 FILENAMES = {
@@ -76,9 +77,9 @@ class Omim:
 
 
 class HPO_Gene(dict):
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, path='./'):
         if filename is None:
-            filename = FILENAMES['HPO_GENE']
+            filename = os.path.join(path, FILENAMES['HPO_GENE'])
         self.load_from_file(filename)
 
     def load_from_file(self, filename):
@@ -96,9 +97,9 @@ class HPO_Gene(dict):
 
 
 class HPO_Omim(dict):
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, path='./'):
         if filename is None:
-            filename = FILENAMES['HPO_PHENO']
+            filename = os.path.join(path, FILENAMES['HPO_PHENO'])
         self.load_from_file(filename)
 
     def load_from_file(self, filename):
@@ -116,9 +117,9 @@ class HPO_Omim(dict):
 
 
 class HPO_negative_Omim(dict):
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, path='./'):
         if filename is None:
-            filename = FILENAMES['HPO_NEGATIVE_PHENO']
+            filename = os.path.join(path, FILENAMES['HPO_NEGATIVE_PHENO'])
         self.load_from_file(filename)
 
     def load_from_file(self, filename):
