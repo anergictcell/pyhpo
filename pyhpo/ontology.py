@@ -24,19 +24,26 @@ class Ontology():
                 line = line.strip()
                 if line == '[Term]':
                     if term is not None:
-                        self.append(term)
+                        self._append(term)
                     term = HPOTerm()
                     continue
                 if not term:
                     continue
                 term.add_line(line)
-            self.append(term)
-        self.connect_all()
+            self._append(term)
+        self._connect_all()
 
-    def append(self, item):
+    def _append(self, item):
+        """
+        Adds one HPO term to the ontology
+        """
         self._map[item._index] = item
 
-    def connect_all(self):
+    def _connect_all(self):
+        """
+        Connects all parent-child associations in the Ontology
+        Called by default after loading the ontology from a file
+        """
         for term in self._map.values():
             for parent in term.parent_ids():
                 term.parents = self._map[parent]
