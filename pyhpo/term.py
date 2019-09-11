@@ -267,7 +267,7 @@ class HPOTerm():
             Maximum number of nodes until the root HPOTerm
         """
         return max([
-            len(h) for h in self.hierarchy()
+            len(h)-1 for h in self.hierarchy()
         ])
 
     def shortest_path_to_root(self):
@@ -280,7 +280,7 @@ class HPOTerm():
             Minimum number of nodes until the root HPOTerm
         """
         return min([
-            len(h) for h in self.hierarchy()
+            len(h)-1 for h in self.hierarchy()
         ])
 
     def shortest_path_to_parent(self, other):
