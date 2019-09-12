@@ -152,4 +152,4 @@ class SingleTermAttributes(unittest.TestCase):
             'HP:0009145 ! Abnormal cerebral artery morphology'
         ]
         assert term.parent_ids() == [2617, 9145]
-        assert term.hierarchy() == [[term]]
+        assert term.hierarchy() == ((term,),)

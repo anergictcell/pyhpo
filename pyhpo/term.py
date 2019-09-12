@@ -246,15 +246,15 @@ class HPOTerm():
             return self._hierarchy
 
         if not self.parents:
-            self._hierarchy = [[self]]
+            self._hierarchy = ((self,),)
             return self._hierarchy
 
         paths = []
         for parent in self.parents:
             for path in parent.hierarchy():
-                paths.append([self] + path)
+                paths.append((self,) + path)
 
-        self._hierarchy = paths
+        self._hierarchy = tuple(paths)
         return self._hierarchy
 
     def longest_path_to_root(self):
@@ -298,8 +298,8 @@ class HPOTerm():
             Minimum number of nodes until the specified HPOTerm
 
             (float('inf') if ``other`` is not a parent.)
-        list
-            List of all HPOTerm instances on the path
+        tuple
+            Tuple of all HPOTerm instances on the path
 
             (``None`` if ``other`` is not a parent)
         """

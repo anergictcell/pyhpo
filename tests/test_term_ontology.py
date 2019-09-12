@@ -148,31 +148,31 @@ class OntologyTreeTraversal(unittest.TestCase):
     def test_hierarchy(self):
         self.terms._connect_all()
 
-        assert self.root.hierarchy() == [
-            [self.root]
-        ]
+        assert self.root.hierarchy() == (
+            (self.root,),
+        )
 
-        assert self.child_1_1.hierarchy() == [
-            [self.child_1_1, self.root]
-        ]
+        assert self.child_1_1.hierarchy() == (
+            (self.child_1_1, self.root),
+        )
 
-        assert self.child_1_2.hierarchy() == [
-            [self.child_1_2, self.root]
-        ]
+        assert self.child_1_2.hierarchy() == (
+            (self.child_1_2, self.root),
+        )
 
-        assert self.child_2_1.hierarchy() == [
-            [self.child_2_1, self.child_1_1, self.root]
-        ]
+        assert self.child_2_1.hierarchy() == (
+            (self.child_2_1, self.child_1_1, self.root),
+        )
 
-        assert self.child_3.hierarchy() == [
-            [self.child_3, self.child_2_1, self.child_1_1, self.root],
-            [self.child_3, self.child_1_2, self.root]
-        ]
+        assert self.child_3.hierarchy() == (
+            (self.child_3, self.child_2_1, self.child_1_1, self.root),
+            (self.child_3, self.child_1_2, self.root)
+        )
 
-        assert self.child_4.hierarchy() == [
-            [self.child_4, self.child_3, self.child_2_1, self.child_1_1, self.root],
-            [self.child_4, self.child_3, self.child_1_2, self.root]
-        ]
+        assert self.child_4.hierarchy() == (
+            (self.child_4, self.child_3, self.child_2_1, self.child_1_1, self.root),
+            (self.child_4, self.child_3, self.child_1_2, self.root)
+        )
 
     def test_path_to_root_finding(self):
         self.terms._connect_all()
@@ -212,47 +212,47 @@ class OntologyTreeTraversal(unittest.TestCase):
         self.terms._connect_all()
         assert self.child_1_1.shortest_path_to_parent(self.root) == (
             1,
-            [self.child_1_1, self.root]
+            (self.child_1_1, self.root)
         )
 
         assert self.child_1_2.shortest_path_to_parent(self.root) == (
             1,
-            [self.child_1_2, self.root]
+            (self.child_1_2, self.root)
         )
 
         assert self.child_2_1.shortest_path_to_parent(self.root) == (
             2,
-            [self.child_2_1, self.child_1_1, self.root]
+            (self.child_2_1, self.child_1_1, self.root)
         )
 
         assert self.child_3.shortest_path_to_parent(self.root) == (
             2,
-            [self.child_3, self.child_1_2, self.root]
+            (self.child_3, self.child_1_2, self.root)
         )
 
         assert self.child_4.shortest_path_to_parent(self.root) == (
             3,
-            [self.child_4, self.child_3, self.child_1_2, self.root]
+            (self.child_4, self.child_3, self.child_1_2, self.root)
         )
 
         assert self.child_4.shortest_path_to_parent(self.child_3) == (
             1,
-            [self.child_4, self.child_3]
+            (self.child_4, self.child_3)
         )
 
         assert self.child_4.shortest_path_to_parent(self.child_2_1) == (
             2,
-            [self.child_4, self.child_3, self.child_2_1]
+            (self.child_4, self.child_3, self.child_2_1)
         )
 
         assert self.child_4.shortest_path_to_parent(self.child_1_1) == (
             3,
-            [self.child_4, self.child_3, self.child_2_1, self.child_1_1]
+            (self.child_4, self.child_3, self.child_2_1, self.child_1_1)
         )
 
         assert self.child_4.shortest_path_to_parent(self.child_1_2) == (
             2,
-            [self.child_4, self.child_3, self.child_1_2]
+            (self.child_4, self.child_3, self.child_1_2)
         )
 
         assert self.child_4.shortest_path_to_parent(self.child_1_3) == (
