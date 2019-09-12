@@ -107,8 +107,8 @@ class Ontology():
         """
 
         if isinstance(query, str):
-            if str.startswith('HP:'):
-                return self[HPOTerm.id_from_string(str)]
+            if query.startswith('HP:'):
+                return self[HPOTerm.id_from_string(query)]
             else:
                 return self.synonym_match(query)
 
