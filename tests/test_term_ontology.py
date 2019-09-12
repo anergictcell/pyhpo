@@ -1,6 +1,19 @@
 import unittest
+from unittest.mock import MagicMock
+
 from pyhpo.ontology import Ontology
 from pyhpo.term import HPOTerm
+from pyhpo import term
+
+
+class MockPrint:
+    def __init__(self):
+        self.counter = 0
+        self.strings = []
+
+    def __call__(self, string):
+        self.counter += 1
+        self.strings.append(string)
 
 
 class MockOntology:
@@ -266,22 +279,344 @@ class OntologyTreeTraversal(unittest.TestCase):
         )
 
     def test_path_to_other(self):
-        # path_to_other
-        pass
+        self.terms._connect_all()
+
+        path = self.child_1_1.path_to_other(self.root)
+        assert path == (
+            1,
+            (self.child_1_1, self.root),
+            1,
+            0
+        )
+
+        path = self.root.path_to_other(self.child_1_1)
+        assert path == (
+            1,
+            (self.root, self.child_1_1),
+            0,
+            1
+        )
+
+        path = self.child_1_1.path_to_other(self.child_1_2)
+        assert path == (
+            2,
+            (self.child_1_1, self.root, self.child_1_2),
+            1,
+            1
+        )
+
+        path = self.child_1_1.path_to_other(self.child_1_3)
+        assert path == (
+            2,
+            (self.child_1_1, self.root, self.child_1_3),
+            1,
+            1
+        )
+
+        path = self.child_2_1.path_to_other(self.child_1_3)
+        assert path == (
+            3,
+            (self.child_2_1, self.child_1_1, self.root, self.child_1_3),
+            2,
+            1
+        )
+
+        path = self.child_4.path_to_other(self.child_1_3)
+        assert path == (
+            4,
+            (
+                self.child_4,
+                self.child_3,
+                self.child_1_2,
+                self.root,
+                self.child_1_3
+            ),
+            3,
+            1
+        )
+
+        path = self.child_1_3.path_to_other(self.child_4)
+        assert path == (
+            4,
+            (
+                self.child_1_3,
+                self.root,
+                self.child_1_2,
+                self.child_3,
+                self.child_4
+            ),
+            1,
+            3
+        )
 
     def test_child_parent_checking(self):
-        # is_parent
-        # is_child_of
-        pass
+        self.terms._connect_all()
+
+        assert self.root.is_parent(self.child_1_1)
+        assert self.root.is_parent(self.child_1_2)
+        assert self.root.is_parent(self.child_2_1)
+        assert self.root.is_parent(self.child_3)
+        assert self.root.is_parent(self.child_4)
+        assert self.root.is_parent(self.child_1_3)
+
+        assert not self.root.is_child_of(self.child_1_1)
+        assert not self.root.is_child_of(self.child_1_2)
+        assert not self.root.is_child_of(self.child_2_1)
+        assert not self.root.is_child_of(self.child_3)
+        assert not self.root.is_child_of(self.child_4)
+        assert not self.root.is_child_of(self.child_1_3)
+
+        assert not self.child_1_1.is_parent(self.root)
+        assert not self.child_1_1.is_parent(self.child_1_2)
+        assert self.child_1_1.is_parent(self.child_2_1)
+        assert self.child_1_1.is_parent(self.child_3)
+        assert self.child_1_1.is_parent(self.child_4)
+        assert not self.child_1_1.is_parent(self.child_1_3)
+
+        assert self.child_1_1.is_child_of(self.root)
+        assert not self.child_1_1.is_child_of(self.child_1_2)
+        assert not self.child_1_1.is_child_of(self.child_2_1)
+        assert not self.child_1_1.is_child_of(self.child_3)
+        assert not self.child_1_1.is_child_of(self.child_4)
+        assert not self.child_1_1.is_child_of(self.child_1_3)
+
+        assert not self.child_1_2.is_parent(self.root)
+        assert not self.child_1_2.is_parent(self.child_1_1)
+        assert not self.child_1_2.is_parent(self.child_2_1)
+        assert self.child_1_2.is_parent(self.child_3)
+        assert self.child_1_2.is_parent(self.child_4)
+        assert not self.child_1_2.is_parent(self.child_1_3)
+
+        assert self.child_1_2.is_child_of(self.root)
+        assert not self.child_1_2.is_child_of(self.child_1_1)
+        assert not self.child_1_2.is_child_of(self.child_2_1)
+        assert not self.child_1_2.is_child_of(self.child_3)
+        assert not self.child_1_2.is_child_of(self.child_4)
+        assert not self.child_1_2.is_child_of(self.child_1_3)
+
+        assert not self.child_2_1.is_parent(self.root)
+        assert not self.child_2_1.is_parent(self.child_1_1)
+        assert not self.child_2_1.is_parent(self.child_1_2)
+        assert self.child_2_1.is_parent(self.child_3)
+        assert self.child_2_1.is_parent(self.child_4)
+        assert not self.child_2_1.is_parent(self.child_1_3)
+
+        assert self.child_2_1.is_child_of(self.root)
+        assert self.child_2_1.is_child_of(self.child_1_1)
+        assert not self.child_2_1.is_child_of(self.child_1_2)
+        assert not self.child_2_1.is_child_of(self.child_3)
+        assert not self.child_2_1.is_child_of(self.child_4)
+        assert not self.child_2_1.is_child_of(self.child_1_3)
+
+        assert not self.child_3.is_parent(self.root)
+        assert not self.child_3.is_parent(self.child_1_1)
+        assert not self.child_3.is_parent(self.child_1_2)
+        assert not self.child_3.is_parent(self.child_2_1)
+        assert self.child_3.is_parent(self.child_4)
+        assert not self.child_3.is_parent(self.child_1_3)
+
+        assert self.child_3.is_child_of(self.root)
+        assert self.child_3.is_child_of(self.child_1_1)
+        assert self.child_3.is_child_of(self.child_1_2)
+        assert self.child_3.is_child_of(self.child_2_1)
+        assert not self.child_3.is_child_of(self.child_4)
+        assert not self.child_3.is_child_of(self.child_1_3)
+
+        err_msg = 'An HPO term cannot be parent/child of itself'
+        with self.assertRaises(RuntimeError) as err:
+            self.child_3.is_child_of(self.child_3)
+        assert str(err.exception) == err_msg
+
+        with self.assertRaises(RuntimeError) as err:
+            self.child_3.is_parent(self.child_3)
+        assert str(err.exception) == err_msg
+
+        with self.assertRaises(RuntimeError) as err:
+            self.root.is_child_of(self.root)
+        assert str(err.exception) == err_msg
+
+        with self.assertRaises(RuntimeError) as err:
+            self.root.is_parent(self.root)
+        assert str(err.exception) == err_msg
 
     def test_parent_listing(self):
-        # count_parents
-        # parent_ids
-        pass
+        self.terms._connect_all()
+
+        assert self.root.count_parents() == 0
+        assert self.child_1_1.count_parents() == 1
+        assert self.child_1_2.count_parents() == 1
+        assert self.child_2_1.count_parents() == 2
+        assert self.child_3.count_parents() == 5
+        assert self.child_4.count_parents() == 6
+        assert self.child_1_3.count_parents() == 1
+
+        assert self.root.parent_ids() == []
+        assert self.child_1_1.parent_ids() == [1]
+        assert self.child_1_2.parent_ids() == [1]
+        assert self.child_2_1.parent_ids() == [11]
+        assert self.child_3.parent_ids() == [21, 12]
+        assert self.child_4.parent_ids() == [31]
+        assert self.child_1_3.parent_ids() == [1]
 
     def test_builtins(self):
-        # >
-        # ==
-        # str()
-        # repr()
+        assert int(self.root) == 1
+        assert int(self.child_1_3) == 13
+
+        assert self.child_1_3 > self.root
+        assert self.child_3 > self.root
+        assert self.child_3 > self.child_2_1
+
+        assert not self.child_1_3 == self.root
+        assert not self.child_3 == self.root
+        assert not self.child_3 == self.child_2_1
+
+        assert self.child_1_3 != self.root
+        assert self.child_3 != self.root
+        assert self.child_3 != self.child_2_1
+
+        assert self.root == self.root
+        assert self.child_1_3 == self.child_1_3
+        assert self.child_3 == self.child_3
+
+        assert str(self.root) == 'HP:0001 | Test root'
+        string = repr(self.root)
+        assert '\n[Term]\n' in string
+        assert '\nid: HP:0001\n' in string
+        assert '\nname: Test root\n' in string
+
+    def test_hierarchy_printing(self):
+        term.print = MockPrint()
+
+        self.terms._connect_all()
+        self.child_3.print_hierarchy()
+        assert term.print.counter == 6
+        assert term.print.strings[0] == '-Test child level 3'
+        assert term.print.strings[1].endswith('-Test child level 2-1')
+        assert term.print.strings[2].endswith('-Test child level 1-1')
+        assert term.print.strings[3].endswith('-Test root')
+        assert term.print.strings[4].endswith('-Test child level 1-2')
+        assert term.print.strings[5].endswith('-Test root')
+        term.print = print
+
+
+class OntologyQueries(unittest.TestCase):
+    def setUp(self):
+        items = make_terms()
+        self.root = items[0]
+        self.child_1_1 = items[1]
+        self.child_1_2 = items[2]
+        self.child_2_1 = items[3]
+        self.child_3 = items[4]
+        self.child_4 = items[5]
+        self.child_1_3 = items[6]
+
+        self.terms = Ontology(filename=None)
+        self.terms._append(self.root)
+        self.terms._append(self.child_1_1)
+        self.terms._append(self.child_1_2)
+        self.terms._append(self.child_2_1)
+        self.terms._append(self.child_3)
+        self.terms._append(self.child_4)
+        self.terms._append(self.child_1_3)
+
+    def test_get_hpo_object(self):
+        self.terms._connect_all()
+        assert self.terms.get_hpo_object('Test child level 1-2') == self.child_1_2
+        assert self.terms.get_hpo_object('HP:00012') == self.child_1_2
+        assert self.terms.get_hpo_object(12) == self.child_1_2
+        with self.assertRaises(SyntaxError) as err:
+            self.terms.get_hpo_object([1, 2, 3])
+        assert 'Invalid type' in str(err.exception)
+
+        with self.assertRaises(RuntimeError) as err:
+            self.terms.get_hpo_object('Some invalid term')
+        assert 'No HPO entry with term' in str(err.exception)
+
+    def test_matching(self):
+        self.terms._connect_all()
+        assert self.terms.match(self.root.name) == self.root
+        assert self.terms.match(self.child_1_1.name) == self.child_1_1
+        assert self.terms.match(self.child_1_2.name) == self.child_1_2
+        assert self.terms.match(self.child_1_3.name) == self.child_1_3
+        assert self.terms.match(self.child_1_2.name) == self.child_1_2
+        assert self.terms.match(self.child_3.name) == self.child_3
+        assert self.terms.match(self.child_4.name) == self.child_4
+
+        with self.assertRaises(RuntimeError) as err:
+            self.terms.match('Some invalid term')
+        assert 'No HPO entry with name' in str(err.exception)
+
+    def test_path_unit(self):
+        self.terms._connect_all()
+
+        Ontology.get_hpo_object = MagicMock(return_value=self.child_1_1)
+        self.child_1_1.path_to_other = MagicMock(return_value=1)
+
+        self.terms.path('first query', 'second query')
+
+        Ontology.get_hpo_object.assert_any_call('first query')
+        Ontology.get_hpo_object.assert_any_call('second query')
+        assert Ontology.get_hpo_object.call_count == 2
+
+        self.child_1_1.path_to_other.assert_called_once_with(self.child_1_1)
+
+    def test_path_integration(self):
+        self.terms._connect_all()
+
+        path = self.terms.path('Test child level 1-1', 'Test root')
+        assert path == (
+            1,
+            (self.child_1_1, self.root),
+            1,
+            0
+        )
+
+        path = self.terms.path('Test root', 'Test child level 1-1')
+        assert path == (
+            1,
+            (self.root, self.child_1_1),
+            0,
+            1
+        )
+
+        path = self.terms.path('Test child level 1-1', 'Test child level 1-2')
+        assert path == (
+            2,
+            (self.child_1_1, self.root, self.child_1_2),
+            1,
+            1
+        )
+
+    def test_search(self):
+        self.terms._connect_all()
+        self.terms.synonym_search = MagicMock(return_value=False)
+
+        assert list(self.terms.search('something')) == []
+        # All terms will be searched for in synonyms
+        assert self.terms.synonym_search.call_count == 7
+        self.terms.synonym_search.reset_mock()
+
+        assert list(self.terms.search('Test root')) == [self.root]
+        # Root term will not be searched for in synonyms
+        assert self.terms.synonym_search.call_count == 6
+        self.terms.synonym_search.reset_mock()
+
+        assert list(self.terms.search('Test child level 1-1')) == [self.child_1_1]
+        # Matched term will not be searched for in synonyms
+        assert self.terms.synonym_search.call_count == 6
+
+    @unittest.skip('TODO')
+    def test_synonym_search(self):
+        pass
+
+    @unittest.skip('TODO')
+    def test_synonym_match(self):
+        pass
+
+    @unittest.skip('TODO')
+    def test_annotations(self):
+        pass
+
+    @unittest.skip('TODO')
+    def test_loading_from_file(self):
         pass

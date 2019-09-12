@@ -120,6 +120,13 @@ class TermInit(unittest.TestCase):
             self.term.add_line('id: HP:00002')
         assert 'Unable to update existing ID' == str(err.exception)
 
+    def test_empty_line(self):
+        a = HPOTerm()
+        b = HPOTerm()
+        a.add_line('')
+        for attrs in a.__dict__:
+            assert a.__getattribute__(attrs) == b.__getattribute__(attrs)
+
 
 class SingleTermAttributes(unittest.TestCase):
     def setUp(self):
