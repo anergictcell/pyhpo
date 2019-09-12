@@ -205,9 +205,9 @@ class HPOTerm():
             The number of all ancestral HPO Terms
         """
         return sum([
-            parent.count_parents()
+            parent.count_parents() + 1
             for parent in self.parents
-        ])+1
+        ])
 
     def print_hierarchy(self, indent=0, indent_increase=2):
         """
