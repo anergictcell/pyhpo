@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import MagicMock
 
+import pyhpo
 from pyhpo.ontology import Ontology
 from pyhpo.term import HPOTerm
-from pyhpo import term
 
 
 class MockPrint:
@@ -35,6 +35,8 @@ def make_terms():
     child_1_2.id = 'HP:0012'
     child_1_2.name = 'Test child level 1-2'
     child_1_2.is_a = root.id
+    child_1_2.synonym = '"another name"'
+    child_1_2.synonym = '"third name"'
 
     child_2_1 = HPOTerm()
     child_2_1.id = 'HP:0021'
@@ -485,18 +487,18 @@ class OntologyTreeTraversal(unittest.TestCase):
         assert '\nname: Test root\n' in string
 
     def test_hierarchy_printing(self):
-        term.print = MockPrint()
+        pyhpo.term.print = MockPrint()
 
         self.terms._connect_all()
         self.child_3.print_hierarchy()
-        assert term.print.counter == 6
-        assert term.print.strings[0] == '-Test child level 3'
-        assert term.print.strings[1].endswith('-Test child level 2-1')
-        assert term.print.strings[2].endswith('-Test child level 1-1')
-        assert term.print.strings[3].endswith('-Test root')
-        assert term.print.strings[4].endswith('-Test child level 1-2')
-        assert term.print.strings[5].endswith('-Test root')
-        term.print = print
+        assert pyhpo.term.print.counter == 6
+        assert pyhpo.term.print.strings[0] == '-Test child level 3'
+        assert pyhpo.term.print.strings[1].endswith('-Test child level 2-1')
+        assert pyhpo.term.print.strings[2].endswith('-Test child level 1-1')
+        assert pyhpo.term.print.strings[3].endswith('-Test root')
+        assert pyhpo.term.print.strings[4].endswith('-Test child level 1-2')
+        assert pyhpo.term.print.strings[5].endswith('-Test root')
+        pyhpo.term.print = print
 
 
 class OntologyQueries(unittest.TestCase):
@@ -601,16 +603,42 @@ class OntologyQueries(unittest.TestCase):
         assert self.terms.synonym_search.call_count == 6
         self.terms.synonym_search.reset_mock()
 
-        assert list(self.terms.search('Test child level 1-1')) == [self.child_1_1]
+        assert list(self.terms.search('Test child level 1-1')) == [
+            self.child_1_1
+        ]
         # Matched term will not be searched for in synonyms
         assert self.terms.synonym_search.call_count == 6
 
-    @unittest.skip('TODO')
     def test_synonym_search(self):
+        self.terms._connect_all()
+        assert self.terms.synonym_search(self.child_1_2, 'not')
+        assert self.terms.synonym_search(self.child_1_2, 'ther na')
+        assert self.terms.synonym_search(self.child_1_2, 'another name')
+        assert self.terms.synonym_search(self.child_1_2, 'name')
+        assert self.terms.synonym_search(self.child_1_2, 'third name')
+        assert not self.terms.synonym_search(self.child_1_2, 'xyz')
+
+        assert not self.terms.synonym_search(self.child_1_3, 'not')
+        assert not self.terms.synonym_search(self.child_1_3, 'ther na')
+        assert not self.terms.synonym_search(self.child_1_3, 'another name')
+        assert not self.terms.synonym_search(self.child_1_3, 'name')
+        assert not self.terms.synonym_search(self.child_1_3, 'third name')
+        assert not self.terms.synonym_search(self.child_1_3, 'xyz')
         pass
 
-    @unittest.skip('TODO')
     def test_synonym_match(self):
+        self.child_1_1.synonym = '"Test child level 1-2"'
+        self.terms._connect_all()
+
+        assert self.terms.synonym_match('Test child level 1-2') == self.child_1_2
+        assert self.terms.synonym_match('another name') == self.child_1_2
+        assert self.terms.synonym_match('third name') == self.child_1_2
+
+        self.child_1_2.name = 'something else'
+        assert self.terms.synonym_match('Test child level 1-2') == self.child_1_1
+
+    @unittest.skip('TODO')
+    def test_common_ancestors(self):
         pass
 
     @unittest.skip('TODO')
