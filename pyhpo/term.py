@@ -66,6 +66,10 @@ class HPOTerm():
         self.genes = set()
         self.omim_diseases = set()
         self.omim_excluded_diseases = set()
+        self.information_content = {
+            'omim': None,
+            'gene': None
+        }
 
     def add_line(self, line):
         """
@@ -399,6 +403,26 @@ class HPOTerm():
                 path2[0]
             ))
         return sorted(paths, key=lambda x: x[0])[0]
+
+    def similarity_score(self, other, kind=None):
+        """
+        According to Robinson et al, American Journal of Human Genetics, 2008
+        """
+        sim = {
+            'omim': 0,
+            'gene': 0
+        }
+        for term in self.common_ancestors(other):
+            ic = term.information_content
+            if ic['omim'] > sim['omim']:
+                sim['omim'] = ic['omim']
+            if ic['gene'] > sim['gene']:
+                sim['gene'] = ic['gene']
+
+        if kind is None:
+            return sim
+        else:
+            return sim[kind]
 
     @staticmethod
     def id_from_string(hpo_string):

@@ -1,4 +1,6 @@
 import os
+import math
+
 from pyhpo.term import HPOTerm
 from pyhpo.annotations import HPO_Gene, HPO_Omim, HPO_negative_Omim
 
@@ -67,6 +69,23 @@ class Ontology():
             if term._index in omim_excluded_diseases:
                 term.omim_excluded_diseases = omim_excluded_diseases[term._index]
                 self._omim_excluded_diseases.update(omim_excluded_diseases[term._index])
+        self.add_information_content()
+
+    def add_information_content(self):
+        total_diseases = len(self.omim_diseases)
+        total_genes = len(self.genes)
+        for term in self:
+            p_omim = len(term.omim_diseases)/total_diseases
+            p_gene = len(term.genes)/total_genes
+            if p_omim == 0:
+                term.information_content['omim'] = 0
+            else:
+                term.information_content['omim'] = -math.log10(p_omim)
+
+            if p_gene == 0:
+                term.information_content['gene'] = 0
+            else:
+                term.information_content['gene'] = -math.log10(p_gene)
 
     def get_hpo_object(self, query):
         """

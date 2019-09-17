@@ -37,6 +37,21 @@ class HPOSet(list):
             genes.update(term.genes)
         return genes
 
+    def information_content(self, kind):
+        res = {
+            'mean': None,
+            'total': 0,
+            'max': 0
+        }
+
+        for term in self:
+            ic = term.information_content[kind]
+            res['total'] += ic
+            if ic > res['max']:
+                res['max'] = ic
+        res['mean'] = res['total']/len(self)
+        return res
+
     def variance(self):
         """
         Calculates the distances between all its term-pairs. It also provides
