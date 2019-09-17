@@ -38,17 +38,38 @@ class HPOSet(list):
         return genes
 
     def information_content(self, kind):
+        """
+        Gives back basic information content stats about the
+        HPOTerms within the set
+
+        Parameters
+        ----------
+        kind: str
+            Which kind of information content should be calculated.
+            Options are ['omim', 'gene']
+
+
+        Returns
+        -------
+        dict
+            Dict with the following keys
+        mean
+            Mean information content
+        max
+            Maximum information content value
+        total
+            Sum of all information content values
+        all
+            List with all information content values
+        """
         res = {
             'mean': None,
             'total': 0,
-            'max': 0
+            'max': 0,
+            'all': [term.information_content[kind] for term in self]
         }
-
-        for term in self:
-            ic = term.information_content[kind]
-            res['total'] += ic
-            if ic > res['max']:
-                res['max'] = ic
+        res['total'] = sum(res['all'])
+        res['max'] = max(res['all'])
         res['mean'] = res['total']/len(self)
         return res
 
