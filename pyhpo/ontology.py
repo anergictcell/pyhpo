@@ -1,5 +1,13 @@
 import os
 import math
+import warnings
+
+try:
+    import pandas as pd
+except ImportError:
+    warnings.warn(
+        'Some functionality requires pandas, which is currently not available',
+        UserWarning)
 
 from pyhpo.term import HPOTerm
 from pyhpo.annotations import HPO_Gene, HPO_Omim, HPO_negative_Omim
@@ -258,6 +266,37 @@ class Ontology():
             if query in synonym:
                 return True
         return False
+
+    def to_dataframe(self):
+        data = {
+            'id': [],
+            'name': [],
+            'parents': [],
+            'children': [],
+            'ic_omim': [],
+            'ic_gene': [],
+            'dTop_l': [],
+            'dTop_s': [],
+            'dBottom': [],
+            'genes': [],
+            'diseases': []
+        }
+        for term in self:
+            data['id'].append(term.id)
+            data['name'].append(term.name)
+            data['parents'].append('|'.join([x.id for x in term.parents]))
+            data['children'].append('|'.join([x.id for x in term.children]))
+            data['ic_omim'].append(term.information_content['omim'])
+            data['ic_gene'].append(term.information_content['gene'])
+            data['dTop_l'].append(term.longest_path_to_root())
+            data['dTop_s'].append(term.shortest_path_to_root())
+            data['dBottom'].append(term.longest_path_to_bottom())
+            data['genes'].append('|'.join([str(x) for x in term.genes]))
+            data['diseases'].append('|'.join([
+                str(x) for x in term.omim_diseases
+            ]))
+
+        return pd.DataFrame(data).set_index('id')
 
     @property
     def genes(self):
