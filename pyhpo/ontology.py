@@ -80,12 +80,12 @@ class Ontology():
             if p_omim == 0:
                 term.information_content['omim'] = 0
             else:
-                term.information_content['omim'] = -math.log10(p_omim)
+                term.information_content['omim'] = -math.log(p_omim)
 
             if p_gene == 0:
                 term.information_content['gene'] = 0
             else:
-                term.information_content['gene'] = -math.log10(p_gene)
+                term.information_content['gene'] = -math.log(p_gene)
 
     def get_hpo_object(self, query):
         """
