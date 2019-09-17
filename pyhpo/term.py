@@ -195,6 +195,33 @@ class HPOTerm():
             HPOTerm.id_from_string(val) for val in self.is_a
         ]
 
+    def common_ancestors(self, other):
+        """
+        Identifies all common ancestors
+        of two HPO terms
+
+        Parameters
+        ----------
+        other: HPOTerm
+            Target HPO term for path finding
+
+        Returns
+        -------
+        set
+            Set of common ancestor HPOTerms
+        """
+        parents1 = set()
+        for path in self.hierarchy():
+            parents1.update(path)
+
+        # set of all parents for other
+        parents2 = set()
+        for path in other.hierarchy():
+            parents2.update(path)
+
+        # common ancestors
+        return parents1 & parents2
+
     def count_parents(self):
         """
         Calculates total number of ancestral HPO Terms
@@ -358,19 +385,7 @@ class HPOTerm():
             Number of steps from term-2 to the common parent
 
         """
-
-        # set of all parents for self
-        parents1 = set()
-        for path in self.hierarchy():
-            parents1.update(path)
-
-        # set of all parents for other
-        parents2 = set()
-        for path in other.hierarchy():
-            parents2.update(path)
-
-        # common ancestors
-        common = parents1 & parents2
+        common = self.common_ancestors(other)
 
         paths = []
         for term in common:
