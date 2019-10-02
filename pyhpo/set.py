@@ -29,7 +29,7 @@ class HPOSet(list):
 
         Returns
         -------
-        set
+        set of :class:`annotations.Gene`
             Set of all genes associated with the HPOTerms in the set
         """
         genes = set()
@@ -77,14 +77,13 @@ class HPOSet(list):
 
         Returns
         -------
-        int
-            Average distance between pairs
-        int
-            Smallest distance between pairs
-        int
-            Largest distance between pairs
-        list of int
-            List of all distances between pairs
+        tuple of (int, int, int, list of int)
+            Tuple with the variance metrices
+
+            * **int** Average distance between pairs
+            * **int** Smallest distance between pairs
+            * **int** Largest distance between pairs
+            * **list of int** List of all distances between pairs
         """
 
         distances = []
@@ -111,10 +110,11 @@ class HPOSet(list):
 
         Yields
         ------
-        HPOTerm
-            HPOTerm instance 1 of the pair
-        HPOTerm
-            HPOTerm instance 2 of the pair
+        Tuple of :class:`term.HPOTerm`
+            Tuple containing the follow items
+
+            * **HPOTerm** instance 1 of the pair
+            * **HPOTerm** instance 2 of the pair
 
         Examples
         --------
@@ -149,10 +149,11 @@ class HPOSet(list):
 
         Yields
         ------
-        HPOTerm
-            HPOTerm instance 1 of the pair
-        HPOTerm
-            HPOTerm instance 2 of the pair
+        Tuple of :class:`term.HPOTerm`
+            Tuple containing the follow items
+
+            * **HPOTerm** instance 1 of the pair
+            * **HPOTerm** instance 2 of the pair
 
         Example
         -------
