@@ -67,7 +67,7 @@ class Ontology():
 
         genes = HPO_Gene(path=data_folder)
         omim_diseases = HPO_Omim(path=data_folder)
-        omim_excluded_diseases = HPO_negative_Omim(path=data_folder)
+        omim_excluded = HPO_negative_Omim(path=data_folder)
         for term in self:
             if term._index in genes:
                 term.genes = genes[term._index]
@@ -75,9 +75,11 @@ class Ontology():
             if term._index in omim_diseases:
                 term.omim_diseases = omim_diseases[term._index]
                 self._omim_diseases.update(omim_diseases[term._index])
-            if term._index in omim_excluded_diseases:
-                term.omim_excluded_diseases = omim_excluded_diseases[term._index]
-                self._omim_excluded_diseases.update(omim_excluded_diseases[term._index])
+            if term._index in omim_excluded:
+                term.omim_excluded_diseases = omim_excluded[term._index]
+                self._omim_excluded_diseases.update(
+                    omim_excluded[term._index]
+                )
         self.add_information_content()
 
     def add_information_content(self):
