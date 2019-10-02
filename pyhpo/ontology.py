@@ -53,12 +53,13 @@ class Ontology():
 
         Parameters
         ----------
-        data_folder: str
+        data_folder: str, default ``None``
             Path to location where annotation files are stored
 
         Returns
         -------
         None
+            None
         """
 
         if data_folder is None:
@@ -80,6 +81,16 @@ class Ontology():
         self.add_information_content()
 
     def add_information_content(self):
+        """
+        Calculates the information content for each HPO Term
+        Based on paper from `Köhler S et. al., Nucleic Acids Res. 2014`
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3965098/
+
+        Returns
+        -------
+        None
+            None
+        """
         total_diseases = len(self.omim_diseases)
         total_genes = len(self.genes)
         for term in self:
@@ -101,7 +112,7 @@ class Ontology():
 
         Parameters
         ----------
-        query: str, int
+        query: str or int
             HPO term, synonym or HPO-ID (HP:00001) to match
             HPO term id (Integer based)
             e.g: Abnormality of the nervous system
@@ -174,8 +185,12 @@ class Ontology():
 
         Parameters
         ----------
-        query: str, int
-            HPO term, synonym or HPO-ID (HP:00001) to match
+        query1: str or int
+            HPO term 1, synonym or HPO-ID (HP:00001) to match
+            HPO term id (Integer based)
+            e.g: Abnormality of the nervous system
+        query2: str or int
+            HPO term 2, synonym or HPO-ID (HP:00001) to match
             HPO term id (Integer based)
             e.g: Abnormality of the nervous system
 
@@ -268,6 +283,37 @@ class Ontology():
         return False
 
     def to_dataframe(self):
+        """
+        Creates a Pandas DataFrame from the most important features
+
+        Each HPO term is one row, the features are present in columns
+
+        Returns
+        -------
+        :class:`DataFrame`
+            The DataFrame of HPO-Terms and their
+            attributes in the following columns
+
+            * **id** ``str`` The HPO Term ID "HP:0000003" (used as index)
+            * **name** ``str`` The HPO Term name "Multicystic kidney dysplasia"
+            * **parents** ``str`` Concatenated list of direct parents of
+              HPO terms. Separated by ``|``
+            * **children** ``str`` Concatenated list of direct children of
+              HPO terms. Separated by ``|``
+            * **ic_omim** ``float`` Information-content
+              (based on associated OMIM diseases)
+            * **ic_gene** ``float`` Information-content
+              (based on associated genes)
+            * **dTop_l** ``int`` Maximum distance to root term
+              (via :func:`pyhpo.term.longest_path_to_root`)
+            * **dTop_s** ``int`` Shortest distance to root term
+              (via :func:`pyhpo.term.shortest_path_to_root`)
+            * **dBottom** ``int`` Longest graph of children nodes
+              (via :func:`pyhpo.term.longest_path_to_bottom`)
+            * **diseases** ``str`` Concatenated list of associated
+              OMIM diseases. Separated by ``|``
+        """
+
         data = {
             'id': [],
             'name': [],
@@ -281,6 +327,9 @@ class Ontology():
             'genes': [],
             'diseases': []
         }
+
+        # This is not the most elegant way to generate a DataFrame
+        # But it works
         for term in self:
             data['id'].append(term.id)
             data['name'].append(term.name)

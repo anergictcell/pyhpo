@@ -52,15 +52,12 @@ class HPOSet(list):
         Returns
         -------
         dict
-            Dict with the following keys
-        mean
-            Mean information content
-        max
-            Maximum information content value
-        total
-            Sum of all information content values
-        all
-            List with all information content values
+            Dict with the following items
+
+            * **mean** ``float`` Mean information content
+            * **max** ``float`` Maximum information content value
+            * **total** ``float`` Sum of all information content values
+            * **all** ``list of HPOTerm`` List with all information content values
         """
         res = {
             'mean': None,
@@ -86,7 +83,7 @@ class HPOSet(list):
             Smallest distance between pairs
         int
             Largest distance between pairs
-        list
+        list of int
             List of all distances between pairs
         """
 
