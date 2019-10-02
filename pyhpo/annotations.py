@@ -29,10 +29,19 @@ class Gene:
     def __init__(self, columns):
         self.id = int(columns[2])
         self.name = columns[3]
+        self._hpo = set()
 
     @property
     def symbol(self):
         return self.name
+
+    @property
+    def hpo(self):
+        return self._hpo
+
+    @hpo.setter
+    def hpo(self, term):
+        self._hpo.add(term)
 
     def __eq__(self, other):
         if isinstance(other, int):
@@ -80,6 +89,15 @@ class Omim:
     def __init__(self, cols):
         self.id = int(cols[1])
         self.name = cols[2]
+        self._hpo = set
+
+    @property
+    def hpo(self):
+        return self._hpo
+
+    @hpo.setter
+    def hpo(self, term):
+        self._hpo.add(term)
 
     def __eq__(self, other):
         if isinstance(other, int):
