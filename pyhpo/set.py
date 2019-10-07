@@ -180,3 +180,64 @@ class HPOSet(list):
         for i, term_a in enumerate(self):
             for term_b in self[i+1:]:
                 yield (term_a, term_b)
+
+    def similarity(self, other, kind='omim'):
+        """
+        Calculates the similarity to another HPOSet
+        According to Robinson et al, American Journal of Human Genetics, (2008)
+        and Pesquita et al, BMC Bioinformatics, (2008)
+
+        Parameters
+        ----------
+        other: HPOSet
+            Another HPOSet to measure the similarity to
+
+        kind: str, default ``omim``
+            Which kind of information content should be calculated.
+            Options are ['omim', 'gene']
+
+        Returns
+        -------
+        float
+            The similarity score to the other HPOSet
+
+        """
+        score1 = HPOSet._sim_score(self, other, kind)
+        score2 = HPOSet._sim_score(other, self, kind)
+        return (score1 + score2)/2
+
+    @staticmethod
+    def _sim_score(set1, set2, kind):
+        """
+        Calculates one-way similarity from one HPOSet to another HPOSet
+
+        .. warning::
+
+           This method should not be used by itself.
+           Use :func:`pyhpo.set.HPOSet.similarity` instead.
+
+        Parameters
+        ----------
+        set1: HPOSet
+            One HPOSet to measure the similarity from
+        set2: HPOSet
+            Another HPOSet to measure the similarity to
+
+        kind: str
+            Which kind of information content should be calculated.
+            Options are ['omim', 'gene']
+
+        Returns
+        -------
+        float
+            The one-way similarity from one to the other HPOSet
+
+        """
+        scores = []
+        for set1_term in set1:
+            scores.append(0)
+            for set2_term in set2:
+                score = set1_term.similarity_score(set2_term, kind)
+                if score > scores[-1]:
+                    scores[-1] = score
+        return sum(scores)/len(scores)
