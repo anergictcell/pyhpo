@@ -108,6 +108,8 @@ class HPOSet(list):
         This function is direction dependent. That means that every
         pair will appear twice. Once for each direction
 
+        .. seealso:: :func:`pyhpo.set.HPOSet.combinations_one_way`
+
         Yields
         ------
         Tuple of :class:`term.HPOTerm`
@@ -115,6 +117,7 @@ class HPOSet(list):
 
             * **HPOTerm** instance 1 of the pair
             * **HPOTerm** instance 2 of the pair
+
 
         Examples
         --------
@@ -147,6 +150,8 @@ class HPOSet(list):
 
         This methow will report each pair only once
 
+        .. seealso:: :func:`pyhpo.set.HPOSet.combinations`
+
         Yields
         ------
         Tuple of :class:`term.HPOTerm`
@@ -154,6 +159,8 @@ class HPOSet(list):
 
             * **HPOTerm** instance 1 of the pair
             * **HPOTerm** instance 2 of the pair
+
+
 
         Example
         -------

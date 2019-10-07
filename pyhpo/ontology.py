@@ -85,8 +85,8 @@ class Ontology():
     def add_information_content(self):
         """
         Calculates the information content for each HPO Term
-        Based on paper from `Köhler S et. al., Nucleic Acids Res. 2014`
-        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3965098/
+        According to Robinson et al, American Journal of Human Genetics, 2008
+        https://www.sciencedirect.com/science/article/pii/S0002929708005351
 
         Returns
         -------

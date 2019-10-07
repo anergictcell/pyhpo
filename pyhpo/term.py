@@ -6,48 +6,83 @@ class HPOTerm():
     Represents an HPO Term
     with all metadata
 
-    Initilized as empty object
-    add info line by line from OBO file
+    .. note::
+
+        An HPOTerm is initialized as an empty object.
+        Attributes are added line by line from an OBO file
 
     Attributes
     ----------
-    children: list(HPOTerm)
+    children: list of HPOTerm
         List of direct children HPOTerms
+
     comment: str
         Comments from HPO Team
-        Example: Multicystic kidney dysplasia is the result of
-        abnormal fetal renal development in which the affected kidney
-        is replaced by multiple cysts and has little or no residual function.
-        The vast majority of multicystic kidneys are unilateral.
-        Multicystic kidney can be diagnosed on prenatal ultrasound.
+
+        **Example:** ::
+
+            Multicystic kidney dysplasia is the result of
+            abnormal fetal renal development in which the affected kidney
+            is replaced by multiple cysts and has little or no residual
+            function. The vast majority of multicystic kidneys are unilateral.
+            Multicystic kidney can be diagnosed on prenatal ultrasound.
+
     definition: str
         HPO Term Definition
-        Example: "Multicystic dysplasia of the kidney is characterized by
-        multiple cysts of varying size in the kidney and the absence of a
-        normal pelvicaliceal system. The condition is associated with ureteral
-        or ureteropelvic atresia, and the affected kidney is nonfunctional."
-        [HPO:curators]
+
+        **Example:** ::
+
+            "Multicystic dysplasia of the kidney is characterized by
+            multiple cysts of varying size in the kidney and the absence of a
+            normal pelvicaliceal system. The condition is associated with
+            ureteral or ureteropelvic atresia, and the affected kidney is
+            nonfunctional." [HPO:curators]
+
+        .. warning::
+
+           The string contains double-quote enclosed sections
+
     id: str
         HPO Term ID
-        Example: HP:0000003
+
+        **Example:** ::
+
+            HP:0000003
+
     name: str
         HPO Term name
-        Example: Abnormality of body heigh
-    parents: list(HPOTerm)
+
+        **Example:** ::
+
+            Abnormality of body height
+
+    parents: list of HPOTerm
         List of direct parent HPOTerms
-    synonym: list(str)
+
+    synonym: list of str
         List of synonymous names
-        Example: ['Multicystic dysplastic kidney', 'Multicystic kidneys',
-        'Multicystic renal dysplasia']
+
+        **Example:** ::
+
+            ['Multicystic dysplastic kidney', 'Multicystic kidneys',
+            'Multicystic renal dysplasia']
+
     xref: list
         List of xref attributes
-    is_a: list(str)
+
+    is_a: list of str
         List of parent HPO terms
-        Example: ['HP:0000107 ! Renal cyst']
+
+        **Example:** ::
+
+            ['HP:0000107 ! Renal cyst']
+
     _index: int
         Integer representation of ID
-        Example: 3
 
+        **Example:** ::
+
+            3
     """
     def __init__(self):
         self.name = None
@@ -351,6 +386,13 @@ class HPOTerm():
         Calculates all paths from current term to Root term
         and returns each path as a Tuple of HPOTerms
 
+        .. note::
+
+            This function is expensive. To ensure better performance, the
+            result is cached and all subsequent calls utilize the cache. Don't
+            call ``hierarchy`` before the Ontology is fully built with all
+            items.
+
         Returns
         -------
         tuple
@@ -490,7 +532,22 @@ class HPOTerm():
 
     def similarity_score(self, other, kind=None):
         """
-        According to Robinson et al, American Journal of Human Genetics, 2008
+        According to Robinson et al, American Journal of Human Genetics, (2008)
+        and Resnik et at, Proceedings of the 14th IJCAI, (1995)
+
+        Parameters
+        ----------
+        kind: str, default ``None``
+            Which kind of information content should be calculated.
+            Options are ['omim', 'gene']
+
+        Returns
+        -------
+        float or dict
+            The similarity score of a dict with the following items:
+
+            * **omim** ``float`` The OMIM-based similarity score
+            * **gene** ``float`` The gene association-based similarity score
         """
         sim = {
             'omim': 0,
