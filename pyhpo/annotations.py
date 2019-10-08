@@ -129,7 +129,7 @@ class Omim:
 
 class HPO_Gene(dict):
     """
-    Associative ``dict`` to link an HPO term to a ``Gene``
+    Associative ``dict`` to link an HPO term to a :class:`.Gene`
 
     Parameters
     ----------
@@ -161,7 +161,7 @@ class HPO_Gene(dict):
 
 class HPO_Omim(dict):
     """
-    Associative ``dict`` to link an HPO term to an ``Omim`` disease
+    Associative ``dict`` to link an HPO term to an :class:`.Omim` disease
 
     Parameters
     ----------
