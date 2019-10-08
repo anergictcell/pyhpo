@@ -14,7 +14,7 @@ class HPOTerm():
 
     Attributes
     ----------
-    children: list of HPOTerm
+    children: list of :class:`.HPOTerm`
         List of direct children HPOTerms
 
     comment: str
@@ -43,7 +43,7 @@ class HPOTerm():
 
            The string contains double-quote enclosed sections
 
-    genes: set of :class:`annotations.Gene`
+    genes: set of :class:`pyhpo.annotations.Gene`
         All genes associated with the term or its children
 
         .. note::
@@ -75,7 +75,7 @@ class HPOTerm():
 
             Abnormality of body height
 
-    omim_diseases: set of :class:`annotations.Omim`
+    omim_diseases: set of :class:`pyhpo.annotations.Omim`
         All OMIM diseases associated with the term or its children
 
         .. note::
@@ -93,19 +93,17 @@ class HPOTerm():
             of the cache and the caches of all parents, so this is a quite
             expensive operation and should be avoided.
 
-    omim_excluded_diseases: set of :class:`annotations.Omim`
+    omim_excluded_diseases: set of :class:`pyhpo.annotations.Omim`
         All OMIM diseases that are excluded from the term
 
-        .. warning::
+        .. note::
 
-            Currently, the functionality of this feature is incorrect.
-            It should inherit excluded diseases from its parents,
-            but it currently does not.
+            Since excluded diseased do not follow the general model
+            of ontology inheritance, the associated annotations
+            are not inherited from or passed on to parents or children
 
-            **Don't use this attribute for now**
-
-    parents: list of HPOTerm
-        List of direct parent HPOTerms
+    parents: list of :class:`.HPOTerm`
+        List of direct parent :class:`.HPOTerms`
 
     synonym: list of str
         List of synonymous names
@@ -275,19 +273,68 @@ class HPOTerm():
         self._annotations['omim_excluded_diseases'][0].update(diseases)
 
     def _get_annotations(self, kind):
-        # check if cache flag is set
+        """
+        Retrieves the associated annotations from itself and all child terms
+
+        Parameters
+        ----------
+        kind: str
+            The type of annotation to return. Possible values:
+
+            * **genes** Return all associated genes
+            * **omim_diseases** Return all associated OMIM diseases
+
+        This function creates a cache (if not yet present) by
+        recursively querying the annotations of all child terms through
+        :func:`pyhpo.term.HPOTerm._build_annotation_cache`
+        """
+
         if not self._annotations[kind][1]:
+            # Cache not yet built
             self._build_annotation_cache(kind)
         return self._annotations[kind][0]
 
     def _build_annotation_cache(self, kind):
+        """
+        Traverses through all child terms to retrieve their
+        annotations and build a local cache of all annotations
+
+        Parameters
+        ----------
+        kind: str
+            The type of annotation to return. Possible values:
+
+            * **genes** Return all associated genes
+            * **omim_diseases** Return all associated OMIM diseases
+
+        """
         for child in self.children:
             self._annotations[kind][0].update(
                 child.__getattribute__(kind)
             )
+
+        # Set cache-flag to True
         self._annotations[kind][1] = True
 
     def _update_annotations(self, kind, annotations):
+        """
+        Adds additional annotations of the given kind
+
+        Parameters
+        ----------
+        kind: str
+            The type of annotation to return. Possible values:
+
+            * **genes** Return all associated genes
+            * **omim_diseases** Return all associated OMIM diseases
+
+        annotations: set
+            A set of new annotations to add to the extsting ones
+
+        If an annotation-cache is already present, this method will
+        ensure that all parent-caches will be updated as well.
+
+        """
         if not isinstance(annotations, set):
             raise RuntimeError('{} must be specified as set'.format(kind))
 
@@ -316,7 +363,7 @@ class HPOTerm():
 
         Parameters
         ----------
-        other: HPOTerm
+        other: :class:`.HPOTerm`
             HPOTerm to check for lineage dependency
 
         Returns
@@ -332,7 +379,7 @@ class HPOTerm():
 
         Parameters
         ----------
-        other: HPOTerm
+        other: :class:`.HPOTerm`
             HPOTerm to check for lineage dependency
 
         Returns
@@ -352,7 +399,7 @@ class HPOTerm():
 
         Returns
         -------
-        list(int)
+        list of int
             All ids of the direct parents
         """
         return [
@@ -375,7 +422,7 @@ class HPOTerm():
 
         Parameters
         ----------
-        other: HPOTerm
+        other: :class:`.HPOTerm`
             Target HPO term for path finding
 
         Returns
@@ -437,7 +484,7 @@ class HPOTerm():
 
         Returns
         -------
-        tuple
+        tuple of tuple of :class:`.HPOTerm` s
             Tuple of paths. Each path is another tuple made up of HPOTerms
         """
 
