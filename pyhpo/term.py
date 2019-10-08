@@ -101,11 +101,12 @@ class HPOTerm():
         self._hierarchy = None
 
         # External annotations
-        self._genes = set()
-        self._all_child_genes = None
-        self._omim_diseases = set()
-        self._all_child_omim_diseases = None
-        self._omim_excluded_diseases = set()
+        self._annotations = {
+            'genes': [set(), False],
+            'omim_diseases': [set(), False],
+            'omim_excluded_diseases': [set(), False]
+        }
+
         self.information_content = {
             'omim': None,
             'gene': None
@@ -192,82 +193,63 @@ class HPOTerm():
 
     @property
     def genes(self):
-        # Check if cache is present
-        if self._all_child_genes is None:
-
-            # Update all child gene associations
-            # then include all their association with self
-            genes = self._genes
-            for child in self.children:
-                genes.update(child.genes)
-
-            # Update the cache
-            self._all_child_genes = genes
-        return self._all_child_genes
+        return self._get_annotations('genes')
 
     @genes.setter
     def genes(self, genes):
-        if not isinstance(genes, set):
-            raise RuntimeError('Genes must be specified as set')
-        self._genes.update(genes)
-
-        # If the cache was present, we have to update all parent
-        # terms again
-        if self._all_child_genes:
-            warnings.warn(
-                (
-                    'It is strongly discouraged to update gene'
-                    ' associations during the runtime after setup.'
-                    ' This is a very time consuming process.'
-                )
-            )
-            self._all_child_genes = None
-            for parent in self.parents:
-                parent.genes = self.genes
+        self._update_annotations('genes', genes)
 
     @property
     def omim_diseases(self):
-        # Check if cache is present
-        if self._all_child_omim_diseases is None:
-
-            # Update all child OMIM associations
-            # then include all their association with self
-            diseases = self._omim_diseases
-            for child in self.children:
-                diseases.update(child.omim_diseases)
-
-            # Update the cache
-            self._all_child_omim_diseases = diseases
-
-        return self._all_child_omim_diseases
+        return self._get_annotations('omim_diseases')
 
     @omim_diseases.setter
     def omim_diseases(self, diseases):
-        if not isinstance(diseases, set):
-            raise RuntimeError('OMIM diseases must be specified as set')
-        self._omim_diseases.update(diseases)
+        self._update_annotations('omim_diseases', diseases)
 
-        # If the cache was present, we have to update all parent
-        # terms again
-        if self._all_child_omim_diseases:
+    @property
+    def omim_excluded_diseases(self):
+        return self._get_annotations('omim_excluded_diseases')
+
+    @omim_excluded_diseases.setter
+    def omim_excluded_diseases(self, diseases):
+        self._update_annotations('omim_excluded_diseases', diseases)
+
+    def _get_annotations(self, kind):
+        # check if cache flag is set
+        if not self._annotations[kind][1]:
+            self._build_annotation_cache(kind)
+        return self._annotations[kind][0]
+
+    def _build_annotation_cache(self, kind):
+        for child in self.children:
+            self._annotations[kind][0].update(
+                child.__getattribute__(kind)
+            )
+        self._annotations[kind][1] = True
+
+    def _update_annotations(self, kind, annotations):
+        if not isinstance(annotations, set):
+            raise RuntimeError('{} must be specified as set'.format(kind))
+
+        self._annotations[kind][0].update(annotations)
+
+        # If cache-flag is set we need to update the parents as well
+        if self._annotations[kind][1]:
             warnings.warn(
                 (
-                    'It is strongly discouraged to update disease'
+                    'It is strongly discouraged to update annotation'
                     ' associations during the runtime after setup.'
                     ' This is a very time consuming process.'
                 )
             )
-            self._all_child_omim_diseases = None
+
+            # Reset the cache
+            self._build_annotation_cache(kind)
+
+            # Update all parents
             for parent in self.parents:
-                parent.omim_diseases = self.omim_diseases
-
-    @property
-    def omim_excluded_diseases(self):
-        return self._omim_excluded_diseases
-
-    @omim_excluded_diseases.setter
-    def omim_excluded_diseases(self, diseases):
-        self._omim_excluded_diseases.update(diseases)
+                parent.__setattr__(kind, self._annotations[kind][0])
 
     def is_parent(self, other):
         """
