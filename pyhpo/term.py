@@ -42,6 +42,24 @@ class HPOTerm():
 
            The string contains double-quote enclosed sections
 
+    genes: set of :class:`annotations.Gene`
+        All genes associated with the term or its children
+
+        .. note::
+
+            The set is recursively calcualted the first time it is requested
+            by retrieving all children genes as well. The updated set is then
+            cached.
+
+            It is not possibe to remove genes from the set. Any updates will
+            only allow addition of new genes.
+
+        .. warning::
+
+            Updating the associated gene set causes a recalculation of the
+            cache and the caches of all parents, so this is a quite expensive
+            operation and should be avoided.
+
     id: str
         HPO Term ID
 
@@ -55,6 +73,35 @@ class HPOTerm():
         **Example:** ::
 
             Abnormality of body height
+
+    omim_diseases: set of :class:`annotations.Omim`
+        All OMIM diseases associated with the term or its children
+
+        .. note::
+
+            The set is recursively calcualted the first time it is requested
+            by retrieving all children OMIM diseases as well. The updated set
+            is then cached.
+
+            It is not possibe to remove OMIM diseases from the set. Any updates
+            will only allow addition of new omim-diseases.
+
+        .. warning::
+
+            Updating the associated OMIM disease set causes a recalculation
+            of the cache and the caches of all parents, so this is a quite
+            expensive operation and should be avoided.
+
+    omim_excluded_diseases: set of :class:`annotations.Omim`
+        All OMIM diseases that are excluded from the term
+
+        .. warning::
+
+            Currently, the functionality of this feature is incorrect.
+            It should inherit excluded diseases from its parents,
+            but it currently does not.
+
+            **Don't use this attribute for now**
 
     parents: list of HPOTerm
         List of direct parent HPOTerms
