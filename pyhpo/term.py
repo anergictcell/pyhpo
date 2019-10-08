@@ -258,11 +258,21 @@ class HPOTerm():
 
     @property
     def omim_excluded_diseases(self):
-        return self._get_annotations('omim_excluded_diseases')
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        return self._annotations['omim_excluded_diseases'][0]
 
     @omim_excluded_diseases.setter
     def omim_excluded_diseases(self, diseases):
-        self._update_annotations('omim_excluded_diseases', diseases)
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        self._annotations['omim_excluded_diseases'][0].update(diseases)
 
     def _get_annotations(self, kind):
         # check if cache flag is set
