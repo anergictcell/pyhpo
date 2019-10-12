@@ -316,7 +316,7 @@ class HPOTerm():
     def omim_excluded_diseases(self, diseases):
         self._omim_excluded_diseases.update(diseases)
 
-    def is_parent(self, other):
+    def parent_of(self, other):
         """
         Checks if ``self`` is a direct or indirect parent of ``other``.
 
@@ -330,9 +330,9 @@ class HPOTerm():
         bool
             Is the HPOTerm a direct or indirect parent of another HPOTerms
         """
-        return other.is_child_of(self)
+        return other.child_of(self)
 
-    def is_child_of(self, other):
+    def child_of(self, other):
         """
         Checks if ``self`` is a direct or indirect child of ``other``.
 
