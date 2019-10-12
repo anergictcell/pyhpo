@@ -14,6 +14,13 @@ class HPOTerm():
 
     Attributes
     ----------
+    all_parents: set of :class:`.HPOTerm`
+        Set of direct and indirect parent HPOTerms
+
+        .. note::
+
+            This property is read-only
+
     children: list of :class:`.HPOTerm`
         List of direct children HPOTerms
 
@@ -631,7 +638,9 @@ class HPOTerm():
             Options are ['omim', 'gene']
 
         method: string, default ``resnik``
-            The method to use to calculate the similarity. Options:
+            The method to use to calculate the similarity.
+
+            Available options:
 
             * **resnik** - Resnik P, Proceedings of the 14th IJCAI, (1995)
             * **lin** - Lin D, Proceedings of the 15th ICML, (1998)
@@ -643,15 +652,11 @@ class HPOTerm():
             * **rel** - Relevance measure - Schlicker A, et.al.,
               BMC Bioinformatics, (2006)
             * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
-            * TBD
 
         Returns
         -------
-        float or dict
-            The similarity score of a dict with the following items:
-
-            * **omim** ``float`` The OMIM-based similarity score
-            * **gene** ``float`` The gene association-based similarity score
+        float
+            The similarity score of the two terms.
         """
         if method is None:
             method = 'resnik'
