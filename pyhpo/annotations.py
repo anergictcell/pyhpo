@@ -2,6 +2,7 @@ import os
 from pyhpo.term import HPOTerm
 
 FILENAMES = {
+    'HPO_ONTOLOGY': 'hp.obo',
     'HPO_GENE': 'ALL_SOURCES_ALL_FREQUENCIES_phenotype_to_genes.txt',
     'HPO_PHENO': 'phenotype_annotation_hpoteam.tab',
     'HPO_NEGATIVE_PHENO': 'negative_phenotype_annotation.tab'
