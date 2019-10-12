@@ -80,9 +80,9 @@ class Ontology():
                 self._omim_excluded_diseases.update(
                     omim_excluded[term._index]
                 )
-        self.add_information_content()
+        self._add_information_content()
 
-    def add_information_content(self):
+    def _add_information_content(self):
         """
         Calculates the information content for each HPO Term
         According to Robinson et al, American Journal of Human Genetics, 2008
