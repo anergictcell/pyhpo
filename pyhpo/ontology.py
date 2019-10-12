@@ -381,6 +381,11 @@ class Ontology():
                 term.parents = self._map[parent]
                 self._map[parent].children = term
 
+        for term in self._map.values():
+            # Build caches of hierarchy to speed
+            # up performance
+            term.all_parents
+
     def _load_from_file(self, filename):
         """
         Reads an obo file line by line to add
