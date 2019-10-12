@@ -14,7 +14,7 @@ class HPOTerm():
 
     Attributes
     ----------
-    children: list of HPOTerm
+    children: list of :class:`.HPOTerm`
         List of direct children HPOTerms
 
     comment: str
@@ -43,7 +43,7 @@ class HPOTerm():
 
            The string contains double-quote enclosed sections
 
-    genes: set of :class:`annotations.Gene`
+    genes: set of :class:`pyhpo.annotations.Gene`
         All genes associated with the term or its children
 
         .. note::
@@ -75,7 +75,7 @@ class HPOTerm():
 
             Abnormality of body height
 
-    omim_diseases: set of :class:`annotations.Omim`
+    omim_diseases: set of :class:`pyhpo.annotations.Omim`
         All OMIM diseases associated with the term or its children
 
         .. note::
@@ -93,19 +93,17 @@ class HPOTerm():
             of the cache and the caches of all parents, so this is a quite
             expensive operation and should be avoided.
 
-    omim_excluded_diseases: set of :class:`annotations.Omim`
+    omim_excluded_diseases: set of :class:`pyhpo.annotations.Omim`
         All OMIM diseases that are excluded from the term
 
-        .. warning::
+        .. note::
 
-            Currently, the functionality of this feature is incorrect.
-            It should inherit excluded diseases from its parents,
-            but it currently does not.
+            Since excluded diseased do not follow the general model
+            of ontology inheritance, the associated annotations
+            are not inherited from or passed on to parents or children
 
-            **Don't use this attribute for now**
-
-    parents: list of HPOTerm
-        List of direct parent HPOTerms
+    parents: list of :class:`.HPOTerm`
+        List of direct parent :class:`.HPOTerms`
 
     synonym: list of str
         List of synonymous names
@@ -150,11 +148,12 @@ class HPOTerm():
         self._hierarchy = None
 
         # External annotations
-        self._genes = set()
-        self._all_child_genes = None
-        self._omim_diseases = set()
-        self._all_child_omim_diseases = None
-        self._omim_excluded_diseases = set()
+        self._annotations = {
+            'genes': [set(), False],
+            'omim_diseases': [set(), False],
+            'omim_excluded_diseases': [set(), False]
+        }
+
         self.information_content = {
             'omim': None,
             'gene': None
@@ -241,82 +240,122 @@ class HPOTerm():
 
     @property
     def genes(self):
-        # Check if cache is present
-        if self._all_child_genes is None:
-
-            # Update all child gene associations
-            # then include all their association with self
-            genes = self._genes
-            for child in self.children:
-                genes.update(child.genes)
-
-            # Update the cache
-            self._all_child_genes = genes
-        return self._all_child_genes
+        return self._get_annotations('genes')
 
     @genes.setter
     def genes(self, genes):
-        if not isinstance(genes, set):
-            raise RuntimeError('Genes must be specified as set')
-        self._genes.update(genes)
-
-        # If the cache was present, we have to update all parent
-        # terms again
-        if self._all_child_genes:
-            warnings.warn(
-                (
-                    'It is strongly discouraged to update gene'
-                    ' associations during the runtime after setup.'
-                    ' This is a very time consuming process.'
-                )
-            )
-            self._all_child_genes = None
-            for parent in self.parents:
-                parent.genes = self.genes
+        self._update_annotations('genes', genes)
 
     @property
     def omim_diseases(self):
-        # Check if cache is present
-        if self._all_child_omim_diseases is None:
-
-            # Update all child OMIM associations
-            # then include all their association with self
-            diseases = self._omim_diseases
-            for child in self.children:
-                diseases.update(child.omim_diseases)
-
-            # Update the cache
-            self._all_child_omim_diseases = diseases
-
-        return self._all_child_omim_diseases
+        return self._get_annotations('omim_diseases')
 
     @omim_diseases.setter
     def omim_diseases(self, diseases):
-        if not isinstance(diseases, set):
-            raise RuntimeError('OMIM diseases must be specified as set')
-        self._omim_diseases.update(diseases)
+        self._update_annotations('omim_diseases', diseases)
 
-        # If the cache was present, we have to update all parent
-        # terms again
-        if self._all_child_omim_diseases:
+    @property
+    def omim_excluded_diseases(self):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        return self._annotations['omim_excluded_diseases'][0]
+
+    @omim_excluded_diseases.setter
+    def omim_excluded_diseases(self, diseases):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        self._annotations['omim_excluded_diseases'][0].update(diseases)
+
+    def _get_annotations(self, kind):
+        """
+        Retrieves the associated annotations from itself and all child terms
+
+        Parameters
+        ----------
+        kind: str
+            The type of annotation to return. Possible values:
+
+            * **genes** Return all associated genes
+            * **omim_diseases** Return all associated OMIM diseases
+
+        This function creates a cache (if not yet present) by
+        recursively querying the annotations of all child terms through
+        :func:`pyhpo.term.HPOTerm._build_annotation_cache`
+        """
+
+        if not self._annotations[kind][1]:
+            # Cache not yet built
+            self._build_annotation_cache(kind)
+        return self._annotations[kind][0]
+
+    def _build_annotation_cache(self, kind):
+        """
+        Traverses through all child terms to retrieve their
+        annotations and build a local cache of all annotations
+
+        Parameters
+        ----------
+        kind: str
+            The type of annotation to return. Possible values:
+
+            * **genes** Return all associated genes
+            * **omim_diseases** Return all associated OMIM diseases
+
+        """
+        for child in self.children:
+            self._annotations[kind][0].update(
+                child.__getattribute__(kind)
+            )
+
+        # Set cache-flag to True
+        self._annotations[kind][1] = True
+
+    def _update_annotations(self, kind, annotations):
+        """
+        Adds additional annotations of the given kind
+
+        Parameters
+        ----------
+        kind: str
+            The type of annotation to return. Possible values:
+
+            * **genes** Return all associated genes
+            * **omim_diseases** Return all associated OMIM diseases
+
+        annotations: set
+            A set of new annotations to add to the extsting ones
+
+        If an annotation-cache is already present, this method will
+        ensure that all parent-caches will be updated as well.
+
+        """
+        if not isinstance(annotations, set):
+            raise RuntimeError('{} must be specified as set'.format(kind))
+
+        self._annotations[kind][0].update(annotations)
+
+        # If cache-flag is set we need to update the parents as well
+        if self._annotations[kind][1]:
             warnings.warn(
                 (
-                    'It is strongly discouraged to update disease'
+                    'It is strongly discouraged to update annotation'
                     ' associations during the runtime after setup.'
                     ' This is a very time consuming process.'
                 )
             )
-            self._all_child_omim_diseases = None
+
+            # Reset the cache
+            self._build_annotation_cache(kind)
+
+            # Update all parents
             for parent in self.parents:
-                parent.omim_diseases = self.omim_diseases
-
-    @property
-    def omim_excluded_diseases(self):
-        return self._omim_excluded_diseases
-
-    @omim_excluded_diseases.setter
-    def omim_excluded_diseases(self, diseases):
-        self._omim_excluded_diseases.update(diseases)
+                parent.__setattr__(kind, self._annotations[kind][0])
 
     def parent_of(self, other):
         """
@@ -324,7 +363,7 @@ class HPOTerm():
 
         Parameters
         ----------
-        other: HPOTerm
+        other: :class:`.HPOTerm`
             HPOTerm to check for lineage dependency
 
         Returns
@@ -340,7 +379,7 @@ class HPOTerm():
 
         Parameters
         ----------
-        other: HPOTerm
+        other: :class:`.HPOTerm`
             HPOTerm to check for lineage dependency
 
         Returns
@@ -360,7 +399,7 @@ class HPOTerm():
 
         Returns
         -------
-        list(int)
+        list of int
             All ids of the direct parents
         """
         return [
@@ -383,7 +422,7 @@ class HPOTerm():
 
         Parameters
         ----------
-        other: HPOTerm
+        other: :class:`.HPOTerm`
             Target HPO term for path finding
 
         Returns
@@ -445,7 +484,7 @@ class HPOTerm():
 
         Returns
         -------
-        tuple
+        tuple of tuple of :class:`.HPOTerm` s
             Tuple of paths. Each path is another tuple made up of HPOTerms
         """
 

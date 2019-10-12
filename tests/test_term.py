@@ -1,4 +1,6 @@
 import unittest
+import warnings
+
 from pyhpo.ontology import HPOTerm
 
 
@@ -160,3 +162,110 @@ class SingleTermAttributes(unittest.TestCase):
         ]
         assert term.parent_ids() == [2617, 9145]
         assert term.hierarchy() == ((term,),)
+
+
+class TermAnnotations(unittest.TestCase):
+    def setUp(self):
+        self.term = HPOTerm()
+        for line in TEST_HPO:
+            self.term.add_line(line)
+
+    def test_empty_genes(self):
+        assert self.term._annotations['genes'] == [set(), False]
+
+        _ = self.term.genes
+        assert self.term._annotations['genes'] == [set(), True]
+
+    def test_gene_setting(self):
+        self.term.genes = set([1, 2])
+        assert len(self.term.genes) == 2, self.term.genes
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            self.term.genes = set([3])
+            assert len(self.term.genes) == 3
+
+            # Item already present, set will not be updated
+            self.term.genes = set([1])
+            assert len(self.term.genes) == 3
+
+            with self.assertRaises(RuntimeError) as err:
+                self.term.genes = 14
+                assert 'Genes must be specified as set' in str(err.exception)
+
+            with self.assertRaises(RuntimeError) as err:
+                self.term.genes = 'string'
+                assert 'Genes must be specified as set' in str(err.exception)
+
+            with self.assertRaises(RuntimeError) as err:
+                self.term.genes = [5, 6, 7]
+                assert 'Genes must be specified as set' in str(err.exception)
+
+    def test_genes_and_cache(self):
+        # Private cache value must be None initially
+        assert not self.term._annotations['genes'][1]
+
+        self.term.genes = set(['Gene1', 'Gene2'])
+
+        # Private cache value should remain None until
+        # it needs to be checked
+        assert not self.term._annotations['genes'][1]
+
+        assert self.term.genes == set(['Gene1', 'Gene2'])
+
+        # Once ``genes`` has been accessed, private cache must be updated
+        assert self.term._annotations['genes'][1]
+        assert self.term._annotations['genes'][0] == set(['Gene1', 'Gene2'])
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.term.genes = set(['Gene3'])
+
+        assert self.term._annotations['genes'][1]
+        assert self.term.genes == set(['Gene1', 'Gene2', 'Gene3'])
+        assert self.term._annotations['genes'][0] == set(['Gene1', 'Gene2', 'Gene3'])
+
+    def test_gene_parent_update(self):
+        term2 = HPOTerm()
+        term2.add_line('id: HP:000001')
+        term2.add_line('name: General parent term')
+        term2.children = self.term
+        self.term.parents = term2
+
+        # Both terms should not have a cache-flag yet
+        assert not self.term._annotations['genes'][1]
+        assert not term2._annotations['genes'][1]
+
+        # Adding genes to one term should not affect the caches
+        self.term.genes = set(['Gene1', 'Gene2'])
+        assert not self.term._annotations['genes'][1]
+        assert not term2._annotations['genes'][1]
+
+        # Retrieving genes from term should
+        # built the cache on term
+        # have no effect on term2 cache
+        assert self.term.genes == set(['Gene1', 'Gene2'])
+        assert self.term._annotations['genes'][1]
+        assert not term2._annotations['genes'][1]
+
+        # Retrieving genes from term2
+        # (should be identical to child term1)
+        # shoud set cache-flag on term2
+        assert term2.genes == set(['Gene1', 'Gene2'])
+        assert term2._annotations['genes'][1]
+        assert term2._annotations['genes'][0] == set(['Gene1', 'Gene2'])
+
+        # Adding a new gene to term1
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.term.genes = set(['Gene3'])
+
+        assert self.term._annotations['genes'][1]
+        assert self.term._annotations['genes'][0] == set(['Gene1', 'Gene2', 'Gene3'])
+
+        assert term2._annotations['genes'][1]
+        assert term2._annotations['genes'][0] == set(['Gene1', 'Gene2', 'Gene3'])
+
+        assert self.term.genes == set(['Gene1', 'Gene2', 'Gene3'])
+        assert term2.genes == set(['Gene1', 'Gene2', 'Gene3'])
