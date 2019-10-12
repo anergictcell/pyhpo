@@ -620,26 +620,26 @@ class HPOTerm():
         if kind is None:
             kind = 'omim'
 
-        if method.lower() not in ('resnik', 'lin', 'jc', 'jc2', 'rel', 'ic'):
-            raise RuntimeError('Unknown method to calculate similarity')
-
-        if method.lower() == 'resnik':
+        if method == 'resnik':
             return self._resnik_similarity_score(other, kind)
 
-        if method.lower() == 'lin':
+        elif method == 'lin':
             return self._lin_similarity_score(other, kind)
 
-        if method.lower() == 'jc':
+        elif method == 'jc':
             return self._jc_similarity_score(other, kind)
 
-        if method.lower() == 'jc2':
+        elif method == 'jc2':
             return self._jc_similarity_score_2(other, kind)
 
-        if method.lower() == 'rel':
+        elif method == 'rel':
             return self. _rel_similarity_score(other, kind)
 
-        if method.lower() == 'ic':
+        elif method == 'ic':
             return self. _ic_similarity_score(other, kind)
+
+        else:
+            raise RuntimeError('Unknown method to calculate similarity')
 
     def _resnik_similarity_score(self, other, kind):
         sim = 0
