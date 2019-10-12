@@ -1,4 +1,5 @@
 import warnings
+import math
 
 
 class HPOTerm():
@@ -579,16 +580,31 @@ class HPOTerm():
             ))
         return sorted(paths, key=lambda x: x[0])[0]
 
-    def similarity_score(self, other, kind=None):
+    def similarity_score(self, other, kind=None, method=None):
         """
         According to Robinson et al, American Journal of Human Genetics, (2008)
         and Resnik et at, Proceedings of the 14th IJCAI, (1995)
 
         Parameters
         ----------
-        kind: str, default ``None``
+        kind: str, default ``omim``
             Which kind of information content should be calculated.
             Options are ['omim', 'gene']
+
+        method: string, default ``resnik``
+            The method to use to calculate the similarity. Options:
+
+            * **resnik** - Resnik P, Proceedings of the 14th IJCAI, (1995)
+            * **lin** - Lin D, Proceedings of the 15th ICML, (1998)
+            * **jc** - Jiang J, Conrath D, ROCLING X, (1997)
+              Implementation according to R source code
+            * **jc2** - Jiang J, Conrath D, ROCLING X, (1997)
+              Implementation according to paper from R ``hposim`` library
+              Deng Y, et. al., PLoS One, (2015)
+            * **rel** - Relevance measure - Schlicker A, et.al.,
+              BMC Bioinformatics, (2006)
+            * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
+            * TBD
 
         Returns
         -------
@@ -598,21 +614,109 @@ class HPOTerm():
             * **omim** ``float`` The OMIM-based similarity score
             * **gene** ``float`` The gene association-based similarity score
         """
-        sim = {
-            'omim': 0,
-            'gene': 0
-        }
-        for term in self.common_ancestors(other):
-            ic = term.information_content
-            if ic['omim'] > sim['omim']:
-                sim['omim'] = ic['omim']
-            if ic['gene'] > sim['gene']:
-                sim['gene'] = ic['gene']
+        if method is None:
+            method = 'resnik'
 
         if kind is None:
-            return sim
+            kind = 'omim'
+
+        if method == 'resnik':
+            return self._resnik_similarity_score(other, kind)
+
+        elif method == 'lin':
+            return self._lin_similarity_score(other, kind)
+
+        elif method == 'jc':
+            return self._jc_similarity_score(other, kind)
+
+        elif method == 'jc2':
+            return self._jc_similarity_score_2(other, kind)
+
+        elif method == 'rel':
+            return self. _rel_similarity_score(other, kind)
+
+        elif method == 'ic':
+            return self. _ic_similarity_score(other, kind)
+
         else:
-            return sim[kind]
+            raise RuntimeError('Unknown method to calculate similarity')
+
+    def _resnik_similarity_score(self, other, kind):
+        sim = 0
+        for term in self.common_ancestors(other):
+            ic = term.information_content[kind]
+            if ic > sim:
+                sim = ic
+
+        return sim
+
+    def _lin_similarity_score(self, other, kind):
+        mica = self._resnik_similarity_score(other, kind)
+        ic_t1 = self.information_content[kind]
+        ic_t2 = other.information_content[kind]
+        try:
+            return (2 * mica) / (ic_t1 + ic_t2)
+        except ZeroDivisionError:
+            return 0
+
+    def _jc_similarity_score(self, other, kind):
+        """
+        This method is the same as the source code in
+        the R package ``hposim``
+
+        .. code-block:: r
+
+            res= - 1/ ( 1 + 2*IC[IC[,1]==an,3] - IC[IC[,1]==term1,3]
+            - IC[IC[,1]==term2,3] )
+
+        .. note::
+
+            See :func:`pyhpo.term._jc_similarity_score_2`
+            for an alternative way to calcukate Jiang & Conrath
+        """
+        if self == other:
+            return 1
+
+        mica = self._resnik_similarity_score(other, kind)
+        ic_t1 = self.information_content[kind]
+        ic_t2 = other.information_content[kind]
+
+        return -1 / (1 + (2 * mica) - ic_t1 - ic_t2)
+
+    def _jc_similarity_score_2(self, other, kind):
+        """
+        This method is the same as the description
+        in the paper for the R package ``hposim``
+
+        ::
+
+            sim[JC](t1,t2) = 1-(IC(t1)+IC(t2)−2×IC(t[MICA]))
+
+        .. note::
+
+            See :func:`pyhpo.term._jc_similarity_score`
+            for an alternative way to calcukate Jiang & Conrath
+        """
+        if self == other:
+            return 1
+
+        mica = self._resnik_similarity_score(other, kind)
+        ic_t1 = self.information_content[kind]
+        ic_t2 = other.information_content[kind]
+
+        return 1 - (ic_t1 + ic_t2 - (2 * mica))
+
+    def _rel_similarity_score(self, other, kind):
+        mica = self._resnik_similarity_score(other, kind)
+        lin = self._lin_similarity_score(other, kind)
+
+        return lin * (1 - (math.exp(mica * -1)))
+
+    def _ic_similarity_score(self, other, kind):
+        mica = self._resnik_similarity_score(other, kind)
+        lin = self._lin_similarity_score(other, kind)
+
+        return lin * (1 - (1 / (1 + mica)))
 
     @staticmethod
     def id_from_string(hpo_string):

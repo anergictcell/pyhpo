@@ -16,7 +16,7 @@ class HPOSet(list):
         """
         counter = {term.id: 0 for term in self}
         for child, parent in self.combinations():
-            if child.is_child_of(parent):
+            if child.child_of(parent):
                 counter[parent.id] += 1
         return HPOSet([
             term for term in self if counter[term.id] == 0
