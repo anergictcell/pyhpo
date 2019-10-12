@@ -9,6 +9,19 @@ HPOTerm
    :no-private-members:
    :no-special-members:
 
+
+parent_of
+----------
+.. automethod:: pyhpo.term.HPOTerm.parent_of
+
+child_of
+----------
+.. automethod:: pyhpo.term.HPOTerm.child_of
+
+parent_ids
+----------
+.. automethod:: pyhpo.term.HPOTerm.parent_ids
+
 common_ancestors
 ----------------
 .. automethod:: pyhpo.term.HPOTerm.common_ancestors
