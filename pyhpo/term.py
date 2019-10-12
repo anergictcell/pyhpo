@@ -144,6 +144,7 @@ class HPOTerm():
         self._xref = []
         self._is_a = []
         self._parents = []
+        self._all_parents = None
         self._children = []
         self._hierarchy = None
 
@@ -365,6 +366,15 @@ class HPOTerm():
             HPOTerm.id_from_string(val) for val in self.is_a
         ]
 
+    @property
+    def all_parents(self):
+        if self._all_parents is None:
+            self._all_parents = set()
+            for path in self.hierarchy():
+                self._all_parents.update(path)
+
+        return self._all_parents
+
     def common_ancestors(self, other):
         """
         Identifies all common ancestors
@@ -380,17 +390,9 @@ class HPOTerm():
         set
             Set of common ancestor HPOTerms
         """
-        parents1 = set()
-        for path in self.hierarchy():
-            parents1.update(path)
-
-        # set of all parents for other
-        parents2 = set()
-        for path in other.hierarchy():
-            parents2.update(path)
 
         # common ancestors
-        return parents1 & parents2
+        return self.all_parents & other.all_parents
 
     def count_parents(self):
         """
