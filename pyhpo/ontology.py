@@ -115,9 +115,11 @@ class Ontology():
         Parameters
         ----------
         query: str or int
-            HPO term, synonym or HPO-ID (HP:00001) to match
-            HPO term id (Integer based)
-            e.g: Abnormality of the nervous system
+
+            * **str** HPO term ``Scoliosis``
+            * **str** synonym ``Curved spine``
+            * **str** HPO-ID ``HP:0002650``
+            * **int** HPO term id ``2650``
 
         Returns
         -------
@@ -312,6 +314,8 @@ class Ontology():
               (via :func:`pyhpo.term.shortest_path_to_root`)
             * **dBottom** ``int`` Longest graph of children nodes
               (via :func:`pyhpo.term.longest_path_to_bottom`)
+            * **genes** ``str`` Concatenated list of associated
+              genes. Separated by ``|``
             * **diseases** ``str`` Concatenated list of associated
               OMIM diseases. Separated by ``|``
         """
