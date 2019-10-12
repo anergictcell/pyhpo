@@ -298,7 +298,7 @@ class HPOTerm():
             for parent in self.parents:
                 parent.__setattr__(kind, self._annotations[kind][0])
 
-    def is_parent(self, other):
+    def parent_of(self, other):
         """
         Checks if ``self`` is a direct or indirect parent of ``other``.
 
@@ -312,9 +312,9 @@ class HPOTerm():
         bool
             Is the HPOTerm a direct or indirect parent of another HPOTerms
         """
-        return other.is_child_of(self)
+        return other.child_of(self)
 
-    def is_child_of(self, other):
+    def child_of(self, other):
         """
         Checks if ``self`` is a direct or indirect child of ``other``.
 
