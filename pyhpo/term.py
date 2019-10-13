@@ -75,6 +75,19 @@ class HPOTerm():
 
             HP:0000003
 
+    information_content: dict
+        The information content of the HPO term for:
+
+        * **gene**: float
+        * **omim**: float
+
+        **Example:** ::
+
+            {
+                'gene': 0.24,
+                'omim': 0.84
+            }
+
     name: str
         HPO Term name
 
