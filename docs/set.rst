@@ -39,3 +39,10 @@ combinations_one_way
 similarity
 --------------------
 .. automethod:: pyhpo.set.HPOSet.similarity
+
+Class methods
+************************
+
+from_ontology
+--------------------
+.. automethod:: pyhpo.set.HPOSet.from_ontology

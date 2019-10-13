@@ -37,14 +37,14 @@ class HPOSet(list):
             genes.update(term.genes)
         return genes
 
-    def information_content(self, kind):
+    def information_content(self, kind=None):
         """
         Gives back basic information content stats about the
         HPOTerms within the set
 
         Parameters
         ----------
-        kind: str
+        kind: str, default: ``omim``
             Which kind of information content should be calculated.
             Options are ['omim', 'gene']
 
@@ -54,11 +54,15 @@ class HPOSet(list):
         dict
             Dict with the following items
 
-            * **mean** ``float`` Mean information content
-            * **max** ``float`` Maximum information content value
-            * **total** ``float`` Sum of all information content values
-            * **all** ``list of HPOTerm`` List with all information content values
+            * **mean** - float - Mean information content
+            * **max** - float - Maximum information content value
+            * **total** - float - Sum of all information content values
+            * **all** - list of float -
+              List with all information content values
         """
+        if kind is None:
+            kind = 'omim'
+
         res = {
             'mean': None,
             'total': 0,
@@ -118,7 +122,6 @@ class HPOSet(list):
             * **HPOTerm** instance 1 of the pair
             * **HPOTerm** instance 2 of the pair
 
-
         Examples
         --------
             ::
@@ -159,8 +162,6 @@ class HPOSet(list):
 
             * **HPOTerm** instance 1 of the pair
             * **HPOTerm** instance 2 of the pair
-
-
 
         Example
         -------
@@ -241,3 +242,37 @@ class HPOSet(list):
                 if score > scores[-1]:
                     scores[-1] = score
         return sum(scores)/len(scores)
+
+    @staticmethod
+    def from_ontology(ontology, queries):
+        """
+        Builds an HPO set by specifying a list of queries to run on an
+        :class:`pyhpo.ontology.Ontology` object
+
+        Parameters
+        ----------
+        ontology: :class:`pyhpo.ontology.Ontology`
+            The HPO Ontology that will be used to get HPOTerms
+
+        queries: list of (string or int)
+            The queries to be run the identify the HPOTerm from the ontology
+
+        Returns
+        -------
+        :class:`pyhpo.set.HPOSet`
+            A new HPOset
+
+        Examples
+        --------
+            ::
+
+                ci = HPOSet(ontology, [
+                    'Scoliosis',
+                    'HP:0001234',
+                    12
+                ])
+
+        """
+        return HPOSet([
+            ontology.get_hpo_object(query) for query in queries
+        ])
