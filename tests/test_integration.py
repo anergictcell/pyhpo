@@ -101,7 +101,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert 6.5 < df.dTop_s.mean() < 6.6, df.dTop_s.mean()
         assert 0.62 < df.dBottom.mean() < 0.63, df.dBottom.mean()
 
-    @unittest.skip('Taking too long for automated tests')
+    @unittest.skip('This test needs better specification')
     def test_similarity_scores(self):
         print('Calculating sim scores')
         i = 0
@@ -113,9 +113,3 @@ class IntegrationFullTest(unittest.TestCase):
             for other in self.terms:
                 with self.subTest(t=term.id, c=other.id):
                     assert term.similarity_score(other, method='resnik') >= 0
-                    assert term.similarity_score(other, method='lin') >= 0
-                    assert term.similarity_score(other, method='jc') >= 0
-                    assert term.similarity_score(other, method='rel') >= 0
-                    assert term.similarity_score(other, method='ic') >= 0
-                    assert True
-
