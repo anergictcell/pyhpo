@@ -33,7 +33,8 @@ Installation / Setup
 --------------------
 This is not yet defined. I'm planning on adding PyHPO to PyPy, so you can install it via pip. For now, you need to install it manually. The easiest way to do so is:
 
-..code:: bash
+.. code:: bash
+
     HPO_DIR=/your/desired/path
     cd ${HPO_DIR}
     git clone https://github.com/anergictcell/pyhpo.git
@@ -46,7 +47,7 @@ Usage
 -----
 For a detailed description of how to use PyHPO, visit the documentation at https://esbme.com/pyhpo/docs/
 
-..code: python
+.. code:: python
 
     ontology = Ontology()
     
@@ -59,7 +60,7 @@ For a detailed description of how to use PyHPO, visit the documentation at https
 
 There are multiple ways to retrieve a single term out of an ontology:
 
-..code: python
+.. code:: python
 
     # Retrieve a term via its HPO-ID
     term = ontology.get_hpo_object('HP:0002650')
@@ -75,7 +76,7 @@ There are multiple ways to retrieve a single term out of an ontology:
 
 You can also do substring search on term names and synonyms:
 
-..code: python
+.. code:: python
 
     # ontology.search returns an Iterator over all matches
     for term in ontology.search('Abn'):
@@ -83,7 +84,8 @@ You can also do substring search on term names and synonyms:
 
 Find the shortest path between two terms:
 
-..code: python
+.. code:: python
+
     ontology.path(
         'Abnormality of the nervous system',
         'HP:0002650'
@@ -101,6 +103,6 @@ License
 PyHPO is released under the `MIT license`_.
 
 
-.. _PyHPO Documentation: ttps://esbme.com/pyhpo/docs/ 
+.. _PyHPO Documentation: https://esbme.com/pyhpo/docs/ 
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Human Phenotype Ontology: https://hpo.jax.org/
