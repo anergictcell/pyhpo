@@ -21,7 +21,6 @@ class IntegrationFullTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.terms = Ontology()
-        cls.terms.add_annotations()
 
     def test_terms_present(self):
         """

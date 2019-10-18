@@ -44,6 +44,15 @@ class Ontology():
             ))
 
     def add_annotations(self, data_folder=None):
+        warnings.warn(
+            'The method `ontology.add_annotations` is deprecated. '
+            'The functionality is included by default when the Ontology '
+            'is loaded from file since version 1.1.',
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+    def _add_annotations(self, data_folder=None):
         """
         Add secondary annotations to each HPO Term.
         They currently include:
@@ -415,6 +424,7 @@ class Ontology():
                 term.add_line(line)
             self._append(term)
         self._connect_all()
+        self._add_annotations()
 
     def __getitem__(self, key):
         if key in self._map:

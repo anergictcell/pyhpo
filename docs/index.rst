@@ -1,8 +1,3 @@
-.. PyHPO documentation master file, created by
-   sphinx-quickstart on Sun Jun  2 14:20:48 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to PyHPO's documentation!
 =================================
 
@@ -29,7 +24,6 @@ Examples
     # Initialize an Ontology
 
     ontology = pyhpo.Ontology()
-    ontology.add_annotations()
 
     # Iterate through all HPO terms
     for term in ontology:
@@ -90,6 +84,24 @@ Working with Sets
 
     # Calculate the similarity of two Sets
     sim_score = clinical_info.similarity(other_set)
+
+
+
+Installation
+------------
+The easiest way to install PyHPO is via pip
+
+.. code:: bash
+
+    pip install pyhpo
+
+.. note::
+
+    Some features of PyHPO require ``pandas``. The standard installation via pip will not include pandas and PyHPO will work just fine. (You will get a warning on the initial import though). As long as you don't try to create a ``pandas.DataFrame``, everything should work without pandas. If you want to use all features, install ``pandas`` yourself:
+
+    .. code:: bash
+
+        pip install pandas
 
 
 Indices and tables

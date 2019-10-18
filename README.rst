@@ -22,7 +22,7 @@ An individual ``HPOTerm`` contains all info about itself as well as pointers to 
 
 HPOSet
 ------
-An ``HPOSet`` can be used to represent e.g. a patient's clinical information. It allows some basic filtering and comparisons to other ``HPOSet``s.
+An ``HPOSet`` can be used to represent e.g. a patient's clinical information. It allows some basic filtering and comparisons to other ``HPOSet`` s.
 
 Ontology
 --------
@@ -31,16 +31,19 @@ The ``Ontology`` represents all HPO terms and their connections and associations
 
 Installation / Setup
 --------------------
-This is not yet defined. I'm planning on adding PyHPO to PyPy, so you can install it via pip. For now, you need to install it manually. The easiest way to do so is:
+The easiest way to install PyHPO is via pip
 
 .. code:: bash
 
-    HPO_DIR=/your/desired/path
-    cd ${HPO_DIR}
-    git clone https://github.com/anergictcell/pyhpo.git
-    virtualenv pyhpo
+    pip install pyhpo
 
-    ln -s pyhpo ${HPO_DIR}/lib/python/
+.. note::
+
+    Some features of PyHPO require ``pandas``. The standard installation via pip will not include pandas and PyHPO will work just fine. (You will get a warning on the initial import though). As long as you don't try to create a ``pandas.DataFrame``, everything should work without pandas. If you want to use all features, install ``pandas`` yourself:
+
+    .. code:: bash
+
+        pip install pandas
 
 
 Usage
@@ -50,9 +53,6 @@ For a detailed description of how to use PyHPO, visit the documentation at https
 .. code:: python
 
     ontology = Ontology()
-    
-    # Add genes and OMIM disease associations
-    ontology.add_anotations()
     
     # Iterate through all HPO terms
     for term in ontology:
