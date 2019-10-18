@@ -3,7 +3,14 @@ import unittest
 
 from pyhpo.ontology import Ontology
 
-DATA_FOLDER = './data'
+# Number of terms in HPO Ontology
+N_TERMS = 14831
+# Number of genes in the annotation dataset
+N_GENES = 4231
+# Number of OMIM diseases in the annotation dataset
+N_OMIM = 7677
+# Number of excluded OMIM diseases in the annotation dataset
+N_OMIM_EXL = 623
 
 
 @unittest.skipUnless(
@@ -13,22 +20,38 @@ DATA_FOLDER = './data'
 class IntegrationFullTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.terms = Ontology(data_folder=DATA_FOLDER)
+        cls.terms = Ontology()
         cls.terms.add_annotations()
 
     def test_terms_present(self):
-        assert len(self.terms) == 14647, len(self.terms)
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        assert len(self.terms) == N_TERMS, len(self.terms)
 
     def test_genes_associated(self):
-        assert len(self.terms.genes) == 4073, len(self.terms.genes)
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        assert len(self.terms.genes) == N_GENES, len(self.terms.genes)
 
     def test_omim_associated(self):
-        assert len(self.terms.omim_diseases) == 7665, len(
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        assert len(self.terms.omim_diseases) == N_OMIM, len(
             self.terms.omim_diseases
         )
 
     def test_omim_excluded(self):
-        assert len(self.terms.omim_excluded_diseases) == 614, len(
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        assert len(self.terms.omim_excluded_diseases) == N_OMIM_EXL, len(
             self.terms.omim_excluded_diseases
         )
 
@@ -45,9 +68,10 @@ class IntegrationFullTest(unittest.TestCase):
             omim.append(len(term.omim_diseases))
             excluded_omim.append(len(term.omim_excluded_diseases))
 
-        assert sum(genes)/len(genes) > 36
-        assert sum(omim)/len(omim) > 30
-        assert sum(excluded_omim)/len(excluded_omim) > 0.05
+        assert sum(genes)/len(genes) > 36, sum(genes)/len(genes)
+        assert sum(omim)/len(omim) > 29, sum(omim)/len(omim)
+        assert sum(excluded_omim)/len(excluded_omim) > 0.05, \
+            sum(excluded_omim)/len(excluded_omim)
 
     def test_annotation_inheritance(self):
         for term in self.terms:
@@ -94,7 +118,7 @@ class IntegrationFullTest(unittest.TestCase):
         """
         df = self.terms.to_dataframe()
 
-        assert df.shape == (14647, 10), df.shape
+        assert df.shape == (14831, 10), df.shape
         assert 4.2 < df.ic_omim.mean() < 4.3, df.ic_omim.mean()
         assert 3.6 < df.ic_gene.mean() < 3.7, df.ic_gene.mean()
         assert 7.5 < df.dTop_l.mean() < 7.6, df.dTop_l.mean()
@@ -103,13 +127,11 @@ class IntegrationFullTest(unittest.TestCase):
 
     @unittest.skip('This test needs better specification')
     def test_similarity_scores(self):
-        print('Calculating sim scores')
         i = 0
         for term in self.terms:
             i += 1
             if i > 10:
                 continue
-            print(term.name)
             for other in self.terms:
                 with self.subTest(t=term.id, c=other.id):
                     assert term.similarity_score(other, method='resnik') >= 0

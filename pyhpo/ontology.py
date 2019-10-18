@@ -27,11 +27,14 @@ class Ontology():
         Set of all excluded OMIM-diseases associated with the HPOTerms
 
     """
-    def __init__(self, filename='hp.obo', data_folder='./'):
+    def __init__(self, filename='hp.obo', data_folder=None):
         self._map = {}
         self._genes = set()
         self._omim_diseases = set()
         self._omim_excluded_diseases = set()
+
+        if data_folder is None:
+            data_folder = os.path.join(os.path.dirname(__file__), 'data')
         self._data_folder = data_folder
 
         if filename:
