@@ -1,0 +1,7 @@
+include README.rst
+include CHANGELOG.rst
+include pyhpo/data/ALL_SOURCES_ALL_FREQUENCIES_phenotype_to_genes.txt
+include pyhpo/data/hp.obo
+include pyhpo/data/negative_phenotype_annotation.tab
+include pyhpo/data/phenotype_annotation_hpoteam.tab
+

@@ -1,12 +1,15 @@
+*****
 PyHPO
-=====
+*****
 
 A Python library to work with, analyze, filter and inspect the `Human Phenotype Ontology`_
 
 Visit the `PyHPO Documentation`_ for a more detailed overview of all the functionality.
 
+
 Main features
--------------
+=============
+
 It allows working on individual terms ``HPOTerm``, a set of terms ``HPOSet`` and the full ``Ontology``.
 
 Internally the ontology is represented as a branched linked list, every term contains pointers to its parent and child terms. This allows fast tree traversal functioanlity.
@@ -30,7 +33,8 @@ The ``Ontology`` represents all HPO terms and their connections and associations
 
 
 Installation / Setup
---------------------
+====================
+
 The easiest way to install PyHPO is via pip
 
 .. code:: bash
@@ -45,18 +49,24 @@ The easiest way to install PyHPO is via pip
 
         pip install pandas
 
-
 Usage
------
-For a detailed description of how to use PyHPO, visit the documentation at https://esbme.com/pyhpo/docs/
+=====
+
+For a detailed description of how to use PyHPO, visit the `PyHPO Documentation`_.
+
+Getting started
+---------------
 
 .. code:: python
+
+    from pyhpo import Ontology
 
     ontology = Ontology()
     
     # Iterate through all HPO terms
     for term in ontology:
-        # do something
+        # do something, e.g.
+        print(term.name)
 
 There are multiple ways to retrieve a single term out of an ontology:
 
@@ -91,14 +101,52 @@ Find the shortest path between two terms:
         'HP:0002650'
     )
 
+Working with terms
+------------------
+
+.. code-block:: python
+
+    # check the relationship of two terms
+    term.path_to_other(ontology[11])
+
+    # get the information content for OMIM diseases
+    term.information_content['omim']
+
+    # ...or for genes
+    term.information_content['genes']
+
+    # compare two terms
+    term.similarity_score(term2, method='resnik', kind='gene')
+
+Working with sets
+-----------------
+
+.. code-block:: python
+
+    # Create a clinical information set of HPO Terms
+    clinical_info = pyhpo.HPOSet([
+        ontology[12],
+        ontology[14],
+        ontology.get_hpo_object(2650)
+    ])
+
+    # Extract only child nodes and leave out all parent terms
+    children = clinical_info.child_nodes()
+
+    # Calculate the similarity of two Sets
+    sim_score = clinical_info.similarity(other_set)
+
+
 and many more examples in the `PyHPO Documentation`_
 
+
 Contributing
-------------
+============
+
 Yes, please do so. I would appreciate any help, suggestions for improvement or other feedback. Just create a pull-request or open an issue.
 
 License
--------
+=======
 
 PyHPO is released under the `MIT license`_.
 

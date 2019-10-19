@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.1.1
+-----
+- No code changes
+- Removed daemon and client scripts since they are not yet part of the package and aren't working.
+- Restructured some metadata for packaging and documentation
 
 1.1
 ---
