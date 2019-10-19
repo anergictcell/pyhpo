@@ -59,7 +59,7 @@ Getting started
 
 .. code:: python
 
-    from pyhpo import Ontology
+    from pyhpo.ontology import Ontology
 
     ontology = Ontology()
     

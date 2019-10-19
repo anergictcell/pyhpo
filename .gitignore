@@ -1,8 +1,36 @@
 __pycache__/*
 *.pyc
 
+# Sphinx documentation
 _build/
 _static/
 _templates/
 
+# Mac OSX
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Build/setup
+build/
+develop-eggs/
+dist/
+sdist/
+eggs/
+sdist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Tests
+.tox/
+.coverage
+.cache
+.pytest_cache
+coverage.xml
+htmlcov
+
+# Installer logs
+pip-log.txt
