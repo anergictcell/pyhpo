@@ -151,6 +151,10 @@ License
 PyHPO is released under the `MIT license`_.
 
 
+PyHPO is using the Human Phenotype Ontology. Find out more at http://www.human-phenotype-ontology.org
+
+Sebastian Köhler, Leigh Carmody, Nicole Vasilevsky, Julius O B Jacobsen, et al. Expansion of the Human Phenotype Ontology (HPO) knowledge base and resources. Nucleic Acids Research. (2018) doi: 10.1093/nar/gky1105
+
 .. _PyHPO Documentation: https://esbme.com/pyhpo/docs/ 
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Human Phenotype Ontology: https://hpo.jax.org/
