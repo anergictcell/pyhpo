@@ -648,7 +648,11 @@ class HPOTerm():
         ----------
         kind: str, default ``omim``
             Which kind of information content should be calculated.
-            Options are ['omim', 'gene']
+
+            Available option:
+
+            * **omim** (Default)
+            * **gene**
 
         method: string, default ``resnik``
             The method to use to calculate the similarity.

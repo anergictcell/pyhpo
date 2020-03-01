@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.1.2
+-----
+- Only data update
+
 1.1.1
 -----
 - No code changes
