@@ -10,7 +10,7 @@ except ImportError:
         UserWarning)
 
 from pyhpo.term import HPOTerm
-from pyhpo.annotations import HPO_Gene, HPO_Omim, HPO_negative_Omim
+from pyhpo.annotations import HPO_Gene, parse_pheno_file
 
 
 class Ontology():
@@ -78,8 +78,8 @@ class Ontology():
             data_folder = self._data_folder
 
         genes = HPO_Gene(path=data_folder)
-        omim_diseases = HPO_Omim(path=data_folder)
-        omim_excluded = HPO_negative_Omim(path=data_folder)
+        omim_diseases, omim_excluded = parse_pheno_file(path=data_folder)
+
         for term in self:
             if term._index in genes:
                 term.genes = genes[term._index]
