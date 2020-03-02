@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.2
+---
+- Data update
+    - HPO: 14832 ==> 14961
+    - Genes: 4293 ==> 4312
+    - OMIM: 7758 ==> 7623
+    - Negative OMIM: 631 ==> 634
+- Switched to new annotation files from HPO Team (``phenotype.hpoa``)
+
 1.1.2
 -----
 - Only data update

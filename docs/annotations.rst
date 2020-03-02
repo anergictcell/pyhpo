@@ -24,16 +24,14 @@ The ``Annotations`` section contains various metadata annotations for HPO terms.
    :no-private-members:
    :no-special-members:
 
-``HPO_Omim`` class
-********************
-.. autoclass:: pyhpo.annotations.HPO_Omim
-   :members:
-   :no-private-members:
-   :no-special-members:
 
-``HPO_negative_Omim`` class
-***************************
-.. autoclass:: pyhpo.annotations.HPO_negative_Omim
-   :members:
-   :no-private-members:
-   :no-special-members:
+Methods
+*******
+
+parse_pheno_file
+----------------
+.. autofunction:: pyhpo.annotations.parse_pheno_file
+
+remove_outcommented_rows
+------------------------
+.. autofunction:: pyhpo.annotations.remove_outcommented_rows

@@ -1,11 +1,12 @@
 import os
+import csv
+
 from pyhpo.term import HPOTerm
 
 FILENAMES = {
     'HPO_ONTOLOGY': 'hp.obo',
-    'HPO_GENE': 'ALL_SOURCES_ALL_FREQUENCIES_phenotype_to_genes.txt',
-    'HPO_PHENO': 'phenotype_annotation_hpoteam.tab',
-    'HPO_NEGATIVE_PHENO': 'negative_phenotype_annotation.tab'
+    'HPO_GENE': 'phenotype_to_genes.txt',
+    'HPO_PHENO': 'phenotype.hpoa'
 }
 
 
@@ -159,67 +160,88 @@ class HPO_Gene(dict):
                     self[idx].add(gene)
 
 
-class HPO_Omim(dict):
+def remove_outcommented_rows(fh, ignorechar='#'):
     """
-    Associative ``dict`` to link an HPO term to an :class:`.Omim` disease
+    Removes all rows from a filereader object that start
+    with a comment character
+
+    Parameters
+    ----------
+    fh: iterator
+        any object which supports the iterator protocol and
+        returns a string each time its __next__() method is
+        called — file objects and list objects are both suitable
+
+    ignorechar: str, defaults: ``#``
+        All lines starting with this character will be ignored
+
+    Yields
+    ------
+    row: str
+        One row of the ``fh`` iterator
+    """
+    for row in fh:
+        if row[0:len(ignorechar)] != ignorechar:
+            yield row
+
+
+def parse_pheno_file(filename=None, path='./', delimiter='\t'):
+    """
+    Parses OMIM-HPO assoation file and generates a positive
+    and negative annotation dictionary
 
     Parameters
     ----------
     filename: str
-        Filename of HPO-Omim Disease association file.
+        Filename of HPO-Gene association file.
         Defaults to filename from HPO
     path: str
         Path to data files.
         Defaults to './'
+
+    Returns
+    -------
+    omim_dict: dict
+        Dictionary containing all HPO-OMIM associations.
+        HPO-ID is the key
+    negative_omim_dict: dict
+        Dictionary containing all negative HPO-OMIM associations.
+        HPO-ID is the key
     """
-    def __init__(self, filename=None, path='./'):
-        if filename is None:
-            filename = os.path.join(path, FILENAMES['HPO_PHENO'])
-        self.load_from_file(filename)
+    if filename is None:
+        filename = os.path.join(path, FILENAMES['HPO_PHENO'])
 
-    def load_from_file(self, filename):
-        with open(filename) as fh:
-            for line in fh:
-                if not line.startswith('OMIM'):
-                    continue
-                cols = line.strip().split('\t')
-                idx = HPOTerm.id_from_string(cols[4])
-                if idx not in self:
-                    self[idx] = set()
-                omim = Omim(cols)
-                if omim not in self[idx]:
-                    self[idx].add(omim)
+    with open(filename) as fh:
+        reader = csv.DictReader(
+            remove_outcommented_rows(fh),
+            delimiter=delimiter
+        )
 
+        negative_omim_dict = {}
+        omim_dict = {}
 
-class HPO_negative_Omim(dict):
-    """
-    Associative ``dict`` to link an HPO term to an excluded ``Omim`` disease
+        for row in reader:
+            idx = HPOTerm.id_from_string(row['HPO_ID'])
+            if row['DatabaseID'][0:4] == 'OMIM':
 
-    Parameters
-    ----------
-    filename: str
-        Filename of HPO-Excluded Omim Disease association file.
-        Defaults to filename from HPO
-    path: str
-        Path to data files.
-        Defaults to './'
-    """
-    def __init__(self, filename=None, path='./'):
-        if filename is None:
-            filename = os.path.join(path, FILENAMES['HPO_NEGATIVE_PHENO'])
-        self.load_from_file(filename)
+                # To keep backwards compatibility, we're
+                # passing the OMIM details in the same order
+                # as they were present in the old
+                # annotation files
+                omim_id = row['DatabaseID'].split(':')[1]
+                omim = Omim(
+                    [0, omim_id, row['DiseaseName']]
+                )
 
-    def load_from_file(self, filename):
-        with open(filename) as fh:
-            for line in fh:
-                if not line.startswith('OMIM'):
-                    continue
-                cols = line.strip().split('\t')
-                if cols[3] != 'NOT':
-                    continue
-                idx = HPOTerm.id_from_string(cols[4])
-                if idx not in self:
-                    self[idx] = set()
-                omim = Omim(cols)
-                if omim not in self[idx]:
-                    self[idx].add(omim)
+                if row['Qualifier'] == 'NOT':
+                    if idx not in negative_omim_dict:
+                        negative_omim_dict[idx] = set()
+                    if omim not in negative_omim_dict[idx]:
+                        negative_omim_dict[idx].add(omim)
+                if row['Qualifier'] == '':
+                    if idx not in omim_dict:
+                        omim_dict[idx] = set()
+                    if omim not in omim_dict[idx]:
+                        omim_dict[idx].add(omim)
+
+    return (omim_dict, negative_omim_dict)
