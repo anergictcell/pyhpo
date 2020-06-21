@@ -4,13 +4,13 @@ import unittest
 from pyhpo.ontology import Ontology
 
 # Number of terms in HPO Ontology
-N_TERMS = 14961
+N_TERMS = 15332
 # Number of genes in the annotation dataset
-N_GENES = 4312
+N_GENES = 4317
 # Number of OMIM diseases in the annotation dataset
-N_OMIM = 7623
+N_OMIM = 7675
 # Number of excluded OMIM diseases in the annotation dataset
-N_OMIM_EXL = 634
+N_OMIM_EXL = 638
 
 
 @unittest.skipUnless(
@@ -118,10 +118,10 @@ class IntegrationFullTest(unittest.TestCase):
         df = self.terms.to_dataframe()
 
         assert df.shape == (N_TERMS, 10), df.shape
-        assert 4.2 < df.ic_omim.mean() < 4.3, df.ic_omim.mean()
+        assert 4 < df.ic_omim.mean() < 5, df.ic_omim.mean()
         assert 3.6 < df.ic_gene.mean() < 3.7, df.ic_gene.mean()
         assert 7.5 < df.dTop_l.mean() < 7.6, df.dTop_l.mean()
-        assert 6.5 < df.dTop_s.mean() < 6.6, df.dTop_s.mean()
+        assert 6 < df.dTop_s.mean() < 7, df.dTop_s.mean()
         assert 0.61 < df.dBottom.mean() < 0.62, df.dBottom.mean()
 
     @unittest.skip('This test needs better specification')
