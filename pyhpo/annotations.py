@@ -10,7 +10,7 @@ FILENAMES = {
 }
 
 
-class Gene:
+class GeneSingleton:
     """
     Representation of a Gene
 
@@ -72,7 +72,28 @@ class Gene:
         )
 
 
-class Omim:
+class GeneDict(dict):
+    """
+    An associative dict of all genes
+
+    Ensures that every gene is a single GeneSingleton instance
+    and no duplicate instances are generated during parsing of the
+    Gen-Pheno-HPO associations.
+
+    This class is initilized once and then the dict is accessible as
+    ``annotations.Gene``.
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, cols):
+        gene = GeneSingleton(cols)
+        if gene not in self:
+            self[gene] = gene
+        return self[gene]
+
+
+class OmimDisease:
     """
     Representation of an OMIM disease
 
@@ -91,7 +112,7 @@ class Omim:
     def __init__(self, cols):
         self.id = int(cols[1])
         self.name = cols[2]
-        self._hpo = set
+        self._hpo = set()
 
     @property
     def hpo(self):
@@ -128,6 +149,27 @@ class Omim:
         )
 
 
+class OmimDict(dict):
+    """
+    An associative dict of all Omim Diseases
+
+    Ensures that every Omim Disease is a single OmimDisease instance
+    and no duplicate instances are generated during parsing of the
+    Gen-Pheno-HPO associations.
+
+    This class is initilized once and then the dict is accessible as
+    ``annotations.Omim``.
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, cols):
+        disease = OmimDisease(cols)
+        if disease not in self:
+            self[disease] = disease
+        return self[disease]
+
+
 class HPO_Gene(dict):
     """
     Associative ``dict`` to link an HPO term to a :class:`.Gene`
@@ -156,6 +198,7 @@ class HPO_Gene(dict):
                 if idx not in self:
                     self[idx] = set()
                 gene = Gene(cols)
+                gene.hpo = idx
                 if gene not in self[idx]:
                     self[idx].add(gene)
 
@@ -239,9 +282,14 @@ def parse_pheno_file(filename=None, path='./', delimiter='\t'):
                     if omim not in negative_omim_dict[idx]:
                         negative_omim_dict[idx].add(omim)
                 if row['Qualifier'] == '':
+                    omim.hpo = idx
                     if idx not in omim_dict:
                         omim_dict[idx] = set()
                     if omim not in omim_dict[idx]:
                         omim_dict[idx].add(omim)
 
     return (omim_dict, negative_omim_dict)
+
+
+Omim = OmimDict()
+Gene = GeneDict()
