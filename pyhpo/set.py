@@ -22,6 +22,39 @@ class HPOSet(list):
             term for term in self if counter[term.id] == 0
         ])
 
+    def remove_modifier(self):
+        """
+        Removes all modifier terms. By default, this includes
+
+        * ``Mode of inheritance: 'HP:0000005'``
+        * ``Clinical modifier: 'HP:0012823'``
+        * ``Frequency: 'HP:0040279'``
+        * ``Clinical course: 'HP:0031797'``
+        * ``Blood group: 'HP:0032223'``
+        * ``Past medical history: 'HP:0032443'``
+
+
+        Returns
+        -------
+        HPOSet
+            HPOSet instance that contains only
+            ``Phenotypic abnormality`` HPO terms
+
+        """
+
+        # Parent modifier terms
+        modifier = (5, 12823, 40279, 31797, 32223, 32443)
+
+        counter = {term.id: 0 for term in self}
+        for term in self:
+            for path in term.hierarchy():
+                for mod in modifier:
+                    if mod in [int(parent) for parent in path]:
+                        counter[term.id] += 1
+        return HPOSet([
+            term for term in self if counter[term.id] == 0
+        ])
+
     def all_genes(self):
         """
         Calculates the union of the genes
@@ -276,3 +309,13 @@ class HPOSet(list):
         return HPOSet([
             ontology.get_hpo_object(query) for query in queries
         ])
+
+    def __str__(self):
+        return 'HPOSet: {}'.format(
+            ', '.join([x.name for x in self])
+        )
+
+    def __repr__(self):
+        return 'HPOSet(ontology, {})'.format(
+            ', '.join([x.id for x in self])
+        )
