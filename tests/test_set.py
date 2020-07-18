@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from pyhpo.set import HPOSet
-from tests.mockontology import make_ontology
+from tests.mockontology import make_ontology, make_ontology_with_modifiers
 
 
 class SetMethods(unittest.TestCase):
@@ -61,6 +61,47 @@ class SetInitTests(unittest.TestCase):
         assert self.ontology[21] not in child_nodes
         assert self.ontology[31] not in child_nodes
         assert self.ontology[41] in child_nodes
+
+    def test_remove_modifier(self):
+        terms = make_ontology_with_modifiers()
+
+        normal_term_ids = set(
+            [1, 11, 12, 21, 31, 41, 13]
+        )
+        modifier_term_ids = set(
+            [5, 12823, 5000001, 5000002, 5100001]
+        )
+
+        self.assertEqual(
+            len(terms),
+            (len(normal_term_ids | modifier_term_ids))
+        )
+
+        full_set = HPOSet.from_ontology(
+            terms,
+            normal_term_ids | modifier_term_ids
+        )
+
+        self.assertEqual(
+            len(full_set),
+            len(normal_term_ids | modifier_term_ids)
+        )
+
+        set_2 = full_set.remove_modifier()
+        self.assertEqual(
+            len(set_2),
+            len(normal_term_ids)
+        )
+
+        self.assertEqual(
+            (normal_term_ids | modifier_term_ids),
+            {int(x) for x in full_set}
+        )
+
+        self.assertEqual(
+            normal_term_ids,
+            {int(x) for x in set_2}
+        )
 
 
 class SetMetricsTests(unittest.TestCase):

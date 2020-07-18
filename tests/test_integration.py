@@ -2,6 +2,7 @@ import sys
 import unittest
 
 from pyhpo.ontology import Ontology
+from pyhpo.set import HPOSet
 
 # Number of terms in HPO Ontology
 N_TERMS = 15332
@@ -123,6 +124,37 @@ class IntegrationFullTest(unittest.TestCase):
         assert 7.5 < df.dTop_l.mean() < 7.6, df.dTop_l.mean()
         assert 6 < df.dTop_s.mean() < 7, df.dTop_s.mean()
         assert 0.61 < df.dBottom.mean() < 0.62, df.dBottom.mean()
+
+    def test_set(self):
+        full_set = HPOSet.from_ontology(
+            self.terms,
+            [int(x) for x in self.terms]
+        )
+
+        self.assertEqual(
+            len(full_set),
+            len(self.terms)
+        )
+
+        phenoterms = full_set.remove_modifier()
+        self.assertLess(
+            len(phenoterms),
+            len(full_set)
+        )
+        self.assertGreater(
+            len(phenoterms),
+            0
+        )
+
+        self.assertIn(
+            self.terms[5],
+            full_set
+        )
+
+        self.assertNotIn(
+            self.terms[5],
+            phenoterms
+        )
 
     @unittest.skip('This test needs better specification')
     def test_similarity_scores(self):
