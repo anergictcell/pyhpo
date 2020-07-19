@@ -62,6 +62,51 @@ class SetInitTests(unittest.TestCase):
         assert self.ontology[31] not in child_nodes
         assert self.ontology[41] in child_nodes
 
+    def test_toJSON(self):
+        res = self.ci.toJSON()
+
+        self.assertEqual(
+            len(res),
+            7
+        )
+        self.assertEqual(
+            res[0],
+            self.ontology[1].toJSON()
+        )
+
+        res_verbose = self.ci.toJSON(verbose=True)
+
+        self.assertEqual(
+            len(res_verbose),
+            7
+        )
+        self.assertEqual(
+            res_verbose[0],
+            self.ontology[1].toJSON(verbose=True)
+        )
+
+    def test_serialization(self):
+        a = HPOSet.from_ontology(
+            self.ontology,
+            [
+                'Test child level 1-1',
+                'Test child level 2-1',
+                'Test child level 4'
+            ]
+        )
+        self.assertEqual(
+            a.serialize(),
+            '11+21+41'
+        )
+
+        self.assertEqual(
+            HPOSet.from_serialized(
+                self.ontology,
+                '11+21+41'
+            ),
+            a
+        )
+
     def test_remove_modifier(self):
         terms = make_ontology_with_modifiers()
 

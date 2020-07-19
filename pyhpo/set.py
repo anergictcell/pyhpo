@@ -310,6 +310,42 @@ class HPOSet(list):
             ontology.get_hpo_object(query) for query in queries
         ])
 
+    @staticmethod
+    def from_serialized(ontology, pickle):
+        """
+        Re-Builds an HPO set from a serialized HPOSet object
+
+        Parameters
+        ----------
+        ontology: :class:`pyhpo.ontology.Ontology`
+            The HPO Ontology that will be used to get HPOTerms
+
+        pickle: str
+            The serialized HPOSet object
+
+        Returns
+        -------
+        :class:`pyhpo.set.HPOSet`
+            A new HPOset
+
+        Examples
+        --------
+            ::
+
+                ci = HPOSet(ontology, '12+24+66628')
+
+        """
+        return HPOSet([
+            ontology.get_hpo_object(int(query)) for query in pickle.split('+')
+        ])
+
+    def serialize(self):
+        ids = [str(x) for x in sorted([int(x) for x in self])]
+        return '+'.join(ids)
+
+    def toJSON(self, verbose=False):
+        return [t.toJSON(verbose) for t in self]
+
     def __str__(self):
         return 'HPOSet: {}'.format(
             ', '.join([x.name for x in self])
