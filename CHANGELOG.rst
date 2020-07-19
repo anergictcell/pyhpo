@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.0
+---
+- Refactored Ontology to act as a singleton
+  - Able to remove some weird dependencies when creating HPOSets
+  - Refactored some unit tests to only temporarily mock methods
+
 1.4
 ---
 - Added serialization to HPO Term and HPO Set

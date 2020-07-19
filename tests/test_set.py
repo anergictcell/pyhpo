@@ -38,15 +38,12 @@ class SetInitTests(unittest.TestCase):
     def test_initialization(self):
         assert len(self.ci) == len(self.ontology)
 
-    def test_set_from_ontology(self):
-        a = HPOSet.from_ontology(
-            self.ontology,
-            [
-                'Test child level 1-1',
-                'Test child level 2-1',
-                'Test child level 4'
-            ]
-        )
+    def test_set_from_queries(self):
+        a = HPOSet.from_queries([
+            'Test child level 1-1',
+            'Test child level 2-1',
+            'Test child level 4'
+        ])
         assert len(a) == 3
 
     def test_child_nodes(self):
@@ -86,24 +83,18 @@ class SetInitTests(unittest.TestCase):
         )
 
     def test_serialization(self):
-        a = HPOSet.from_ontology(
-            self.ontology,
-            [
-                'Test child level 1-1',
-                'Test child level 2-1',
-                'Test child level 4'
-            ]
-        )
+        a = HPOSet.from_queries([
+            'Test child level 1-1',
+            'Test child level 2-1',
+            'Test child level 4'
+        ])
         self.assertEqual(
             a.serialize(),
             '11+21+41'
         )
 
         self.assertEqual(
-            HPOSet.from_serialized(
-                self.ontology,
-                '11+21+41'
-            ),
+            HPOSet.from_serialized('11+21+41'),
             a
         )
 
@@ -122,8 +113,7 @@ class SetInitTests(unittest.TestCase):
             (len(normal_term_ids | modifier_term_ids))
         )
 
-        full_set = HPOSet.from_ontology(
-            terms,
+        full_set = HPOSet.from_queries(
             normal_term_ids | modifier_term_ids
         )
 

@@ -126,8 +126,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert 0.61 < df.dBottom.mean() < 0.62, df.dBottom.mean()
 
     def test_set(self):
-        full_set = HPOSet.from_ontology(
-            self.terms,
+        full_set = HPOSet.from_queries(
             [int(x) for x in self.terms]
         )
 

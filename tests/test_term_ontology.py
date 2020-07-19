@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pyhpo
 from pyhpo.ontology import Ontology
@@ -502,16 +502,15 @@ class OntologyQueries(unittest.TestCase):
     def test_path_unit(self):
         self.terms._connect_all()
 
-        Ontology.get_hpo_object = MagicMock(return_value=self.child_1_1)
-        self.child_1_1.path_to_other = MagicMock(return_value=1)
+        with patch.object(Ontology, 'get_hpo_object', return_value=self.child_1_1) as mock_gho:
+            with patch.object(self.child_1_1, 'path_to_other', return_value=1) as mock_pto:
+                self.terms.path('first query', 'second query')
 
-        self.terms.path('first query', 'second query')
+                mock_gho.assert_any_call('first query')
+                mock_gho.assert_any_call('second query')
+                assert mock_gho.call_count == 2
 
-        Ontology.get_hpo_object.assert_any_call('first query')
-        Ontology.get_hpo_object.assert_any_call('second query')
-        assert Ontology.get_hpo_object.call_count == 2
-
-        self.child_1_1.path_to_other.assert_called_once_with(self.child_1_1)
+                mock_pto.assert_called_once_with(self.child_1_1)
 
     def test_path_integration(self):
         self.terms._connect_all()
@@ -542,23 +541,23 @@ class OntologyQueries(unittest.TestCase):
 
     def test_search(self):
         self.terms._connect_all()
-        self.terms.synonym_search = MagicMock(return_value=False)
+        with patch.object(self.terms, 'synonym_search', return_value=False) as mock_syn_search:
 
-        assert list(self.terms.search('something')) == []
-        # All terms will be searched for in synonyms
-        assert self.terms.synonym_search.call_count == 7
-        self.terms.synonym_search.reset_mock()
+            assert list(self.terms.search('something')) == []
+            # All terms will be searched for in synonyms
+            assert mock_syn_search.call_count == 7
+            mock_syn_search.reset_mock()
 
-        assert list(self.terms.search('Test root')) == [self.root]
-        # Root term will not be searched for in synonyms
-        assert self.terms.synonym_search.call_count == 6
-        self.terms.synonym_search.reset_mock()
+            assert list(self.terms.search('Test root')) == [self.root]
+            # Root term will not be searched for in synonyms
+            assert mock_syn_search.call_count == 6
+            mock_syn_search.reset_mock()
 
-        assert list(self.terms.search('Test child level 1-1')) == [
-            self.child_1_1
-        ]
-        # Matched term will not be searched for in synonyms
-        assert self.terms.synonym_search.call_count == 6
+            assert list(self.terms.search('Test child level 1-1')) == [
+                self.child_1_1
+            ]
+            # Matched term will not be searched for in synonyms
+            assert mock_syn_search.call_count == 6
 
     def test_synonym_search(self):
         self.terms._connect_all()
