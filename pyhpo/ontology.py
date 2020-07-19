@@ -13,7 +13,7 @@ from pyhpo.term import HPOTerm
 from pyhpo.annotations import HPO_Gene, parse_pheno_file
 
 
-class Ontology_Singleton():
+class OntologyClass():
     """
     A linked and indexed list of interconnected :class:`HPOTerm` s.
 
@@ -441,4 +441,4 @@ class Ontology_Singleton():
         return len(self._map.keys())
 
 
-Ontology = Ontology_Singleton()
+Ontology = OntologyClass()

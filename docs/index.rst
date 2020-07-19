@@ -10,6 +10,7 @@ Welcome to PyHPO's documentation!
     ontology
     annotations
     set
+    data
 
 *************
 Introduction:

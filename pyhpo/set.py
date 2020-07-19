@@ -342,7 +342,7 @@ class HPOSet(list):
     def serialize(self):
         """
         Creates a string serialization that can be used to
-        rebuild the same HPOSet via `pyhpo.set.HPOSet.from_serialized`
+        rebuild the same HPOSet via :func:`pyhpo.set.HPOSet.from_serialized`
 
         Returns
         -------
