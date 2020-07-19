@@ -162,6 +162,46 @@ class SingleTermAttributes(unittest.TestCase):
         ]
         assert term.parent_ids() == [2617, 9145]
         assert term.hierarchy() == ((term,),)
+        self.assertEqual(
+            term.toJSON().keys(),
+            {'int', 'id', 'name'}
+        )
+        self.assertEqual(
+            term.toJSON(verbose=True).keys(),
+            {'int', 'id', 'name', 'def', 'comment', 'synonym', 'xref', 'is_a'}
+        )
+        self.assertEqual(
+            term.toJSON()['id'],
+            term.id
+        )
+        self.assertEqual(
+            term.toJSON()['int'],
+            term._index
+        )
+        self.assertEqual(
+            term.toJSON()['name'],
+            term.name
+        )
+        self.assertEqual(
+            term.toJSON(verbose=True)['def'],
+            term.definition
+        )
+        self.assertEqual(
+            term.toJSON(verbose=True)['comment'],
+            term.comment
+        )
+        self.assertEqual(
+            term.toJSON(verbose=True)['synonym'],
+            term._synonym
+        )
+        self.assertEqual(
+            term.toJSON(verbose=True)['xref'],
+            term._xref
+        )
+        self.assertEqual(
+            term.toJSON(verbose=True)['is_a'],
+            term._is_a
+        )
 
 
 class TermAnnotations(unittest.TestCase):
