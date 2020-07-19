@@ -55,6 +55,6 @@ serialize
 Class methods
 ************************
 
-from_ontology
+from_queries
 --------------------
-.. automethod:: pyhpo.set.HPOSet.from_ontology
+.. automethod:: pyhpo.set.HPOSet.from_queries

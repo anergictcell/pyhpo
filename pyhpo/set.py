@@ -1,3 +1,6 @@
+from pyhpo.ontology import Ontology
+
+
 class HPOSet(list):
     def child_nodes(self):
         """
@@ -277,16 +280,13 @@ class HPOSet(list):
         return sum(scores)/len(scores)
 
     @staticmethod
-    def from_ontology(ontology, queries):
+    def from_queries(queries):
         """
-        Builds an HPO set by specifying a list of queries to run on an
-        :class:`pyhpo.ontology.Ontology` object
+        Builds an HPO set by specifying a list of queries to run on the
+        :class:`pyhpo.ontology.Ontology`
 
         Parameters
         ----------
-        ontology: :class:`pyhpo.ontology.Ontology`
-            The HPO Ontology that will be used to get HPOTerms
-
         queries: list of (string or int)
             The queries to be run the identify the HPOTerm from the ontology
 
@@ -299,7 +299,7 @@ class HPOSet(list):
         --------
             ::
 
-                ci = HPOSet(ontology, [
+                ci = HPOSet([
                     'Scoliosis',
                     'HP:0001234',
                     12
@@ -307,19 +307,16 @@ class HPOSet(list):
 
         """
         return HPOSet([
-            ontology.get_hpo_object(query) for query in queries
+            Ontology.get_hpo_object(query) for query in queries
         ])
 
     @staticmethod
-    def from_serialized(ontology, pickle):
+    def from_serialized(pickle):
         """
         Re-Builds an HPO set from a serialized HPOSet object
 
         Parameters
         ----------
-        ontology: :class:`pyhpo.ontology.Ontology`
-            The HPO Ontology that will be used to get HPOTerms
-
         pickle: str
             The serialized HPOSet object
 
@@ -336,7 +333,7 @@ class HPOSet(list):
 
         """
         return HPOSet([
-            ontology.get_hpo_object(int(query)) for query in pickle.split('+')
+            Ontology.get_hpo_object(int(query)) for query in pickle.split('+')
         ])
 
     def serialize(self):
