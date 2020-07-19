@@ -16,6 +16,10 @@ child_nodes
 --------------------
 .. automethod:: pyhpo.set.HPOSet.child_nodes
 
+remove_modifier
+--------------------
+.. automethod:: pyhpo.set.HPOSet.remove_modifier
+
 all_genes
 --------------------
 .. automethod:: pyhpo.set.HPOSet.all_genes
@@ -39,6 +43,14 @@ combinations_one_way
 similarity
 --------------------
 .. automethod:: pyhpo.set.HPOSet.similarity
+
+toJSON
+--------------------
+.. automethod:: pyhpo.set.HPOSet.toJSON
+
+serialize
+--------------------
+.. automethod:: pyhpo.set.HPOSet.serialize
 
 Class methods
 ************************

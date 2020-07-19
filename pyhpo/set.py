@@ -340,10 +340,34 @@ class HPOSet(list):
         ])
 
     def serialize(self):
+        """
+        Creates a string serialization that can be used to
+        rebuild the same HPOSet via `pyhpo.set.HPOSet.from_serialized`
+
+        Returns
+        -------
+        str
+            A string representation of the HPOSet
+
+        """
         ids = [str(x) for x in sorted([int(x) for x in self])]
         return '+'.join(ids)
 
     def toJSON(self, verbose=False):
+        """
+        Creates a JSON-like object of the HPOSet
+
+        Parameters
+        ----------
+        verbose: bool, default ``False``
+            Include extra properties of the HPOTerm
+
+        Returns
+        -------
+        list of dict
+            a list of HPOTerm dict objects
+
+        """
         return [t.toJSON(verbose) for t in self]
 
     def __str__(self):

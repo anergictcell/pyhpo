@@ -703,6 +703,42 @@ class HPOTerm():
             raise RuntimeError('Unknown method to calculate similarity')
 
     def toJSON(self, verbose=False):
+        """
+        Creates a JSON-like object of the HPOTerm
+
+        Parameters
+        ----------
+        verbose: bool, default ``False``
+            Include extra properties
+
+        Returns
+        -------
+        dict
+            A dictionary with the main properties of the HPOTerm
+
+
+        **Example:** ::
+
+            >>> terms[2].toJSON()
+            {
+                'name': 'Abnormality of body height',
+                'id': 'HP:0000002',
+                'int': 2
+            }
+
+            >>> terms[2].toJSON(verbose=True)
+            {
+                'name': 'Abnormality of body height',
+                'synonym': ['Abnormality of body height'],
+                'comment': None,
+                'def': '"Deviation from the norm of height with respect [...]',
+                'xref': ['UMLS:C4025901'],
+                'is_a': ['HP:0001507 ! Growth abnormality'],
+                'id': 'HP:0000002',
+                'int': 2
+            }
+
+        """
         res = {
             'int': int(self),
             'id': self.id,
