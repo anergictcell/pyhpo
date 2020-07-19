@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.4
+---
+- Added serialization to HPO Term and HPO Set
+- Option to remove modifier from HPO Set
+- Changed Omim and Gene to be Singletons
+
 1.3
 ---
 - Data update
@@ -8,7 +14,6 @@ Changelog
     - Genes: 4312 ==> 4317
     - OMIM: 7623 ==> 7675
     - Negative OMIM: 634 ==> 638
-- Switched to new annotation files from HPO Team (``phenotype.hpoa``)
 
 1.2
 ---

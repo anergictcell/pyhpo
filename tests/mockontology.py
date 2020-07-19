@@ -75,3 +75,45 @@ def make_ontology():
     terms._connect_all()
 
     return terms
+
+
+def make_ontology_with_modifiers():
+    items = make_terms()
+
+    terms = Ontology(filename=None)
+    for item in items:
+        terms._append(item)
+
+    moi_root = HPOTerm()
+    moi_root.id = 'HP:0000005'
+    moi_root.name = 'Mode of inheritance'
+    moi_root.is_a = terms[1].id
+    terms._append(moi_root)
+
+    cm_root = HPOTerm()
+    cm_root.id = 'HP:0012823'
+    cm_root.name = 'Clinical modifier'
+    cm_root.is_a = terms[1].id
+    terms._append(cm_root)
+
+    moi_child1 = HPOTerm()
+    moi_child1.id = 'HP:5000001'
+    moi_child1.name = 'MOI - C1'
+    moi_child1.is_a = moi_root.id
+    terms._append(moi_child1)
+
+    moi_child2 = HPOTerm()
+    moi_child2.id = 'HP:5000002'
+    moi_child2.name = 'MOI - C1'
+    moi_child2.is_a = moi_root.id
+    terms._append(moi_child2)
+
+    moi_child3 = HPOTerm()
+    moi_child3.id = 'HP:5100001'
+    moi_child3.name = 'MOI - C1'
+    moi_child3.is_a = moi_child1.id
+    terms._append(moi_child3)
+
+    terms._connect_all()
+
+    return terms

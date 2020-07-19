@@ -702,6 +702,22 @@ class HPOTerm():
         else:
             raise RuntimeError('Unknown method to calculate similarity')
 
+    def toJSON(self, verbose=False):
+        res = {
+            'int': int(self),
+            'id': self.id,
+            'name': self.name
+        }
+
+        if verbose:
+            res['def'] = self.definition
+            res['comment'] = self.comment
+            res['synonym'] = self._synonym
+            res['xref'] = self._xref
+            res['is_a'] = self._is_a
+
+        return res
+
     def _resnik_similarity_score(self, other, kind):
         sim = 0
         for term in self.common_ancestors(other):

@@ -133,6 +133,9 @@ Working with sets
     # Extract only child nodes and leave out all parent terms
     children = clinical_info.child_nodes()
 
+    # Remove HPO modifier terms
+    new_ci = clinical_info.remove_modifier()
+
     # Calculate the similarity of two Sets
     sim_score = clinical_info.similarity(other_set)
 
