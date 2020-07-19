@@ -62,6 +62,10 @@ similarity_score
 ------------------------
 .. automethod:: pyhpo.term.HPOTerm.similarity_score
 
+toJSON
+------------------------
+.. automethod:: pyhpo.term.HPOTerm.toJSON
+
 Class methods
 ************************
 
