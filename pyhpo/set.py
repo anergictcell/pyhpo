@@ -47,10 +47,9 @@ class HPOSet(list):
 
         counter = {term.id: 0 for term in self}
         for term in self:
-            for path in term.hierarchy():
-                for mod in modifier:
-                    if mod in [int(parent) for parent in path]:
-                        counter[term.id] += 1
+            for mod in modifier:
+                if mod in [int(parent) for parent in term.all_parents]:
+                    counter[term.id] += 1
         return HPOSet([
             term for term in self if counter[term.id] == 0
         ])
@@ -267,6 +266,10 @@ class HPOSet(list):
             The one-way similarity from one to the other HPOSet
 
         """
+
+        if not len(set1) or not len(set2):
+            return 0
+
         scores = []
         for set1_term in set1:
             scores.append(0)

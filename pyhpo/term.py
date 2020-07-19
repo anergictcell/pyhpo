@@ -410,8 +410,7 @@ class HPOTerm():
         if self == other:
             raise RuntimeError('An HPO term cannot be parent/child of itself')
 
-        path = self.shortest_path_to_parent(other)
-        return path[0] != float('inf') and path[1] is not None
+        return other in self.all_parents
 
     def parent_ids(self):
         """
@@ -572,11 +571,14 @@ class HPOTerm():
         steps = float('inf')
         shortest_path = None
         for path in self.hierarchy():
-            for i, term in enumerate(path):
-                if term == other:
-                    if i < steps:
-                        steps = i
-                        shortest_path = path[:i+1]
+            try:
+                i = path.index(other)
+                if i < steps:
+                    steps = i
+                    shortest_path = path[:i+1]
+            except ValueError:
+                pass
+
         return (steps, shortest_path)
 
     def longest_path_to_bottom(self, level=0):
@@ -882,8 +884,8 @@ class HPOTerm():
 
     __hash__ = __index__
 
-    def __eq__(self, other):
-        return isinstance(other, HPOTerm) and self.__hash__() == other.__hash__()
+    def __eq__(self, t2):
+        return self.__hash__() == t2.__hash__() and isinstance(t2, HPOTerm)
 
     def __lt__(self, other):
         return self.__int__() < int(other)
