@@ -6,6 +6,10 @@ Changelog
 - Refactored Ontology to act as a singleton
   - Able to remove some weird dependencies when creating HPOSets
   - Refactored some unit tests to only temporarily mock methods
+- Performance improvements through using more cached objects
+- Making HPOSet an actual set
+- Adding BasicHPOSet
+- Handling obsolete terms
 
 1.4
 ---

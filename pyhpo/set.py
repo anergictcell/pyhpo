@@ -1,7 +1,29 @@
 from pyhpo.ontology import Ontology
+from pyhpo.term import HPOTerm
 
 
-class HPOSet(list):
+class HPOSet(set):
+    def __init__(self, items):
+        set.__init__(self, items)
+        self._list = list(items)
+
+    def add(self, item):
+        """
+        Overwrites ``set.add`` to ensure we keep the
+        ``self._list`` property updated as well.
+        """
+        if item not in self:
+            set.add(self, item)
+            self._list.append(item)
+
+    def update(self, items):
+        """
+        Overwrites ``set.update`` to ensure we keep the
+        ``self._list`` property updated as well.
+        """
+        for item in items:
+            self.add(item)
+
     def child_nodes(self):
         """
         Return a new HPOSet tha contains only
@@ -177,8 +199,8 @@ class HPOSet(list):
                 ]
 
         """
-        for term_a in self:
-            for term_b in self:
+        for term_a in self._list:
+            for term_b in self._list:
                 if term_a == term_b:
                     continue
                 yield (term_a, term_b)
@@ -215,8 +237,8 @@ class HPOSet(list):
                 ]
 
         """
-        for i, term_a in enumerate(self):
-            for term_b in self[i+1:]:
+        for i, term_a in enumerate(self._list):
+            for term_b in self._list[i+1:]:
                 yield (term_a, term_b)
 
     def similarity(self, other, kind='omim'):
@@ -284,8 +306,8 @@ class HPOSet(list):
                     scores[-1] = score
         return sum(scores)/len(scores)
 
-    @staticmethod
-    def from_queries(queries):
+    @classmethod
+    def from_queries(cls, queries):
         """
         Builds an HPO set by specifying a list of queries to run on the
         :class:`pyhpo.ontology.Ontology`
@@ -311,7 +333,7 @@ class HPOSet(list):
                 ])
 
         """
-        return HPOSet([
+        return cls([
             Ontology.get_hpo_object(query) for query in queries
         ])
 
@@ -378,6 +400,35 @@ class HPOSet(list):
         )
 
     def __repr__(self):
-        return 'HPOSet(ontology, {})'.format(
+        return '{}(ontology, {})'.format(
+            self.__class__.__name__,
             ', '.join([x.id for x in self])
         )
+
+
+class BasicHPOSet(HPOSet):
+    def __init__(self, items):
+        temp = HPOSet(items)
+        temp = temp.remove_modifier()
+        temp = temp.replace_obsolete()
+        temp = temp.child_nodes()
+        HPOSet.__init__(self, items)
+
+    def add(self, item):
+        """
+        Overwrites ``set.add`` to ensure we keep the
+        ``self._list`` property updated and
+        don't add modifiers, obsolete or parent terms
+        as well
+        """
+        if item in self:
+            return self
+        if item.is_modifier:
+            return self
+        for term in self:
+            if item.child_of(term):
+                self.remove(term)
+            if item.parent_of(term):
+                return self
+            set.add(self, item)
+            self._list.append(item)
