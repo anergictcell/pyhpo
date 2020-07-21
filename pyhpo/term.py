@@ -2,6 +2,9 @@ import warnings
 import math
 
 
+TRUTH = ('true', 't', 'yes', 'y', '1')
+
+
 class HPOTerm():
     """
     Represents an HPO Term
@@ -162,6 +165,7 @@ class HPOTerm():
         self._synonym = []
         self._xref = []
         self._is_a = []
+        self._is_obsolete = False
         self._parents = []
         self._all_parents = None
         self._children = []
@@ -193,7 +197,7 @@ class HPOTerm():
         if line == '':
             return
         key, *values = line.split(': ')
-        value = ': '.join(values)
+        value = ': '.join(values).strip()
         if key == 'def':
             key = 'definition'
         self.__setattr__(key, value)
@@ -241,6 +245,17 @@ class HPOTerm():
     @is_a.setter
     def is_a(self, value):
         self._is_a.append(value)
+
+    @property
+    def is_obsolete(self):
+        return self._is_obsolete
+
+    @is_obsolete.setter
+    def is_obsolete(self, value):
+        if value.lower() in TRUTH:
+            self._is_obsolete = True
+        else:
+            self._is_obsolete = False
 
     @property
     def parents(self):

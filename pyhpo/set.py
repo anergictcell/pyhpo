@@ -57,6 +57,16 @@ class HPOSet(list):
             term for term in self if counter[term.id] == 0
         ])
 
+    def replace_obsolete(self, verbose=False):
+        ids = set()
+        for term in self:
+            if term.is_obsolete:
+                replaced = Ontology[HPOTerm.id_from_string(term.replaced_by)]
+                ids.add(replaced)
+            else:
+                ids.add(term)
+        return HPOSet(ids)
+
     def all_genes(self):
         """
         Calculates the union of the genes
