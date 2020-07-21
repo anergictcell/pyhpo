@@ -45,16 +45,8 @@ class HPOSet(list):
 
         """
 
-        # Parent modifier terms
-        modifier = (5, 12823, 40279, 31797, 32223, 32443)
-
-        counter = {term.id: 0 for term in self}
-        for term in self:
-            for mod in modifier:
-                if mod in [int(parent) for parent in term.all_parents]:
-                    counter[term.id] += 1
         return HPOSet([
-            term for term in self if counter[term.id] == 0
+            term for term in self if not term.is_modifier
         ])
 
     def replace_obsolete(self, verbose=False):

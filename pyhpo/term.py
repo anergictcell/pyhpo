@@ -153,6 +153,10 @@ class HPOTerm():
 
             3
     """
+
+    # IDs of root modifier terms
+    _modifier_ids = {5, 12823, 40279, 31797, 32223, 32443}
+
     def __init__(self):
         self.name = None
         self.definition = None
@@ -306,6 +310,10 @@ class HPOTerm():
         are not inherited from or passed on to parents or children
         """
         self._annotations['omim_excluded_diseases'][0].update(diseases)
+
+    @property
+    def is_modifier(self):
+        return self._modifier_ids & {int(x) for x in self.all_parents}
 
     def _get_annotations(self, kind):
         """
