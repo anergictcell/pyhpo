@@ -258,6 +258,7 @@ class HPOTerm():
     def is_obsolete(self, value):
         if value.lower() in TRUTH:
             self._is_obsolete = True
+            self.name = self.name.replace('obsolete', '').strip()
         else:
             self._is_obsolete = False
 

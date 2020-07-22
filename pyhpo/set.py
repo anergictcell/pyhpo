@@ -1,5 +1,6 @@
 from pyhpo.ontology import Ontology
 from pyhpo.term import HPOTerm
+import warnings
 
 
 class HPOSet(set):
@@ -75,8 +76,14 @@ class HPOSet(set):
         ids = set()
         for term in self:
             if term.is_obsolete:
-                replaced = Ontology[HPOTerm.id_from_string(term.replaced_by)]
-                ids.add(replaced)
+                try:
+                    replaced = Ontology[HPOTerm.id_from_string(term.replaced_by)]
+                    ids.add(replaced)
+                except AttributeError:
+                    warnings.warn(
+                        'The term {} is obsolete and has no replacement.'.format(term),
+                        UserWarning)
+
             else:
                 ids.add(term)
         return HPOSet(ids)
