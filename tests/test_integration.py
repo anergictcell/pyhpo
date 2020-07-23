@@ -111,6 +111,10 @@ class IntegrationFullTest(unittest.TestCase):
         assert broad_term.parent_of(scoliosis)
         assert broad_term.parent_of(specific_term)
 
+    @unittest.skipUnless(
+        'pd' in globals(),
+        'Pandas library is not installed/loaded'
+    )
     def test_pandas_dataframe(self):
         """
         These test will most likely need to be updated
