@@ -1,7 +1,8 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import patch, call
 
 from pyhpo.set import HPOSet
+from pyhpo.term import HPOTerm
 from tests.mockontology import make_ontology, make_ontology_with_modifiers
 
 
@@ -38,15 +39,12 @@ class SetInitTests(unittest.TestCase):
     def test_initialization(self):
         assert len(self.ci) == len(self.ontology)
 
-    def test_set_from_ontology(self):
-        a = HPOSet.from_ontology(
-            self.ontology,
-            [
-                'Test child level 1-1',
-                'Test child level 2-1',
-                'Test child level 4'
-            ]
-        )
+    def test_set_from_queries(self):
+        a = HPOSet.from_queries([
+            'Test child level 1-1',
+            'Test child level 2-1',
+            'Test child level 4'
+        ])
         assert len(a) == 3
 
     def test_child_nodes(self):
@@ -86,24 +84,18 @@ class SetInitTests(unittest.TestCase):
         )
 
     def test_serialization(self):
-        a = HPOSet.from_ontology(
-            self.ontology,
-            [
-                'Test child level 1-1',
-                'Test child level 2-1',
-                'Test child level 4'
-            ]
-        )
+        a = HPOSet.from_queries([
+            'Test child level 1-1',
+            'Test child level 2-1',
+            'Test child level 4'
+        ])
         self.assertEqual(
             a.serialize(),
             '11+21+41'
         )
 
         self.assertEqual(
-            HPOSet.from_serialized(
-                self.ontology,
-                '11+21+41'
-            ),
+            HPOSet.from_serialized('11+21+41'),
             a
         )
 
@@ -122,8 +114,7 @@ class SetInitTests(unittest.TestCase):
             (len(normal_term_ids | modifier_term_ids))
         )
 
-        full_set = HPOSet.from_ontology(
-            terms,
+        full_set = HPOSet.from_queries(
             normal_term_ids | modifier_term_ids
         )
 
@@ -148,6 +139,10 @@ class SetInitTests(unittest.TestCase):
             {int(x) for x in set_2}
         )
 
+    @unittest.skip("TODO")
+    def test_set_and_list(self):
+        self.assertTrue(False)
+
 
 class SetMetricsTests(unittest.TestCase):
     def setUp(self):
@@ -157,45 +152,64 @@ class SetMetricsTests(unittest.TestCase):
         ])
 
     def test_variance(self):
-        i = 0
-        for term in self.ontology:
-            i += 1
-            term.path_to_other = MagicMock(
-                return_value=(i,)
-            )
-        res = self.ci.variance()
-        assert len(res) == 4, len(res)
-        assert 1 < res[0] < 7, res[0]
-        assert res[1] == 1
-        assert res[2] == 6, res[2]
-        assert len(res[3]) == 6+5+4+3+2+1, len(res[3])
+        with patch.object(
+            HPOTerm,
+            'path_to_other',
+            side_effect=[
+                (1, None),
+                (1, None),
+                (1, None),
+                (1, None),
+                (1, None),
+                (1, None),
+                (2, None),
+                (2, None),
+                (2, None),
+                (2, None),
+                (2, None),
+                (3, None),
+                (3, None),
+                (3, None),
+                (3, None),
+                (4, None),
+                (4, None),
+                (4, None),
+                (5, None),
+                (5, None),
+                (6, None)
+            ]
+        ) as mock_pto:
+            res = self.ci.variance()
+            assert len(res) == 4, len(res)
+            assert 1 < res[0] < 7, res[0]
+            assert res[1] == 1
+            assert res[2] == 6, res[2]
+            assert len(res[3]) == 6+5+4+3+2+1, len(res[3])
 
-        self.ci[0].path_to_other.assert_any_call(self.ci[1])
-        self.ci[0].path_to_other.assert_any_call(self.ci[2])
-        self.ci[0].path_to_other.assert_any_call(self.ci[3])
-        self.ci[0].path_to_other.assert_any_call(self.ci[4])
-        self.ci[0].path_to_other.assert_any_call(self.ci[5])
-        self.ci[0].path_to_other.assert_any_call(self.ci[6])
-
-        self.ci[1].path_to_other.assert_any_call(self.ci[2])
-        self.ci[1].path_to_other.assert_any_call(self.ci[3])
-        self.ci[1].path_to_other.assert_any_call(self.ci[4])
-        self.ci[1].path_to_other.assert_any_call(self.ci[5])
-        self.ci[1].path_to_other.assert_any_call(self.ci[6])
-
-        self.ci[2].path_to_other.assert_any_call(self.ci[3])
-        self.ci[2].path_to_other.assert_any_call(self.ci[4])
-        self.ci[2].path_to_other.assert_any_call(self.ci[5])
-        self.ci[2].path_to_other.assert_any_call(self.ci[6])
-
-        self.ci[3].path_to_other.assert_any_call(self.ci[4])
-        self.ci[3].path_to_other.assert_any_call(self.ci[5])
-        self.ci[3].path_to_other.assert_any_call(self.ci[6])
-
-        self.ci[4].path_to_other.assert_any_call(self.ci[5])
-        self.ci[4].path_to_other.assert_any_call(self.ci[6])
-
-        self.ci[5].path_to_other.assert_called_once_with(self.ci[6])
+            calls = [
+                call(self.ci._list[1]),
+                call(self.ci._list[2]),
+                call(self.ci._list[3]),
+                call(self.ci._list[4]),
+                call(self.ci._list[5]),
+                call(self.ci._list[6]),
+                call(self.ci._list[2]),
+                call(self.ci._list[3]),
+                call(self.ci._list[4]),
+                call(self.ci._list[5]),
+                call(self.ci._list[6]),
+                call(self.ci._list[3]),
+                call(self.ci._list[4]),
+                call(self.ci._list[5]),
+                call(self.ci._list[6]),
+                call(self.ci._list[4]),
+                call(self.ci._list[5]),
+                call(self.ci._list[6]),
+                call(self.ci._list[5]),
+                call(self.ci._list[6]),
+                call(self.ci._list[6])
+            ]
+            mock_pto.assert_has_calls(calls)
 
     def test_no_variance(self):
         ci = HPOSet([self.ontology[1]])

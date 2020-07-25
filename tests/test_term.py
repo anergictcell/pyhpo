@@ -10,7 +10,7 @@ TEST_HPO = [
     'name: Dilatation of the cerebral artery',
     'alt_id: HP:0002618',
     'alt_id: HP:0006816',
-    'def: "The presence of a localized dilatation or ballooning of a cerebral artery." [HPO:probinson]',
+    'def: "The presence of a localized dilatation or ballooning of a cerebral artery." [HPO:probinson]',  # noqa: E501
     'comment: Aneurysm is considered a severe form of dilatation.',
     'synonym: "Brain aneurysm" BROAD layperson [ORCID:0000-0001-6908-9849]',
     'synonym: "Cerebral aneurysm" NARROW []',
@@ -58,7 +58,10 @@ class StaticMethodsTest(unittest.TestCase):
 
         with self.assertRaises(AttributeError) as context:
             HPOTerm.id_from_string(12)
-        assert "'int' object has no attribute 'split'" == str(context.exception)
+        self.assertEqual(
+            "'int' object has no attribute 'split'",
+            str(context.exception)
+        )
 
     def test_synonym_parsing(self):
         assert HPOTerm.parse_synonym(
@@ -100,7 +103,10 @@ class StaticMethodsTest(unittest.TestCase):
 
         with self.assertRaises(AttributeError) as context:
             HPOTerm.parse_synonym(12)
-        assert "'int' object has no attribute 'split'" == str(context.exception)
+        self.assertEqual(
+            "'int' object has no attribute 'split'",
+            str(context.exception)
+        )
 
 
 class TermInit(unittest.TestCase):
@@ -142,8 +148,14 @@ class SingleTermAttributes(unittest.TestCase):
         assert term._index == 4944
         assert term.name == 'Dilatation of the cerebral artery'
         assert term.alt_id == ['HP:0002618', 'HP:0006816']
-        assert term.definition == '"The presence of a localized dilatation or ballooning of a cerebral artery." [HPO:probinson]'
-        assert term.comment == 'Aneurysm is considered a severe form of dilatation.'
+        self.assertEqual(
+            term.definition,
+            '"The presence of a localized dilatation or ballooning of a cerebral artery." [HPO:probinson]'  # noqa: E501
+        )
+        self.assertEqual(
+            term.comment,
+            'Aneurysm is considered a severe form of dilatation.'
+        )
         assert term.synonym == [
             'Brain aneurysm',
             'Cerebral aneurysm',

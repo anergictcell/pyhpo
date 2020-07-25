@@ -61,6 +61,7 @@ Getting started
 
     from pyhpo.ontology import Ontology
 
+    # initilize the Ontology (you can specify config parameters if needed here)
     ontology = Ontology()
     
     # Iterate through all HPO terms

@@ -111,6 +111,10 @@ class IntegrationFullTest(unittest.TestCase):
         assert broad_term.parent_of(scoliosis)
         assert broad_term.parent_of(specific_term)
 
+    @unittest.skipUnless(
+        'pd' in globals(),
+        'Pandas library is not installed/loaded'
+    )
     def test_pandas_dataframe(self):
         """
         These test will most likely need to be updated
@@ -126,8 +130,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert 0.61 < df.dBottom.mean() < 0.62, df.dBottom.mean()
 
     def test_set(self):
-        full_set = HPOSet.from_ontology(
-            self.terms,
+        full_set = HPOSet.from_queries(
             [int(x) for x in self.terms]
         )
 

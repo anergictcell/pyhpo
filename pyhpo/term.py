@@ -2,6 +2,9 @@ import warnings
 import math
 
 
+TRUTH = ('true', 't', 'yes', 'y', '1')
+
+
 class HPOTerm():
     """
     Represents an HPO Term
@@ -73,7 +76,7 @@ class HPOTerm():
 
         **Example:** ::
 
-            HP:0000003
+            'HP:0000003'
 
     information_content: dict
         The information content of the HPO term for:
@@ -93,7 +96,7 @@ class HPOTerm():
 
         **Example:** ::
 
-            Abnormality of body height
+            'Abnormality of body height'
 
     omim_diseases: set of :class:`pyhpo.annotations.Omim`
         All OMIM diseases associated with the term or its children
@@ -143,6 +146,36 @@ class HPOTerm():
 
             ['HP:0000107 ! Renal cyst']
 
+    is_obsolete: bool
+        Indicates if the HPO term is obsolete and should not be used anymore.
+
+        .. note::
+
+            Check the ``replaced_by`` attribute which HPO term to use instead.
+
+    replaced_by: str (``HPOTerm.id``)
+        Specifies which HPO term to use instead if self is obsolete.
+
+        **Example:** ::
+
+            'HP:0008665'
+
+        .. warning::
+
+            It is not guaranteed that this attribute is present -
+            even for obsolete terms.
+
+    is_modifier: bool
+        Indicates whether the HPO is a child of a mooifier term. (read only)
+        Modifier terms are specified in ``HPOTerm._modifier_ids``
+
+        * ``Mode of inheritance`` - ``'HP:0000005'``
+        * ``Clinical modifier`` - ``'HP:0012823'``
+        * ``Frequency`` - ``'HP:0040279'``
+        * ``Clinical course`` - ``'HP:0031797'``
+        * ``Blood group`` - ``'HP:0032223'``
+        * ``Past medical history`` - ``'HP:0032443'``
+
     _index: int
         Integer representation of ID
 
@@ -150,6 +183,10 @@ class HPOTerm():
 
             3
     """
+
+    # IDs of root modifier terms
+    _modifier_ids = {5, 12823, 40279, 31797, 32223, 32443}
+
     def __init__(self):
         self.name = None
         self.definition = None
@@ -162,6 +199,7 @@ class HPOTerm():
         self._synonym = []
         self._xref = []
         self._is_a = []
+        self._is_obsolete = False
         self._parents = []
         self._all_parents = None
         self._children = []
@@ -193,7 +231,7 @@ class HPOTerm():
         if line == '':
             return
         key, *values = line.split(': ')
-        value = ': '.join(values)
+        value = ': '.join(values).strip()
         if key == 'def':
             key = 'definition'
         self.__setattr__(key, value)
@@ -241,6 +279,18 @@ class HPOTerm():
     @is_a.setter
     def is_a(self, value):
         self._is_a.append(value)
+
+    @property
+    def is_obsolete(self):
+        return self._is_obsolete
+
+    @is_obsolete.setter
+    def is_obsolete(self, value):
+        if value.lower() in TRUTH:
+            self._is_obsolete = True
+            self.name = self.name.replace('obsolete', '').strip()
+        else:
+            self._is_obsolete = False
 
     @property
     def parents(self):
@@ -291,6 +341,10 @@ class HPOTerm():
         are not inherited from or passed on to parents or children
         """
         self._annotations['omim_excluded_diseases'][0].update(diseases)
+
+    @property
+    def is_modifier(self):
+        return self._modifier_ids & {int(x) for x in self.all_parents}
 
     def _get_annotations(self, kind):
         """
@@ -410,8 +464,7 @@ class HPOTerm():
         if self == other:
             raise RuntimeError('An HPO term cannot be parent/child of itself')
 
-        path = self.shortest_path_to_parent(other)
-        return path[0] != float('inf') and path[1] is not None
+        return other in self.all_parents
 
     def parent_ids(self):
         """
@@ -572,11 +625,14 @@ class HPOTerm():
         steps = float('inf')
         shortest_path = None
         for path in self.hierarchy():
-            for i, term in enumerate(path):
-                if term == other:
-                    if i < steps:
-                        steps = i
-                        shortest_path = path[:i+1]
+            try:
+                i = path.index(other)
+                if i < steps:
+                    steps = i
+                    shortest_path = path[:i+1]
+            except ValueError:
+                pass
+
         return (steps, shortest_path)
 
     def longest_path_to_bottom(self, level=0):
@@ -882,8 +938,8 @@ class HPOTerm():
 
     __hash__ = __index__
 
-    def __eq__(self, other):
-        return isinstance(other, HPOTerm) and self.__hash__() == other.__hash__()
+    def __eq__(self, t2):
+        return self.__hash__() == t2.__hash__() and isinstance(t2, HPOTerm)
 
     def __lt__(self, other):
         return self.__int__() < int(other)

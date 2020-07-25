@@ -13,7 +13,7 @@ from pyhpo.term import HPOTerm
 from pyhpo.annotations import HPO_Gene, parse_pheno_file
 
 
-class Ontology():
+class OntologyClass():
     """
     A linked and indexed list of interconnected :class:`HPOTerm` s.
 
@@ -27,7 +27,8 @@ class Ontology():
         Set of all excluded OMIM-diseases associated with the HPOTerms
 
     """
-    def __init__(self, filename='hp.obo', data_folder=None):
+
+    def __call__(self, filename='hp.obo', data_folder=None):
         self._map = {}
         self._genes = set()
         self._omim_diseases = set()
@@ -42,6 +43,7 @@ class Ontology():
                 data_folder,
                 filename
             ))
+        return self
 
     def add_annotations(self, data_folder=None):
         warnings.warn(
@@ -437,3 +439,6 @@ class Ontology():
 
     def __len__(self):
         return len(self._map.keys())
+
+
+Ontology = OntologyClass()

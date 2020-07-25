@@ -11,7 +11,6 @@ It provides analytical helper functions to narrow down the actual provided clini
    :no-private-members:
    :no-special-members:
 
-
 child_nodes
 --------------------
 .. automethod:: pyhpo.set.HPOSet.child_nodes
@@ -19,6 +18,10 @@ child_nodes
 remove_modifier
 --------------------
 .. automethod:: pyhpo.set.HPOSet.remove_modifier
+
+replace_obsolete
+--------------------
+.. automethod:: pyhpo.set.HPOSet.replace_obsolete
 
 all_genes
 --------------------
@@ -52,9 +55,21 @@ serialize
 --------------------
 .. automethod:: pyhpo.set.HPOSet.serialize
 
+
+``BasicHPOSet`` class
+*****************
+.. autoclass:: pyhpo.set.BasicHPOSet
+   :no-private-members:
+   :no-special-members:
+
+
 Class methods
 ************************
 
-from_ontology
+from_queries
 --------------------
-.. automethod:: pyhpo.set.HPOSet.from_ontology
+.. automethod:: pyhpo.set.HPOSet.from_queries
+
+from_serialized
+--------------------
+.. automethod:: pyhpo.set.HPOSet.from_serialized

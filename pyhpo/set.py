@@ -1,4 +1,30 @@
-class HPOSet(list):
+from pyhpo.ontology import Ontology
+from pyhpo.term import HPOTerm
+import warnings
+
+
+class HPOSet(set):
+    def __init__(self, items):
+        set.__init__(self, items)
+        self._list = list(items)
+
+    def add(self, item):
+        """
+        Overwrites ``set.add`` to ensure we keep the
+        ``self._list`` property updated as well.
+        """
+        if item not in self:
+            set.add(self, item)
+            self._list.append(item)
+
+    def update(self, items):
+        """
+        Overwrites ``set.update`` to ensure we keep the
+        ``self._list`` property updated as well.
+        """
+        for item in items:
+            self.add(item)
+
     def child_nodes(self):
         """
         Return a new HPOSet tha contains only
@@ -42,18 +68,25 @@ class HPOSet(list):
 
         """
 
-        # Parent modifier terms
-        modifier = (5, 12823, 40279, 31797, 32223, 32443)
-
-        counter = {term.id: 0 for term in self}
-        for term in self:
-            for path in term.hierarchy():
-                for mod in modifier:
-                    if mod in [int(parent) for parent in path]:
-                        counter[term.id] += 1
         return HPOSet([
-            term for term in self if counter[term.id] == 0
+            term for term in self if not term.is_modifier
         ])
+
+    def replace_obsolete(self, verbose=False):
+        ids = set()
+        for term in self:
+            if term.is_obsolete:
+                try:
+                    replaced = Ontology[HPOTerm.id_from_string(term.replaced_by)]
+                    ids.add(replaced)
+                except AttributeError:
+                    warnings.warn(
+                        'The term {} is obsolete and has no replacement.'.format(term),
+                        UserWarning)
+
+            else:
+                ids.add(term)
+        return HPOSet(ids)
 
     def all_genes(self):
         """
@@ -173,8 +206,8 @@ class HPOSet(list):
                 ]
 
         """
-        for term_a in self:
-            for term_b in self:
+        for term_a in self._list:
+            for term_b in self._list:
                 if term_a == term_b:
                     continue
                 yield (term_a, term_b)
@@ -211,8 +244,8 @@ class HPOSet(list):
                 ]
 
         """
-        for i, term_a in enumerate(self):
-            for term_b in self[i+1:]:
+        for i, term_a in enumerate(self._list):
+            for term_b in self._list[i+1:]:
                 yield (term_a, term_b)
 
     def similarity(self, other, kind='omim'):
@@ -267,6 +300,10 @@ class HPOSet(list):
             The one-way similarity from one to the other HPOSet
 
         """
+
+        if not len(set1) or not len(set2):
+            return 0
+
         scores = []
         for set1_term in set1:
             scores.append(0)
@@ -276,17 +313,14 @@ class HPOSet(list):
                     scores[-1] = score
         return sum(scores)/len(scores)
 
-    @staticmethod
-    def from_ontology(ontology, queries):
+    @classmethod
+    def from_queries(cls, queries):
         """
-        Builds an HPO set by specifying a list of queries to run on an
-        :class:`pyhpo.ontology.Ontology` object
+        Builds an HPO set by specifying a list of queries to run on the
+        :class:`pyhpo.ontology.Ontology`
 
         Parameters
         ----------
-        ontology: :class:`pyhpo.ontology.Ontology`
-            The HPO Ontology that will be used to get HPOTerms
-
         queries: list of (string or int)
             The queries to be run the identify the HPOTerm from the ontology
 
@@ -299,27 +333,24 @@ class HPOSet(list):
         --------
             ::
 
-                ci = HPOSet(ontology, [
+                ci = HPOSet([
                     'Scoliosis',
                     'HP:0001234',
                     12
                 ])
 
         """
-        return HPOSet([
-            ontology.get_hpo_object(query) for query in queries
+        return cls([
+            Ontology.get_hpo_object(query) for query in queries
         ])
 
     @staticmethod
-    def from_serialized(ontology, pickle):
+    def from_serialized(pickle):
         """
         Re-Builds an HPO set from a serialized HPOSet object
 
         Parameters
         ----------
-        ontology: :class:`pyhpo.ontology.Ontology`
-            The HPO Ontology that will be used to get HPOTerms
-
         pickle: str
             The serialized HPOSet object
 
@@ -336,13 +367,13 @@ class HPOSet(list):
 
         """
         return HPOSet([
-            ontology.get_hpo_object(int(query)) for query in pickle.split('+')
+            Ontology[int(query)] for query in pickle.split('+')
         ])
 
     def serialize(self):
         """
         Creates a string serialization that can be used to
-        rebuild the same HPOSet via `pyhpo.set.HPOSet.from_serialized`
+        rebuild the same HPOSet via :func:`pyhpo.set.HPOSet.from_serialized`
 
         Returns
         -------
@@ -376,6 +407,43 @@ class HPOSet(list):
         )
 
     def __repr__(self):
-        return 'HPOSet(ontology, {})'.format(
+        return '{}(ontology, {})'.format(
+            self.__class__.__name__,
             ', '.join([x.id for x in self])
         )
+
+
+class BasicHPOSet(HPOSet):
+    """
+    Child of :class:`.HPOSet` that automatically:
+
+    * removes parent terms
+    * removes modifier terms
+    * replaces obsolete terms
+    """
+
+    def __init__(self, items):
+        temp = HPOSet(items)
+        temp = temp.remove_modifier()
+        temp = temp.replace_obsolete()
+        temp = temp.child_nodes()
+        HPOSet.__init__(self, items)
+
+    def add(self, item):
+        """
+        Overwrites ``set.add`` to ensure we keep the
+        ``self._list`` property updated and
+        don't add modifiers, obsolete or parent terms
+        as well
+        """
+        if item in self:
+            return self
+        if item.is_modifier:
+            return self
+        for term in self:
+            if item.child_of(term):
+                self.remove(term)
+            if item.parent_of(term):
+                return self
+            set.add(self, item)
+            self._list.append(item)
