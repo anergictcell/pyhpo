@@ -367,7 +367,7 @@ class HPOSet(set):
 
         """
         return HPOSet([
-            Ontology.get_hpo_object(int(query)) for query in pickle.split('+')
+            Ontology[int(query)] for query in pickle.split('+')
         ])
 
     def serialize(self):
@@ -414,6 +414,14 @@ class HPOSet(set):
 
 
 class BasicHPOSet(HPOSet):
+    """
+    Child of :class:`.HPOSet` that automatically:
+
+    * removes parent terms
+    * removes modifier terms
+    * replaces obsolete terms
+    """
+
     def __init__(self, items):
         temp = HPOSet(items)
         temp = temp.remove_modifier()

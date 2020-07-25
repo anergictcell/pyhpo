@@ -76,7 +76,7 @@ class HPOTerm():
 
         **Example:** ::
 
-            HP:0000003
+            'HP:0000003'
 
     information_content: dict
         The information content of the HPO term for:
@@ -96,7 +96,7 @@ class HPOTerm():
 
         **Example:** ::
 
-            Abnormality of body height
+            'Abnormality of body height'
 
     omim_diseases: set of :class:`pyhpo.annotations.Omim`
         All OMIM diseases associated with the term or its children
@@ -145,6 +145,36 @@ class HPOTerm():
         **Example:** ::
 
             ['HP:0000107 ! Renal cyst']
+
+    is_obsolete: bool
+        Indicates if the HPO term is obsolete and should not be used anymore.
+
+        .. note::
+
+            Check the ``replaced_by`` attribute which HPO term to use instead.
+
+    replaced_by: str (``HPOTerm.id``)
+        Specifies which HPO term to use instead if self is obsolete.
+
+        **Example:** ::
+
+            'HP:0008665'
+
+        .. warning::
+
+            It is not guaranteed that this attribute is present -
+            even for obsolete terms.
+
+    is_modifier: bool
+        Indicates whether the HPO is a child of a mooifier term. (read only)
+        Modifier terms are specified in ``HPOTerm._modifier_ids``
+
+        * ``Mode of inheritance`` - ``'HP:0000005'``
+        * ``Clinical modifier`` - ``'HP:0012823'``
+        * ``Frequency`` - ``'HP:0040279'``
+        * ``Clinical course`` - ``'HP:0031797'``
+        * ``Blood group`` - ``'HP:0032223'``
+        * ``Past medical history`` - ``'HP:0032443'``
 
     _index: int
         Integer representation of ID
