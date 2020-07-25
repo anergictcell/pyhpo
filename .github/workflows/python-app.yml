@@ -31,7 +31,3 @@ jobs:
     - name: Unittesting (complete-check)
       run: |
         python -m unittest discover complete-check -s tests
-
-    - name: Benchmarking performance
-      run: |
-        PYTHONPATH=./ python tests/benchmarking.py
