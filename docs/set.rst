@@ -27,6 +27,10 @@ all_genes
 --------------------
 .. automethod:: pyhpo.set.HPOSet.all_genes
 
+omim_diseases
+--------------------
+.. automethod:: pyhpo.set.HPOSet.omim_diseases
+
 information_content
 --------------------
 .. automethod:: pyhpo.set.HPOSet.information_content

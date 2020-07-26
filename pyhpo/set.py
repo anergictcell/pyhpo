@@ -103,6 +103,21 @@ class HPOSet(set):
             genes.update(term.genes)
         return genes
 
+    def omim_diseases(self):
+        """
+        Calculates the union of the Omim diseases
+        attached to the HPO Terms in this set
+
+        Returns
+        -------
+        set of :class:`annotations.Omim`
+            Set of all Omim diseases associated with the HPOTerms in the set
+        """
+        omims = set()
+        for term in self:
+            omims.update(term.omim_diseases)
+        return omims
+
     def information_content(self, kind=None):
         """
         Gives back basic information content stats about the
