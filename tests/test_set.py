@@ -143,6 +143,18 @@ class SetInitTests(unittest.TestCase):
     def test_set_and_list(self):
         self.assertTrue(False)
 
+    @unittest.skip("TODO")
+    def test_adding_terms(self):
+        self.assertTrue(False)
+
+    @unittest.skip("TODO")
+    def test_adding_terms_to_BasicSet(self):
+        self.assertTrue(False)
+
+    @unittest.skip("TODO")
+    def test_replacing_obsolete(self):
+        self.assertTrue(False)
+
 
 class SetMetricsTests(unittest.TestCase):
     def setUp(self):
