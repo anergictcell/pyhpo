@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.x
+---
+- Reworked BasicHPOSet
+- Added omim_diseases to HPOSet
+- Adds distance method to similarity measurement
+
 2.0
 ---
 - Refactored Ontology to act as a singleton
