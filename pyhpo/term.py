@@ -344,7 +344,7 @@ class HPOTerm():
 
     @property
     def is_modifier(self):
-        return self._modifier_ids & {int(x) for x in self.all_parents}
+        return bool(self._modifier_ids & {int(x) for x in self.all_parents})
 
     def _get_annotations(self, kind):
         """
