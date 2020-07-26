@@ -248,7 +248,7 @@ class HPOSet(set):
             for term_b in self._list[i+1:]:
                 yield (term_a, term_b)
 
-    def similarity(self, other, kind='omim'):
+    def similarity(self, other, kind='omim', method=None):
         """
         Calculates the similarity to another HPOSet
         According to Robinson et al, American Journal of Human Genetics, (2008)
@@ -263,18 +263,36 @@ class HPOSet(set):
             Which kind of information content should be calculated.
             Options are ['omim', 'gene']
 
+        method: string, default ``resnik``
+            The method to use to calculate the similarity.
+
+            Available options:
+
+            * **resnik** - Resnik P, Proceedings of the 14th IJCAI, (1995)
+            * **lin** - Lin D, Proceedings of the 15th ICML, (1998)
+            * **jc** - Jiang J, Conrath D, ROCLING X, (1997)
+              Implementation according to R source code
+            * **jc2** - Jiang J, Conrath D, ROCLING X, (1997)
+              Implementation according to paper from R ``hposim`` library
+              Deng Y, et. al., PLoS One, (2015)
+            * **rel** - Relevance measure - Schlicker A, et.al.,
+              BMC Bioinformatics, (2006)
+            * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
+            * **dist** - Distance between HPO terms
+
+
         Returns
         -------
         float
             The similarity score to the other HPOSet
 
         """
-        score1 = HPOSet._sim_score(self, other, kind)
-        score2 = HPOSet._sim_score(other, self, kind)
+        score1 = HPOSet._sim_score(self, other, kind, method)
+        score2 = HPOSet._sim_score(other, self, kind, method)
         return (score1 + score2)/2
 
     @staticmethod
-    def _sim_score(set1, set2, kind):
+    def _sim_score(set1, set2, kind, method=None):
         """
         Calculates one-way similarity from one HPOSet to another HPOSet
 
@@ -294,6 +312,9 @@ class HPOSet(set):
             Which kind of information content should be calculated.
             Options are ['omim', 'gene']
 
+        method: string, default ``resnik``
+            The method to use to calculate the similarity.
+
         Returns
         -------
         float
@@ -308,7 +329,7 @@ class HPOSet(set):
         for set1_term in set1:
             scores.append(0)
             for set2_term in set2:
-                score = set1_term.similarity_score(set2_term, kind)
+                score = set1_term.similarity_score(set2_term, kind, method)
                 if score > scores[-1]:
                     scores[-1] = score
         return sum(scores)/len(scores)

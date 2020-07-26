@@ -755,6 +755,9 @@ class HPOTerm():
         elif method == 'ic':
             return self. _ic_similarity_score(other, kind)
 
+        elif method == 'dist':
+            return self. _dist_similarity_score(other)
+
         else:
             raise RuntimeError('Unknown method to calculate similarity')
 
@@ -886,6 +889,10 @@ class HPOTerm():
         lin = self._lin_similarity_score(other, kind)
 
         return lin * (1 - (1 / (1 + mica)))
+
+    def _dist_similarity_score(self, other):
+        dist = self.path_to_other(other)[0]
+        return 1/(dist + 1)
 
     @staticmethod
     def id_from_string(hpo_string):
