@@ -344,8 +344,8 @@ class HPOSet(set):
             Ontology.get_hpo_object(query) for query in queries
         ])
 
-    @staticmethod
-    def from_serialized(pickle):
+    @classmethod
+    def from_serialized(cls, pickle):
         """
         Re-Builds an HPO set from a serialized HPOSet object
 
@@ -366,7 +366,7 @@ class HPOSet(set):
                 ci = HPOSet(ontology, '12+24+66628')
 
         """
-        return HPOSet([
+        return cls([
             Ontology[int(query)] for query in pickle.split('+')
         ])
 
@@ -402,14 +402,15 @@ class HPOSet(set):
         return [t.toJSON(verbose) for t in self]
 
     def __str__(self):
-        return 'HPOSet: {}'.format(
+        return '{}: {}'.format(
+            self.__class__.__name__,
             ', '.join([x.name for x in self])
         )
 
     def __repr__(self):
-        return '{}(ontology, {})'.format(
+        return '{}.from_serialized("{}")'.format(
             self.__class__.__name__,
-            ', '.join([x.id for x in self])
+            self.serialize()
         )
 
 
@@ -423,11 +424,9 @@ class BasicHPOSet(HPOSet):
     """
 
     def __init__(self, items):
-        temp = HPOSet(items)
-        temp = temp.remove_modifier()
-        temp = temp.replace_obsolete()
-        temp = temp.child_nodes()
-        HPOSet.__init__(self, items)
+        HPOSet.__init__(self, [])
+        for item in items:
+            self.add(item)
 
     def add(self, item):
         """
@@ -441,9 +440,10 @@ class BasicHPOSet(HPOSet):
         if item.is_modifier:
             return self
         for term in self:
-            if item.child_of(term):
-                self.remove(term)
             if item.parent_of(term):
                 return self
-            set.add(self, item)
-            self._list.append(item)
+        for p in item.all_parents:
+            if p in self:
+                self.remove(p)
+        set.add(self, item)
+        self._list.append(item)
