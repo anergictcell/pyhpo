@@ -1,6 +1,7 @@
 import sys
 import unittest
 
+from pyhpo import ontology as ont
 from pyhpo.ontology import Ontology
 from pyhpo.set import HPOSet
 
@@ -112,7 +113,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert broad_term.parent_of(specific_term)
 
     @unittest.skipUnless(
-        'pd' in globals(),
+        'pd' in globals() or 'pd' in dir(ont),
         'Pandas library is not installed/loaded'
     )
     def test_pandas_dataframe(self):
