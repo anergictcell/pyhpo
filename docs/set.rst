@@ -61,7 +61,7 @@ serialize
 
 
 ``BasicHPOSet`` class
-*****************
+*********************
 .. autoclass:: pyhpo.set.BasicHPOSet
    :no-private-members:
    :no-special-members:

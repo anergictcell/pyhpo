@@ -294,6 +294,7 @@ class HPOSet(set):
               BMC Bioinformatics, (2006)
             * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
             * **dist** - Distance between HPO terms
+            * **equal** - Calculates exact matches between both sets
 
 
         Returns
@@ -302,9 +303,42 @@ class HPOSet(set):
             The similarity score to the other HPOSet
 
         """
+        if method == 'equal':
+            return self._equality_score(other)
+
         score1 = HPOSet._sim_score(self, other, kind, method)
         score2 = HPOSet._sim_score(other, self, kind, method)
         return (score1 + score2)/2
+
+    def _equality_score(self, other):
+        """
+        Returns an equality similarity score.
+        Only exact matches between both sets are counted
+        and the fraction of exact matches is returned.
+        A score of 1 means both sets match 100%,
+        0.5 means only half the terms have an exact match.
+
+        This method does not take advantage of the ontology
+        and does not take distance measures into account.
+
+        Parameters
+        ----------
+        other: HPOSet
+            Another HPOSet to measure the similarity to
+
+        Returns
+        -------
+        float
+            The similarity score to the other HPOSet
+
+        """
+
+        matches = 0
+        for term1 in self:
+            for term2 in other:
+                if term1 == term2:
+                    matches += 1
+        return matches / max([len(self), len(other)])
 
     @staticmethod
     def _sim_score(set1, set2, kind, method=None):
