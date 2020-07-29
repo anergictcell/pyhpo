@@ -1,11 +1,12 @@
 Changelog
 =========
 
-2.x
+2.1
 ---
 - Reworked BasicHPOSet
 - Added omim_diseases to HPOSet
-- Adds distance method to similarity measurement
+- Added distance method to similarity measurement
+- Added equal measurement to HPOSet similarity
 
 2.0
 ---
