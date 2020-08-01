@@ -209,7 +209,11 @@ class HPOTerm():
         self._annotations = {
             'genes': [set(), False],
             'omim_diseases': [set(), False],
-            'omim_excluded_diseases': [set(), False]
+            'orpha_diseases': [set(), False],
+            'decipher_diseases': [set(), False],
+            'omim_excluded_diseases': [set(), False],
+            'orpha_excluded_diseases': [set(), False],
+            'decipher_excluded_diseases': [set(), False]
         }
 
         self.information_content = {
@@ -325,6 +329,22 @@ class HPOTerm():
         self._update_annotations('omim_diseases', diseases)
 
     @property
+    def orpha_diseases(self):
+        return self._get_annotations('orpha_diseases')
+
+    @orpha_diseases.setter
+    def orpha_diseases(self, diseases):
+        self._update_annotations('orpha_diseases', diseases)
+
+    @property
+    def decipher_diseases(self):
+        return self._get_annotations('decipher_diseases')
+
+    @decipher_diseases.setter
+    def decipher_diseases(self, diseases):
+        self._update_annotations('decipher_diseases', diseases)
+
+    @property
     def omim_excluded_diseases(self):
         """
         Since excluded diseased do not follow the general model
@@ -341,6 +361,42 @@ class HPOTerm():
         are not inherited from or passed on to parents or children
         """
         self._annotations['omim_excluded_diseases'][0].update(diseases)
+
+    @property
+    def orpha_excluded_diseases(self):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        return self._annotations['orpha_excluded_diseases'][0]
+
+    @orpha_excluded_diseases.setter
+    def orpha_excluded_diseases(self, diseases):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        self._annotations['orpha_excluded_diseases'][0].update(diseases)
+
+    @property
+    def decipher_excluded_diseases(self):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        return self._annotations['decipher_excluded_diseases'][0]
+
+    @decipher_excluded_diseases.setter
+    def decipher_excluded_diseases(self, diseases):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        self._annotations['decipher_excluded_diseases'][0].update(diseases)
 
     @property
     def is_modifier(self):

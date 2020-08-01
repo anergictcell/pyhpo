@@ -9,10 +9,27 @@ from pyhpo.set import HPOSet
 N_TERMS = 15332
 # Number of genes in the annotation dataset
 N_GENES = 4317
+
 # Number of OMIM diseases in the annotation dataset
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l
 N_OMIM = 7675
 # Number of excluded OMIM diseases in the annotation dataset
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l
 N_OMIM_EXL = 638
+
+# Number of ORPHA diseases in the annotation dataset
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l
+N_ORPHA = 3889
+# Number of excluded ORPHA diseases in the annotation dataset
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l
+N_ORPHA_EXL = 240
+
+# Number of DECIPHER diseases in the annotation dataset
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep -v "NOT" | wc -l
+N_DECIPHER = 47
+# Number of excluded DECIPHER diseases in the annotation dataset
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep "NOT" | wc -l
+N_DECIPHER_EXL = 0
 
 
 @unittest.skipUnless(
@@ -43,8 +60,9 @@ class IntegrationFullTest(unittest.TestCase):
         These test will most likely need to be updated
         after every data update
         """
-        assert len(self.terms.omim_diseases) == N_OMIM, len(
-            self.terms.omim_diseases
+        self.assertEqual(
+            len(self.terms.omim_diseases),
+            N_OMIM
         )
 
     def test_omim_excluded(self):
@@ -52,8 +70,49 @@ class IntegrationFullTest(unittest.TestCase):
         These test will most likely need to be updated
         after every data update
         """
-        assert len(self.terms.omim_excluded_diseases) == N_OMIM_EXL, len(
-            self.terms.omim_excluded_diseases
+        self.assertEqual(
+            len(self.terms.omim_excluded_diseases),
+            N_OMIM_EXL
+        )
+
+    def test_orpha_associated(self):
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        self.assertEqual(
+            len(self.terms.orpha_diseases),
+            N_ORPHA
+        )
+
+    def test_orpha_excluded(self):
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        self.assertEqual(
+            len(self.terms.orpha_excluded_diseases),
+            N_ORPHA_EXL
+        )
+
+    def test_decipher_associated(self):
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        self.assertEqual(
+            len(self.terms.decipher_diseases),
+            N_DECIPHER
+        )
+
+    def test_decipher_excluded(self):
+        """
+        These test will most likely need to be updated
+        after every data update
+        """
+        self.assertEqual(
+            len(self.terms.decipher_excluded_diseases),
+            N_DECIPHER_EXL
         )
 
     def test_average_annotation_numbers(self):
@@ -63,14 +122,20 @@ class IntegrationFullTest(unittest.TestCase):
         """
         genes = []
         omim = []
+        orpha = []
+        decipher = []
         excluded_omim = []
         for term in self.terms:
             genes.append(len(term.genes))
             omim.append(len(term.omim_diseases))
+            orpha.append(len(term.orpha_diseases))
+            decipher.append(len(term.decipher_diseases))
             excluded_omim.append(len(term.omim_excluded_diseases))
 
         assert sum(genes)/len(genes) > 36, sum(genes)/len(genes)
         assert sum(omim)/len(omim) > 29, sum(omim)/len(omim)
+        assert sum(orpha)/len(orpha) > 24, sum(orpha)/len(orpha)
+        assert sum(decipher)/len(decipher) > 0.1, sum(decipher)/len(decipher)
         assert sum(excluded_omim)/len(excluded_omim) > 0.05, \
             sum(excluded_omim)/len(excluded_omim)
 
@@ -78,6 +143,9 @@ class IntegrationFullTest(unittest.TestCase):
         for term in self.terms:
             lg = len(term.genes)
             lo = len(term.omim_diseases)
+            lorpha = len(term.orpha_diseases)
+            ld = len(term.decipher_diseases)
+
             for child in term.children:
                 with self.subTest(t=term.id, c=child.id):
                     assert lg >= len(child.genes)
@@ -85,6 +153,12 @@ class IntegrationFullTest(unittest.TestCase):
 
                     assert lo >= len(child.omim_diseases)
                     assert child.omim_diseases.issubset(term.omim_diseases)
+
+                    assert lorpha >= len(child.orpha_diseases)
+                    assert child.orpha_diseases.issubset(term.orpha_diseases)
+
+                    assert ld >= len(child.decipher_diseases)
+                    assert child.decipher_diseases.issubset(term.decipher_diseases)
 
     def test_relationships(self):
         kidney = self.terms.get_hpo_object(123)
@@ -123,8 +197,10 @@ class IntegrationFullTest(unittest.TestCase):
         """
         df = self.terms.to_dataframe()
 
-        assert df.shape == (N_TERMS, 10), df.shape
+        assert df.shape == (N_TERMS, 14), df.shape
         assert 4 < df.ic_omim.mean() < 5, df.ic_omim.mean()
+        assert 3 < df.ic_orpha.mean() < 4, df.ic_orpha.mean()
+        assert 0 < df.ic_decipher.mean() < 1, df.ic_decipher.mean()
         assert 3.6 < df.ic_gene.mean() < 3.7, df.ic_gene.mean()
         assert 7.5 < df.dTop_l.mean() < 7.6, df.dTop_l.mean()
         assert 6 < df.dTop_s.mean() < 7, df.dTop_s.mean()
