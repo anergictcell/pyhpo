@@ -83,12 +83,16 @@ class HPOTerm():
 
         * **gene**: float
         * **omim**: float
+        * **orpha**: float
+        * **decipher**: float
 
         **Example:** ::
 
             {
                 'gene': 0.24,
-                'omim': 0.84
+                'omim': 0.84,
+                'orpha': 0.43,
+                'decipher': 0.12
             }
 
     name: str
@@ -124,6 +128,42 @@ class HPOTerm():
             Since excluded diseased do not follow the general model
             of ontology inheritance, the associated annotations
             are not inherited from or passed on to parents or children
+
+    orpha_diseases: set of :class:`pyhpo.annotations.Orpha`
+        All Orphanet diseases associated with the term or its children
+
+        .. note::
+
+            The set is recursively calcualted the first time it is requested
+            by retrieving all children Orphanet diseases as well. The updated
+            set is then cached.
+
+            It is not possibe to remove Orphanet diseases from the set.
+            Any updates will only allow addition of new orphanet-diseases.
+
+        .. warning::
+
+            Updating the associated Orphanet disease set causes a recalculation
+            of the cache and the caches of all parents, so this is a quite
+            expensive operation and should be avoided.
+
+    decipher_diseases: set of :class:`pyhpo.annotations.Decipher`
+        All Decipher diseases associated with the term or its children
+
+        .. note::
+
+            The set is recursively calcualted the first time it is requested
+            by retrieving all children Decipher diseases as well.
+            The updated set is then cached.
+
+            It is not possibe to remove Decipher diseases from the set.
+            Any updates will only allow addition of new decipher-diseases.
+
+        .. warning::
+
+            Updating the associated Decipher disease set causes a recalculation
+            of the cache and the caches of all parents, so this is a quite
+            expensive operation and should be avoided.
 
     parents: list of :class:`.HPOTerm`
         List of direct parent :class:`.HPOTerms`
@@ -209,7 +249,11 @@ class HPOTerm():
         self._annotations = {
             'genes': [set(), False],
             'omim_diseases': [set(), False],
-            'omim_excluded_diseases': [set(), False]
+            'orpha_diseases': [set(), False],
+            'decipher_diseases': [set(), False],
+            'omim_excluded_diseases': [set(), False],
+            'orpha_excluded_diseases': [set(), False],
+            'decipher_excluded_diseases': [set(), False]
         }
 
         self.information_content = {
@@ -325,6 +369,22 @@ class HPOTerm():
         self._update_annotations('omim_diseases', diseases)
 
     @property
+    def orpha_diseases(self):
+        return self._get_annotations('orpha_diseases')
+
+    @orpha_diseases.setter
+    def orpha_diseases(self, diseases):
+        self._update_annotations('orpha_diseases', diseases)
+
+    @property
+    def decipher_diseases(self):
+        return self._get_annotations('decipher_diseases')
+
+    @decipher_diseases.setter
+    def decipher_diseases(self, diseases):
+        self._update_annotations('decipher_diseases', diseases)
+
+    @property
     def omim_excluded_diseases(self):
         """
         Since excluded diseased do not follow the general model
@@ -343,6 +403,42 @@ class HPOTerm():
         self._annotations['omim_excluded_diseases'][0].update(diseases)
 
     @property
+    def orpha_excluded_diseases(self):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        return self._annotations['orpha_excluded_diseases'][0]
+
+    @orpha_excluded_diseases.setter
+    def orpha_excluded_diseases(self, diseases):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        self._annotations['orpha_excluded_diseases'][0].update(diseases)
+
+    @property
+    def decipher_excluded_diseases(self):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        return self._annotations['decipher_excluded_diseases'][0]
+
+    @decipher_excluded_diseases.setter
+    def decipher_excluded_diseases(self, diseases):
+        """
+        Since excluded diseased do not follow the general model
+        of ontology inheritance, the associated annotations
+        are not inherited from or passed on to parents or children
+        """
+        self._annotations['decipher_excluded_diseases'][0].update(diseases)
+
+    @property
     def is_modifier(self):
         return bool(self._modifier_ids & {int(x) for x in self.all_parents})
 
@@ -357,6 +453,8 @@ class HPOTerm():
 
             * **genes** Return all associated genes
             * **omim_diseases** Return all associated OMIM diseases
+            * **orpha_diseases** Return all associated Orphanet diseases
+            * **decipher_diseases** Return all associated Decipher diseases
 
         This function creates a cache (if not yet present) by
         recursively querying the annotations of all child terms through
@@ -380,6 +478,8 @@ class HPOTerm():
 
             * **genes** Return all associated genes
             * **omim_diseases** Return all associated OMIM diseases
+            * **orpha_diseases** Return all associated Orphanet diseases
+            * **decipher_diseases** Return all associated Decipher diseases
 
         """
         for child in self.children:
@@ -401,6 +501,8 @@ class HPOTerm():
 
             * **genes** Return all associated genes
             * **omim_diseases** Return all associated OMIM diseases
+            * **orpha_diseases** Return all associated Orphanet diseases
+            * **decipher_diseases** Return all associated Decipher diseases
 
         annotations: set
             A set of new annotations to add to the extsting ones
@@ -708,6 +810,8 @@ class HPOTerm():
             Available option:
 
             * **omim** (Default)
+            * **orpha**
+            * **decipher**
             * **gene**
 
         method: string, default ``resnik``

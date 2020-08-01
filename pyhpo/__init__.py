@@ -4,4 +4,4 @@
 
 # The following info will be used by setup.py and sphinx documentation
 __author__ = 'Jonas Marcello'
-__version__ = '2.1.0'
+__version__ = '2.2.0'

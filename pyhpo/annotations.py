@@ -93,16 +93,17 @@ class GeneDict(dict):
         return self[gene]
 
 
-class OmimDisease:
+class Disease:
+    diseasetype = 'Undefined'
     """
-    Representation of an OMIM disease
+    Representation of a disease
 
     Attributes
     ----------
     id: int
-        OMIM id
+        id
     name: str
-        OMIM disease name
+        disease name
 
     Parameters
     ----------
@@ -143,13 +144,27 @@ class OmimDisease:
         return self.name
 
     def __repr__(self):
-        return 'Omim(["", {}, "{}"])'.format(
+        return '{}(["", {}, "{}"])'.format(
+            self.diseasetype,
             self.id,
             self.name
         )
 
 
-class OmimDict(dict):
+class OmimDisease(Disease):
+    diseasetype = 'Omim'
+
+
+class OrphaDisease(Disease):
+    diseasetype = 'Orpha'
+
+
+class DecipherDisease(Disease):
+    diseasetype = 'Decipher'
+
+
+class DiseaseDict(dict):
+    disease_class = None
     """
     An associative dict of all Omim Diseases
 
@@ -164,10 +179,22 @@ class OmimDict(dict):
         pass
 
     def __call__(self, cols):
-        disease = OmimDisease(cols)
+        disease = self.disease_class(cols)
         if disease not in self:
             self[disease] = disease
         return self[disease]
+
+
+class OmimDict(DiseaseDict):
+    disease_class = OmimDisease
+
+
+class OrphaDict(DiseaseDict):
+    disease_class = OrphaDisease
+
+
+class DecipherDict(DiseaseDict):
+    disease_class = DecipherDisease
 
 
 class HPO_Gene(dict):
@@ -262,34 +289,68 @@ def parse_pheno_file(filename=None, path='./', delimiter='\t'):
 
         negative_omim_dict = {}
         omim_dict = {}
+        negative_orpha_dict = {}
+        orpha_dict = {}
+        negative_decipher_dict = {}
+        decipher_dict = {}
 
         for row in reader:
             idx = HPOTerm.id_from_string(row['HPO_ID'])
-            if row['DatabaseID'][0:4] == 'OMIM':
+            phenotype_source, phenotype_id = row['DatabaseID'].split(':')
+            qualifier = row['Qualifier']
+
+            if phenotype_source == 'OMIM':
 
                 # To keep backwards compatibility, we're
                 # passing the OMIM details in the same order
                 # as they were present in the old
                 # annotation files
-                omim_id = row['DatabaseID'].split(':')[1]
-                omim = Omim(
-                    [0, omim_id, row['DiseaseName']]
+                pheno = Omim(
+                    [0, phenotype_id, row['DiseaseName']]
                 )
 
-                if row['Qualifier'] == 'NOT':
-                    if idx not in negative_omim_dict:
-                        negative_omim_dict[idx] = set()
-                    if omim not in negative_omim_dict[idx]:
-                        negative_omim_dict[idx].add(omim)
-                if row['Qualifier'] == '':
-                    omim.hpo = idx
-                    if idx not in omim_dict:
-                        omim_dict[idx] = set()
-                    if omim not in omim_dict[idx]:
-                        omim_dict[idx].add(omim)
+                pos_assoc = omim_dict
+                neg_assoc = negative_omim_dict
 
-    return (omim_dict, negative_omim_dict)
+            elif phenotype_source == 'ORPHA':
+                pheno = Orpha(
+                    [0, phenotype_id, row['DiseaseName']]
+                )
+
+                pos_assoc = orpha_dict
+                neg_assoc = negative_orpha_dict
+
+            elif phenotype_source == 'DECIPHER':
+                pheno = Decipher(
+                    [0, phenotype_id, row['DiseaseName']]
+                )
+
+                pos_assoc = decipher_dict
+                neg_assoc = negative_decipher_dict
+
+            else:
+                continue
+
+            if qualifier == 'NOT':
+                if idx not in neg_assoc:
+                    neg_assoc[idx] = set()
+                if pheno not in neg_assoc[idx]:
+                    neg_assoc[idx].add(pheno)
+            if qualifier == '':
+                pheno.hpo = idx
+                if idx not in pos_assoc:
+                    pos_assoc[idx] = set()
+                if pheno not in pos_assoc[idx]:
+                    pos_assoc[idx].add(pheno)
+
+    return (
+        omim_dict, negative_omim_dict,
+        orpha_dict, negative_orpha_dict,
+        decipher_dict, negative_decipher_dict
+    )
 
 
 Omim = OmimDict()
+Orpha = OrphaDict()
+Decipher = DecipherDict()
 Gene = GeneDict()

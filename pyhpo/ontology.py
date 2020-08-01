@@ -32,7 +32,11 @@ class OntologyClass():
         self._map = {}
         self._genes = set()
         self._omim_diseases = set()
+        self._orpha_diseases = set()
+        self._decipher_diseases = set()
         self._omim_excluded_diseases = set()
+        self._orpha_excluded_diseases = set()
+        self._decipher_excluded_diseases = set()
 
         if data_folder is None:
             data_folder = os.path.join(os.path.dirname(__file__), 'data')
@@ -80,20 +84,47 @@ class OntologyClass():
             data_folder = self._data_folder
 
         genes = HPO_Gene(path=data_folder)
-        omim_diseases, omim_excluded = parse_pheno_file(path=data_folder)
+        phenotypes = parse_pheno_file(path=data_folder)
+        omim_diseases = phenotypes[0]
+        omim_excluded = phenotypes[1]
+        orpha_diseases = phenotypes[2]
+        orpha_excluded = phenotypes[3]
+        decipher_diseases = phenotypes[4]
+        decipher_excluded = phenotypes[5]
 
         for term in self:
             if term._index in genes:
                 term.genes = genes[term._index]
                 self._genes.update(genes[term._index])
+
             if term._index in omim_diseases:
                 term.omim_diseases = omim_diseases[term._index]
                 self._omim_diseases.update(omim_diseases[term._index])
+
+            if term._index in orpha_diseases:
+                term.orpha_diseases = orpha_diseases[term._index]
+                self._orpha_diseases.update(orpha_diseases[term._index])
+
+            if term._index in decipher_diseases:
+                term.decipher_diseases = decipher_diseases[term._index]
+                self._decipher_diseases.update(decipher_diseases[term._index])
+
             if term._index in omim_excluded:
                 term.omim_excluded_diseases = omim_excluded[term._index]
                 self._omim_excluded_diseases.update(
                     omim_excluded[term._index]
                 )
+            if term._index in orpha_excluded:
+                term.orpha_excluded_diseases = orpha_excluded[term._index]
+                self._orpha_excluded_diseases.update(
+                    orpha_excluded[term._index]
+                )
+            if term._index in decipher_excluded:
+                term.decipher_excluded_diseases = decipher_excluded[term._index]
+                self._decipher_excluded_diseases.update(
+                    decipher_excluded[term._index]
+                )
+
         self._add_information_content()
 
     def _add_information_content(self):
@@ -107,15 +138,29 @@ class OntologyClass():
         None
             None
         """
-        total_diseases = len(self.omim_diseases)
+        total_omim_diseases = len(self.omim_diseases)
+        total_orpha_diseases = len(self.orpha_diseases)
+        total_decipher_diseases = len(self.decipher_diseases)
         total_genes = len(self.genes)
         for term in self:
-            p_omim = len(term.omim_diseases)/total_diseases
+            p_omim = len(term.omim_diseases)/total_omim_diseases
+            p_orpha = len(term.orpha_diseases)/total_orpha_diseases
+            p_decipher = len(term.decipher_diseases)/total_decipher_diseases
             p_gene = len(term.genes)/total_genes
             if p_omim == 0:
                 term.information_content['omim'] = 0
             else:
                 term.information_content['omim'] = -math.log(p_omim)
+
+            if p_orpha == 0:
+                term.information_content['orpha'] = 0
+            else:
+                term.information_content['orpha'] = -math.log(p_orpha)
+
+            if p_decipher == 0:
+                term.information_content['decipher'] = 0
+            else:
+                term.information_content['decipher'] = -math.log(p_decipher)
 
             if p_gene == 0:
                 term.information_content['gene'] = 0
@@ -340,12 +385,16 @@ class OntologyClass():
             'parents': [],
             'children': [],
             'ic_omim': [],
+            'ic_orpha': [],
+            'ic_decipher': [],
             'ic_gene': [],
             'dTop_l': [],
             'dTop_s': [],
             'dBottom': [],
             'genes': [],
-            'diseases': []
+            'omim': [],
+            'orpha': [],
+            'decipher': []
         }
 
         # This is not the most elegant way to generate a DataFrame
@@ -356,12 +405,20 @@ class OntologyClass():
             data['parents'].append('|'.join([x.id for x in term.parents]))
             data['children'].append('|'.join([x.id for x in term.children]))
             data['ic_omim'].append(term.information_content['omim'])
+            data['ic_orpha'].append(term.information_content['orpha'])
+            data['ic_decipher'].append(term.information_content['decipher'])
             data['ic_gene'].append(term.information_content['gene'])
             data['dTop_l'].append(term.longest_path_to_root())
             data['dTop_s'].append(term.shortest_path_to_root())
             data['dBottom'].append(term.longest_path_to_bottom())
             data['genes'].append('|'.join([str(x) for x in term.genes]))
-            data['diseases'].append('|'.join([
+            data['omim'].append('|'.join([
+                str(x) for x in term.omim_diseases
+            ]))
+            data['orpha'].append('|'.join([
+                str(x) for x in term.omim_diseases
+            ]))
+            data['decipher'].append('|'.join([
                 str(x) for x in term.omim_diseases
             ]))
 
@@ -378,6 +435,22 @@ class OntologyClass():
     @property
     def omim_excluded_diseases(self):
         return self._omim_excluded_diseases
+
+    @property
+    def orpha_diseases(self):
+        return self._orpha_diseases
+
+    @property
+    def orpha_excluded_diseases(self):
+        return self._orpha_excluded_diseases
+
+    @property
+    def decipher_diseases(self):
+        return self._decipher_diseases
+
+    @property
+    def decipher_excluded_diseases(self):
+        return self._decipher_excluded_diseases
 
     def _append(self, item):
         """
