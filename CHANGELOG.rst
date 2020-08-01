@@ -1,6 +1,11 @@
 Changelog
 =========
 
+2.2
+---
+- Added Orphanet diseases to Annotation
+- Added Decipher diseases to Annotation
+
 2.1
 ---
 - Reworked BasicHPOSet
