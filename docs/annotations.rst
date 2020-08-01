@@ -5,14 +5,14 @@ The ``Annotations`` section contains various metadata annotations for HPO terms.
 
 ``Gene`` class
 ********************
-.. autoclass:: pyhpo.annotations.Gene
+.. autoclass:: pyhpo.annotations.GeneSingleton
    :members:
    :no-private-members:
    :no-special-members:
 
 ``Omim`` class
 ********************
-.. autoclass:: pyhpo.annotations.Omim
+.. autoclass:: pyhpo.annotations.OmimDisease
    :members:
    :no-private-members:
    :no-special-members:

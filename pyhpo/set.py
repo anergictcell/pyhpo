@@ -73,6 +73,24 @@ class HPOSet(set):
         ])
 
     def replace_obsolete(self, verbose=False):
+        """
+        Replaces obsolete terms with the replacement term
+
+        .. warning::
+
+            Not all obsolete terms have a replacement
+
+        Parameters
+        ----------
+        verbose: bool, default: ``False``
+            Print warnings if an obsolete term does not have a replacement.
+
+        Returns
+        -------
+        HPOSet
+            A new HPOSet
+
+        """
         ids = set()
         for term in self:
             if term.is_obsolete:
