@@ -83,12 +83,16 @@ class HPOTerm():
 
         * **gene**: float
         * **omim**: float
+        * **orpha**: float
+        * **decipher**: float
 
         **Example:** ::
 
             {
                 'gene': 0.24,
-                'omim': 0.84
+                'omim': 0.84,
+                'orpha': 0.43,
+                'decipher': 0.12
             }
 
     name: str
@@ -124,6 +128,42 @@ class HPOTerm():
             Since excluded diseased do not follow the general model
             of ontology inheritance, the associated annotations
             are not inherited from or passed on to parents or children
+
+    orpha_diseases: set of :class:`pyhpo.annotations.Orpha`
+        All Orphanet diseases associated with the term or its children
+
+        .. note::
+
+            The set is recursively calcualted the first time it is requested
+            by retrieving all children Orphanet diseases as well. The updated
+            set is then cached.
+
+            It is not possibe to remove Orphanet diseases from the set.
+            Any updates will only allow addition of new orphanet-diseases.
+
+        .. warning::
+
+            Updating the associated Orphanet disease set causes a recalculation
+            of the cache and the caches of all parents, so this is a quite
+            expensive operation and should be avoided.
+
+    decipher_diseases: set of :class:`pyhpo.annotations.Decipher`
+        All Decipher diseases associated with the term or its children
+
+        .. note::
+
+            The set is recursively calcualted the first time it is requested
+            by retrieving all children Decipher diseases as well.
+            The updated set is then cached.
+
+            It is not possibe to remove Decipher diseases from the set.
+            Any updates will only allow addition of new decipher-diseases.
+
+        .. warning::
+
+            Updating the associated Decipher disease set causes a recalculation
+            of the cache and the caches of all parents, so this is a quite
+            expensive operation and should be avoided.
 
     parents: list of :class:`.HPOTerm`
         List of direct parent :class:`.HPOTerms`
@@ -413,6 +453,8 @@ class HPOTerm():
 
             * **genes** Return all associated genes
             * **omim_diseases** Return all associated OMIM diseases
+            * **orpha_diseases** Return all associated Orphanet diseases
+            * **decipher_diseases** Return all associated Decipher diseases
 
         This function creates a cache (if not yet present) by
         recursively querying the annotations of all child terms through
@@ -436,6 +478,8 @@ class HPOTerm():
 
             * **genes** Return all associated genes
             * **omim_diseases** Return all associated OMIM diseases
+            * **orpha_diseases** Return all associated Orphanet diseases
+            * **decipher_diseases** Return all associated Decipher diseases
 
         """
         for child in self.children:
@@ -457,6 +501,8 @@ class HPOTerm():
 
             * **genes** Return all associated genes
             * **omim_diseases** Return all associated OMIM diseases
+            * **orpha_diseases** Return all associated Orphanet diseases
+            * **decipher_diseases** Return all associated Decipher diseases
 
         annotations: set
             A set of new annotations to add to the extsting ones
@@ -764,6 +810,8 @@ class HPOTerm():
             Available option:
 
             * **omim** (Default)
+            * **orpha**
+            * **decipher**
             * **gene**
 
         method: string, default ``resnik``

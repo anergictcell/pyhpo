@@ -175,7 +175,7 @@ class HPOSet(set):
         ----------
         kind: str, default: ``omim``
             Which kind of information content should be calculated.
-            Options are ['omim', 'gene']
+            Options are ['omim', 'orpha', 'decipher', 'gene']
 
 
         Returns
@@ -324,7 +324,7 @@ class HPOSet(set):
 
         kind: str, default ``omim``
             Which kind of information content should be calculated.
-            Options are ['omim', 'gene']
+            Options are ['omim', 'orpha', 'decipher', 'gene']
 
         method: string, default ``resnik``
             The method to use to calculate the similarity.
@@ -407,7 +407,7 @@ class HPOSet(set):
 
         kind: str
             Which kind of information content should be calculated.
-            Options are ['omim', 'gene']
+            Options are ['omim', 'orpha', 'decipher', 'gene']
 
         method: string, default ``resnik``
             The method to use to calculate the similarity.
