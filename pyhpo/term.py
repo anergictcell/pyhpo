@@ -829,6 +829,9 @@ class HPOTerm():
             * **rel** - Relevance measure - Schlicker A, et.al.,
               BMC Bioinformatics, (2006)
             * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
+            * **graphic** - Graph based Information coefficient -
+              Deng Y, et. al., PLoS One, (2015)
+            * **dist** - Distance between terms
 
         Returns
         -------
@@ -858,6 +861,9 @@ class HPOTerm():
 
         elif method == 'ic':
             return self. _ic_similarity_score(other, kind)
+
+        elif method == 'graphic':
+            return self. _graph_ic_similarity_score(other, kind)
 
         elif method == 'dist':
             return self. _dist_similarity_score(other)
@@ -993,6 +999,21 @@ class HPOTerm():
         lin = self._lin_similarity_score(other, kind)
 
         return lin * (1 - (1 / (1 + mica)))
+
+    def _graph_ic_similarity_score(self, other, kind):
+        common = sum([
+            x.information_content[kind] for x in
+            self.common_ancestors(other)
+        ])
+        union = sum([
+            x.information_content[kind] for x in
+            (self.all_parents | other.all_parents)
+        ])
+
+        try:
+            return common/union
+        except ZeroDivisionError:
+            return 0
 
     def _dist_similarity_score(self, other):
         dist = self.path_to_other(other)[0]
