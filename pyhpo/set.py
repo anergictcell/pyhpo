@@ -341,7 +341,9 @@ class HPOSet(set):
             * **rel** - Relevance measure - Schlicker A, et.al.,
               BMC Bioinformatics, (2006)
             * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
-            * **dist** - Distance between HPO terms
+            * **graphic** - Graph based Information coefficient -
+              Deng Y, et. al., PLoS One, (2015)
+            * **dist** - Distance between terms
             * **equal** - Calculates exact matches between both sets
 
 

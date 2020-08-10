@@ -1,6 +1,10 @@
 Changelog
 =========
 
+2.3
+---
+- Added GraphIC similarity measure
+
 2.2
 ---
 - Added Orphanet diseases to Annotation
