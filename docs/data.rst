@@ -36,6 +36,25 @@ If the URLs of the files change, you will need to modify the URLS dict in the ``
     download_data.URLS['HPO_ONTOLOGY'] = 'https://custom-url.com'
     download_data()
 
+
+Sometimes, the HPO-Disease associations file is improperly generated and the header start with ``#``. During Annotation parsing, ``PyHPO`` removes all outcomment rows.
+So you might have to manually change the file from::
+
+    #description: HPO annotations for rare diseases [7801: OMIM; 47: DECIPHER; 3958 ORPHANET]
+    #date: 2020-08-11
+    #tracker: https://github.com/obophenotype/human-phenotype-ontology
+    #HPO-version: http://purl.obolibrary.org/obo/hp.obo/hp/releases/2020-08-11/hp.obo.owl
+    #DatabaseID      DiseaseName     Qualifier       HPO_ID  Reference       Evidence        Onset   Frequency       Sex     Modifier        Aspect  Biocuration
+
+to::
+
+    #description: HPO annotations for rare diseases [7801: OMIM; 47: DECIPHER; 3958 ORPHANET]
+    #date: 2020-08-11
+    #tracker: https://github.com/obophenotype/human-phenotype-ontology
+    #HPO-version: http://purl.obolibrary.org/obo/hp.obo/hp/releases/2020-08-11/hp.obo.owl
+    DatabaseID      DiseaseName     Qualifier       HPO_ID  Reference       Evidence        Onset   Frequency       Sex     Modifier        Aspect  Biocuration
+
+
 ``Manual update``
 ********************
 Of course you can manually download the files and replace them in the ``data`` subfolder. However, this is not recommended, as it might cause issues and is not easy to undo.

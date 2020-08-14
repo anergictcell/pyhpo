@@ -1,6 +1,19 @@
 Changelog
 =========
 
+2.4
+---
+- Data update to ``hp/releases/2020-08-11``
+    - HPO: 15332 ==> 15530
+    - Genes: 4317 ==> 4366
+    - OMIM: 7675 ==> 7801
+    - Negative OMIM: 638 ==> 652
+    - ORPHANET: 3889 ==> 3956
+    - Negative ORPHANET: 240 ==> 255
+    - DECIPHER: 47 ==> 47
+    - Negative DECIPHER: 0 ==> 0
+
+
 2.3
 ---
 - Added GraphIC similarity measure
