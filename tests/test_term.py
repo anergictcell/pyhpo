@@ -264,19 +264,31 @@ class TermAnnotations(unittest.TestCase):
         # it needs to be checked
         assert not self.term._annotations['genes'][1]
 
-        assert self.term.genes == set(['Gene1', 'Gene2'])
+        self.assertEqual(
+            self.term.genes,
+            set(['Gene1', 'Gene2'])
+        )
 
         # Once ``genes`` has been accessed, private cache must be updated
         assert self.term._annotations['genes'][1]
-        assert self.term._annotations['genes'][0] == set(['Gene1', 'Gene2'])
+        self.assertEqual(
+            self.term._annotations['genes'][0],
+            set(['Gene1', 'Gene2'])
+        )
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.term.genes = set(['Gene3'])
 
         assert self.term._annotations['genes'][1]
-        assert self.term.genes == set(['Gene1', 'Gene2', 'Gene3'])
-        assert self.term._annotations['genes'][0] == set(['Gene1', 'Gene2', 'Gene3'])
+        self.assertEqual(
+            self.term.genes,
+            set(['Gene1', 'Gene2', 'Gene3'])
+        )
+        self.assertEqual(
+            self.term._annotations['genes'][0],
+            set(['Gene1', 'Gene2', 'Gene3'])
+        )
 
     def test_gene_parent_update(self):
         term2 = HPOTerm()
@@ -306,7 +318,10 @@ class TermAnnotations(unittest.TestCase):
         # shoud set cache-flag on term2
         assert term2.genes == set(['Gene1', 'Gene2'])
         assert term2._annotations['genes'][1]
-        assert term2._annotations['genes'][0] == set(['Gene1', 'Gene2'])
+        self.assertEqual(
+            term2._annotations['genes'][0],
+            set(['Gene1', 'Gene2'])
+        )
 
         # Adding a new gene to term1
         with warnings.catch_warnings():
@@ -314,10 +329,16 @@ class TermAnnotations(unittest.TestCase):
             self.term.genes = set(['Gene3'])
 
         assert self.term._annotations['genes'][1]
-        assert self.term._annotations['genes'][0] == set(['Gene1', 'Gene2', 'Gene3'])
+        self.assertEqual(
+            self.term._annotations['genes'][0],
+            set(['Gene1', 'Gene2', 'Gene3'])
+        )
 
         assert term2._annotations['genes'][1]
-        assert term2._annotations['genes'][0] == set(['Gene1', 'Gene2', 'Gene3'])
+        self.assertEqual(
+            term2._annotations['genes'][0],
+            set(['Gene1', 'Gene2', 'Gene3'])
+        )
 
         assert self.term.genes == set(['Gene1', 'Gene2', 'Gene3'])
         assert term2.genes == set(['Gene1', 'Gene2', 'Gene3'])

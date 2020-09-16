@@ -1,6 +1,11 @@
 Changelog
 =========
 
+2.5
+---
+- Added combination methods for HPOset similarities
+- Added Matrix module for row/column based operations
+
 2.4
 ---
 - Data update to ``hp/releases/2020-08-11``

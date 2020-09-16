@@ -97,11 +97,14 @@ class HPOSet(set):
         for term in self:
             if term.is_obsolete:
                 try:
-                    replaced = Ontology[HPOTerm.id_from_string(term.replaced_by)]
+                    replaced = Ontology[
+                        HPOTerm.id_from_string(term.replaced_by)
+                    ]
                     ids.add(replaced)
                 except AttributeError:
                     warnings.warn(
-                        'The term {} is obsolete and has no replacement.'.format(term),
+                        'The term {} is obsolete and has no replacement.'
+                            .format(term),
                         UserWarning)
 
             else:
@@ -465,7 +468,9 @@ class HPOSet(set):
         scores = []
         for row, set1_term in enumerate(set1):
             for set2_term in set2:
-                scores.append(set1_term.similarity_score(set2_term, kind, method))
+                scores.append(
+                    set1_term.similarity_score(set2_term, kind, method)
+                )
 
         return Matrix(len(set1), len(set2), scores)
 

@@ -1,5 +1,6 @@
 class Matrix:
     """
+    # noqa: E501
     Poor man's implementation of a DataFrame/Matrix
 
     This is used to calculate similarities between HPO sets
@@ -172,7 +173,9 @@ class Matrix:
 
         for idx, item in enumerate(self._data):
             if idx % self.n_cols == 0:
-                s += '\n{}||'.format(str(int(idx/self.n_cols)).ljust(idxlength))
+                s += '\n{}||'.format(
+                    str(int(idx/self.n_cols)).ljust(idxlength)
+                )
             s += '{}|'.format(str(item).rjust(maxlength))
 
         return s

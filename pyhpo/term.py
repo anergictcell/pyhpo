@@ -755,7 +755,8 @@ class HPOTerm():
         """
         if len(self.children):
             return max([
-                child.longest_path_to_bottom(level + 1) for child in self.children
+                child.longest_path_to_bottom(level + 1)
+                for child in self.children
             ])
         else:
             return level
