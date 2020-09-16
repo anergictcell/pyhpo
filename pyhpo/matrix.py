@@ -2,7 +2,34 @@ class Matrix:
     """
     Poor man's implementation of a DataFrame/Matrix
 
+    This is used to calculate similarities between HPO sets
+    and is surprisingly much faster than using pandas DataFrames
+
     .. note::
+
+        Pandas::
+
+            ===== COMPARING SETS ======
+            23806489 function calls (23770661 primitive calls) in 19.705 seconds
+
+            ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+            ....
+            9900    0.267    0.000   19.106    0.002 set.py:318(similarity)
+            9900    1.124    0.000   14.330    0.001 set.py:477(_sim_score)
+            ....
+
+        Matrix::
+
+            ===== COMPARING SETS ======
+            12870433 function calls in 6.642 seconds
+
+            ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+            ....
+            9900    0.048    0.000    6.424    0.001 set.py:316(similarity)
+            9900    0.928    0.000    5.112    0.001 set.py:432(_sim_score)
+            ....
+
+    .. warning::
 
         This `Matrix` should not be used as a public interface.
         It's only used internally for calculations.
@@ -43,7 +70,6 @@ class Matrix:
             >> [11, 12, 13, 14]
             >> [21, 22, 23, 24]
             >> [31, 32, 33, 34]
-
 
     columns: iterator
         Iterator over all columns

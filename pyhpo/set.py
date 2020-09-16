@@ -348,7 +348,6 @@ class HPOSet(set):
             * **dist** - Distance between terms
             * **equal** - Calculates exact matches between both sets
 
-
         combine: string, default ``funSimAvg``
             The method to combine similarity measures.
 
