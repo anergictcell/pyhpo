@@ -1,6 +1,8 @@
+import warnings
+
 from pyhpo.ontology import Ontology
 from pyhpo.term import HPOTerm
-import warnings
+from pyhpo.matrix import Matrix
 
 
 class HPOSet(set):
@@ -311,7 +313,7 @@ class HPOSet(set):
             for term_b in self._list[i+1:]:
                 yield (term_a, term_b)
 
-    def similarity(self, other, kind='omim', method=None):
+    def similarity(self, other, kind='omim', method=None, combine='funSimAvg'):
         """
         Calculates the similarity to another HPOSet
         According to Robinson et al, American Journal of Human Genetics, (2008)
@@ -347,6 +349,15 @@ class HPOSet(set):
             * **equal** - Calculates exact matches between both sets
 
 
+        combine: string, default ``funSimAvg``
+            The method to combine similarity measures.
+
+            Available options:
+
+            * **funSimAvg** - Schlicker A, BMC Bioinformatics, (2006)
+            * **funSimMax** - Schlicker A, BMC Bioinformatics, (2006)
+            * **BMA** - Deng Y, et. al., PLoS One, (2015)
+
         Returns
         -------
         float
@@ -356,9 +367,37 @@ class HPOSet(set):
         if method == 'equal':
             return self._equality_score(other)
 
-        score1 = HPOSet._sim_score(self, other, kind, method)
-        score2 = HPOSet._sim_score(other, self, kind, method)
-        return (score1 + score2)/2
+        score_matrix = HPOSet._sim_score(self, other, kind, method)
+
+        row_maxes = [
+            max([v for v in row])
+            for row in score_matrix.rows
+        ]
+
+        col_maxes = [
+            max([v for v in col])
+            for col in score_matrix.columns
+        ]
+
+        if combine == 'funSimAvg':
+            return (
+                sum(row_maxes)/len(row_maxes) +
+                sum(col_maxes)/len(col_maxes)
+            )/2
+
+        if combine == 'funSimMax':
+            return max([
+                sum(row_maxes)/len(row_maxes),
+                sum(col_maxes)/len(col_maxes)
+            ])
+
+        if combine == 'BMA':
+            return (
+                (sum(row_maxes) + sum(col_maxes)) /
+                (len(row_maxes) + len(col_maxes))
+            )
+
+        raise RuntimeError('Invalid combine method specified')
 
     def _equality_score(self, other):
         """
@@ -422,16 +461,14 @@ class HPOSet(set):
         """
 
         if not len(set1) or not len(set2):
-            return 0
+            return Matrix(0, 0)
 
         scores = []
-        for set1_term in set1:
-            scores.append(0)
+        for row, set1_term in enumerate(set1):
             for set2_term in set2:
-                score = set1_term.similarity_score(set2_term, kind, method)
-                if score > scores[-1]:
-                    scores[-1] = score
-        return sum(scores)/len(scores)
+                scores.append(set1_term.similarity_score(set2_term, kind, method))
+
+        return Matrix(len(set1), len(set2), scores)
 
     @classmethod
     def from_queries(cls, queries):
