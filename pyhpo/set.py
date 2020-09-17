@@ -316,7 +316,7 @@ class HPOSet(set):
             for term_b in self._list[i+1:]:
                 yield (term_a, term_b)
 
-    def similarity(self, other, kind='omim', method=None, combine='funSimAvg'):
+    def similarity(self, other, kind=None, method=None, combine='funSimAvg'):
         """
         Calculates the similarity to another HPOSet
         According to Robinson et al, American Journal of Human Genetics, (2008)
@@ -327,28 +327,17 @@ class HPOSet(set):
         other: HPOSet
             Another HPOSet to measure the similarity to
 
-        kind: str, default ``omim``
+        kind: str, default ``None``
             Which kind of information content should be calculated.
             Options are ['omim', 'orpha', 'decipher', 'gene']
+            See :func:`pyhpo.HPOTerm.similarity_score` for options
 
-        method: string, default ``resnik``
+        method: string, default ``None``
             The method to use to calculate the similarity.
+            See :func:`pyhpo.HPOTerm.similarity_score` for options
 
-            Available options:
+            Additional options:
 
-            * **resnik** - Resnik P, Proceedings of the 14th IJCAI, (1995)
-            * **lin** - Lin D, Proceedings of the 15th ICML, (1998)
-            * **jc** - Jiang J, Conrath D, ROCLING X, (1997)
-              Implementation according to R source code
-            * **jc2** - Jiang J, Conrath D, ROCLING X, (1997)
-              Implementation according to paper from R ``hposim`` library
-              Deng Y, et. al., PLoS One, (2015)
-            * **rel** - Relevance measure - Schlicker A, et.al.,
-              BMC Bioinformatics, (2006)
-            * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
-            * **graphic** - Graph based Information coefficient -
-              Deng Y, et. al., PLoS One, (2015)
-            * **dist** - Distance between terms
             * **equal** - Calculates exact matches between both sets
 
         combine: string, default ``funSimAvg``
@@ -423,6 +412,8 @@ class HPOSet(set):
             The similarity score to the other HPOSet
 
         """
+        if not len(self) or not len(other):
+            return 0
 
         matches = 0
         for term1 in self:
@@ -432,9 +423,9 @@ class HPOSet(set):
         return matches / max([len(self), len(other)])
 
     @staticmethod
-    def _sim_score(set1, set2, kind, method=None):
+    def _sim_score(set1, set2, kind=None, method=None):
         """
-        Calculates one-way similarity from one HPOSet to another HPOSet
+        Calculates similarity matrix between HPOSets
 
         .. warning::
 
@@ -450,10 +441,11 @@ class HPOSet(set):
 
         kind: str
             Which kind of information content should be calculated.
-            Options are ['omim', 'orpha', 'decipher', 'gene']
+            See :function:`pyhpo.HPOTerm.similarity_score` for options
 
-        method: string, default ``resnik``
+        method: string
             The method to use to calculate the similarity.
+            See :function:`pyhpo.HPOTerm.similarity_score` for options
 
         Returns
         -------
@@ -466,7 +458,7 @@ class HPOSet(set):
             return Matrix(0, 0)
 
         scores = []
-        for row, set1_term in enumerate(set1):
+        for set1_term in set1:
             for set2_term in set2:
                 scores.append(
                     set1_term.similarity_score(set2_term, kind, method)
