@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, call
 import warnings
 
 from pyhpo.ontology import HPOTerm
@@ -244,15 +245,24 @@ class TermAnnotations(unittest.TestCase):
 
             with self.assertRaises(RuntimeError) as err:
                 self.term.genes = 14
-                assert 'Genes must be specified as set' in str(err.exception)
+            self.assertIn(
+                'genes must be specified as set',
+                str(err.exception)
+            )
 
             with self.assertRaises(RuntimeError) as err:
                 self.term.genes = 'string'
-                assert 'Genes must be specified as set' in str(err.exception)
+            self.assertIn(
+                'genes must be specified as set',
+                str(err.exception)
+            )
 
             with self.assertRaises(RuntimeError) as err:
                 self.term.genes = [5, 6, 7]
-                assert 'Genes must be specified as set' in str(err.exception)
+            self.assertIn(
+                'genes must be specified as set',
+                str(err.exception)
+            )
 
     def test_genes_and_cache(self):
         # Private cache value must be None initially
@@ -342,3 +352,439 @@ class TermAnnotations(unittest.TestCase):
 
         assert self.term.genes == set(['Gene1', 'Gene2', 'Gene3'])
         assert term2.genes == set(['Gene1', 'Gene2', 'Gene3'])
+
+
+class TermSimilarities(unittest.TestCase):
+    def setUp(self):
+        self.term = HPOTerm()
+        for line in TEST_HPO:
+            self.term.add_line(line)
+
+        self.t1 = HPOTerm()
+        self.t1.id = 'HP:001'
+        self.t1.information_content = {'omim': 1, 'gene': 11}
+        self.t2 = HPOTerm()
+        self.t2.id = 'HP:002'
+        self.t2.information_content = {'omim': 3, 'gene': 33}
+        self.t3 = HPOTerm()
+        self.t3.id = 'HP:003'
+        self.t3.information_content = {'omim': 2, 'gene': 22}
+
+    def test_similarity_method_selection(self):
+        with patch.object(
+            HPOTerm,
+            '_resnik_similarity_score',
+            return_value=121
+        ) as patch_resnik, patch.object(
+            HPOTerm,
+            '_lin_similarity_score',
+            return_value=122
+        ) as patch_lin, patch.object(
+            HPOTerm,
+            '_jc_similarity_score',
+            return_value=123
+        ) as patch_jc, patch.object(
+            HPOTerm,
+            '_jc_similarity_score_2',
+            return_value=124
+        ) as patch_jc2, patch.object(
+            HPOTerm,
+            '_rel_similarity_score',
+            return_value=125
+        ) as patch_rel, patch.object(
+            HPOTerm,
+            '_ic_similarity_score',
+            return_value=126
+        ) as patch_ic, patch.object(
+            HPOTerm,
+            '_graph_ic_similarity_score',
+            return_value=127
+        ) as patch_graphic, patch.object(
+            HPOTerm,
+            '_dist_similarity_score',
+            return_value=128
+        ) as patch_dist:
+
+            self.term.similarity_score('mockterm')
+            patch_resnik.assert_called_once_with('mockterm', 'omim')
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='resnik')
+            patch_resnik.assert_called_once_with('mockterm', 'omim')
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='lin')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_called_once_with('mockterm', 'omim')
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='jc')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_called_once_with('mockterm', 'omim')
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='jc2')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_called_once_with('mockterm', 'omim')
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='rel')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_called_once_with('mockterm', 'omim')
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='ic')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_called_once_with('mockterm', 'omim')
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='graphic')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_called_once_with('mockterm', 'omim')
+            patch_dist.assert_not_called()
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            self.term.similarity_score('mockterm', method='dist')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_called_once_with('mockterm')
+
+            patch_resnik.reset_mock()
+            patch_lin.reset_mock()
+            patch_jc.reset_mock()
+            patch_jc2.reset_mock()
+            patch_rel.reset_mock()
+            patch_ic.reset_mock()
+            patch_graphic.reset_mock()
+            patch_dist.reset_mock()
+            with self.assertRaises(RuntimeError) as context:
+                self.term.similarity_score('mockterm', method='invalid')
+            patch_resnik.assert_not_called()
+            patch_lin.assert_not_called()
+            patch_jc.assert_not_called()
+            patch_jc2.assert_not_called()
+            patch_rel.assert_not_called()
+            patch_ic.assert_not_called()
+            patch_graphic.assert_not_called()
+            patch_dist.assert_not_called()
+            self.assertEqual(
+                str(context.exception),
+                'Unknown method to calculate similarity'
+            )
+
+    def test_resnik(self):
+        with patch.object(
+            HPOTerm,
+            'common_ancestors',
+            return_value=[self.t1, self.t2, self.t3]
+        ) as patch_ca:
+            self.assertEqual(
+                self.term._resnik_similarity_score('foo', 'omim'),
+                3
+            )
+            patch_ca.assert_called_once_with('foo')
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.term._resnik_similarity_score('bar', 'gene'),
+                33
+            )
+            patch_ca.assert_called_once_with('bar')
+
+    def test_lin(self):
+        with patch.object(
+            HPOTerm,
+            '_resnik_similarity_score',
+            return_value=12
+        ) as patch_ca:
+            self.assertEqual(
+                self.t1._lin_similarity_score(self.t2, 'omim'),
+                24/4
+            )
+            patch_ca.assert_called_once_with(self.t2, 'omim')
+
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._lin_similarity_score(self.t2, 'gene'),
+                24/44
+            )
+            patch_ca.assert_called_once_with(self.t2, 'gene')
+
+            self.t1.information_content['zero'] = 0
+            self.t2.information_content['zero'] = 0
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._lin_similarity_score(self.t2, 'zero'),
+                0
+            )
+            patch_ca.assert_called_once_with(self.t2, 'zero')
+
+    def test_jc(self):
+        with patch.object(
+            HPOTerm,
+            '_resnik_similarity_score',
+            return_value=12
+        ) as patch_ca:
+            self.assertEqual(
+                self.t1._jc_similarity_score(self.t2, 'omim'),
+                -1/(25 - 1 - 3)
+            )
+            patch_ca.assert_called_once_with(self.t2, 'omim')
+
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._jc_similarity_score(self.t2, 'gene'),
+                -1/(25 - 11 - 33)
+            )
+            patch_ca.assert_called_once_with(self.t2, 'gene')
+
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._jc_similarity_score(self.t1, 'gene'),
+                1
+            )
+            patch_ca.assert_not_called()
+
+    def test_jc2(self):
+        with patch.object(
+            HPOTerm,
+            '_resnik_similarity_score',
+            return_value=12
+        ) as patch_ca:
+            self.assertEqual(
+                self.t1._jc_similarity_score_2(self.t2, 'omim'),
+                1 - (1 + 3 - 24)
+            )
+            patch_ca.assert_called_once_with(self.t2, 'omim')
+
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._jc_similarity_score_2(self.t2, 'gene'),
+                1 - (11 + 33 - 24)
+            )
+            patch_ca.assert_called_once_with(self.t2, 'gene')
+
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._jc_similarity_score_2(self.t1, 'gene'),
+                1
+            )
+            patch_ca.assert_not_called()
+
+    def test_rel(self):
+        with patch.object(
+            HPOTerm,
+            '_resnik_similarity_score',
+            side_effect=[12, 0.0001]
+        ) as patch_resnik, patch.object(
+            HPOTerm,
+            '_lin_similarity_score',
+            return_value=22
+        ) as patch_lin:
+            self.assertGreater(
+                self.t1._rel_similarity_score(self.t2, 'omim'),
+                20
+            )
+            patch_resnik.assert_called_once_with(self.t2, 'omim')
+            patch_lin.assert_called_once_with(self.t2, 'omim')
+            patch_resnik.reset_mock()
+
+            self.assertLess(
+                self.t1._rel_similarity_score(self.t2, 'omim'),
+                0.01
+            )
+            patch_resnik.assert_called_once_with(self.t2, 'omim')
+
+    def test_ic(self):
+        with patch.object(
+            HPOTerm,
+            '_resnik_similarity_score',
+            side_effect=[12, 0.0001]
+        ) as patch_resnik, patch.object(
+            HPOTerm,
+            '_lin_similarity_score',
+            return_value=22
+        ) as patch_lin:
+            self.assertGreater(
+                self.t1._ic_similarity_score(self.t2, 'omim'),
+                20
+            )
+            patch_resnik.assert_called_once_with(self.t2, 'omim')
+            patch_lin.assert_called_once_with(self.t2, 'omim')
+            patch_resnik.reset_mock()
+
+            self.assertLess(
+                self.t1._ic_similarity_score(self.t2, 'omim'),
+                0.01
+            )
+            patch_resnik.assert_called_once_with(self.t2, 'omim')
+
+    def test_graphic(self):
+        with patch.object(
+            HPOTerm,
+            'common_ancestors',
+            return_value=set([self.t2])
+        ) as patch_ca:
+
+            self.t1._all_parents = set([self.t1, self.t2])
+            self.t2._all_parents = set([self.t2, self.t3])
+
+            self.assertEqual(
+                self.t1._graph_ic_similarity_score(self.t2, 'omim'),
+                3 / 6
+            )
+            patch_ca.assert_called_once_with(self.t2)
+
+            patch_ca.reset_mock()
+            self.assertEqual(
+                self.t1._graph_ic_similarity_score(self.t2, 'gene'),
+                33 / 66
+            )
+            patch_ca.assert_called_once_with(self.t2)
+
+            patch_ca.reset_mock()
+            self.t1.information_content['zero'] = 0
+            self.t2.information_content['zero'] = 0
+            self.t3.information_content['zero'] = 0
+            self.assertEqual(
+                self.t1._graph_ic_similarity_score(self.t2, 'zero'),
+                0
+            )
+            patch_ca.assert_called_once_with(self.t2)
+
+    def test_dist(self):
+        with patch.object(
+            HPOTerm,
+            'path_to_other',
+            side_effect=[[0, None], [1, None], [3, None]]
+        ) as patch_pto:
+
+            self.assertEqual(
+                self.t1._dist_similarity_score(self.t2),
+                1
+            )
+
+            self.assertEqual(
+                self.t1._dist_similarity_score(self.t2),
+                0.5
+            )
+
+            self.assertEqual(
+                self.t1._dist_similarity_score(self.t2),
+                0.25
+            )
+
+            patch_pto.assert_has_calls([
+                call(self.t2),
+                call(self.t2),
+                call(self.t2)
+            ])

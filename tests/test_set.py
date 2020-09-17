@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import patch, call
+import warnings
 
-from pyhpo.set import HPOSet
+from pyhpo.set import HPOSet, BasicHPOSet
 from pyhpo.term import HPOTerm
-from tests.mockontology import make_ontology, make_ontology_with_modifiers
+from pyhpo.matrix import Matrix
+from tests.mockontology import make_terms, make_ontology, make_ontology_with_modifiers
 
 
 class SetMethods(unittest.TestCase):
@@ -139,21 +141,198 @@ class SetInitTests(unittest.TestCase):
             {int(x) for x in set_2}
         )
 
-    @unittest.skip("TODO")
-    def test_set_and_list(self):
-        self.assertTrue(False)
-
-    @unittest.skip("TODO")
     def test_adding_terms(self):
-        self.assertTrue(False)
+        hposet = HPOSet([
+            self.ontology[1],
+            self.ontology[11],
+            self.ontology[41]
+        ])
+        self.assertEqual(
+            hposet,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[41]
+            ])
+        )
+        self.assertEqual(
+            len(hposet),
+            len(hposet._list)
+        )
 
-    @unittest.skip("TODO")
-    def test_adding_terms_to_BasicSet(self):
-        self.assertTrue(False)
+        hposet.add(self.ontology[41])
+        self.assertEqual(
+            hposet,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[41]
+            ])
+        )
+        self.assertEqual(
+            len(hposet),
+            len(hposet._list)
+        )
 
-    @unittest.skip("TODO")
+        hposet.add(self.ontology[31])
+        self.assertEqual(
+            hposet,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[31],
+                self.ontology[41]
+            ])
+        )
+        self.assertEqual(
+            len(hposet),
+            len(hposet._list)
+        )
+
+    def test_updating_terms(self):
+        hposet = HPOSet([
+            self.ontology[1],
+            self.ontology[11],
+            self.ontology[41]
+        ])
+        self.assertEqual(
+            hposet,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[41]
+            ])
+        )
+        self.assertEqual(
+            len(hposet),
+            len(hposet._list)
+        )
+
+        hposet.update([
+            self.ontology[41],
+            self.ontology[31],
+        ])
+        self.assertEqual(
+            hposet,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[31],
+                self.ontology[41]
+            ])
+        )
+        self.assertEqual(
+            len(hposet),
+            len(hposet._list)
+        )
+
     def test_replacing_obsolete(self):
-        self.assertTrue(False)
+        ci = HPOSet([
+            self.ontology[1],
+            self.ontology[11],
+            self.ontology[12],
+            self.ontology[21],
+            self.ontology[31]
+        ])
+        self.assertEqual(
+            len(ci),
+            5
+        )
+        ci2 = ci.replace_obsolete()
+        self.assertEqual(
+            len(ci2),
+            5
+        )
+
+        self.ontology[12].is_obsolete = True
+        self.ontology[12].replaced_by = 'HP:0041'
+        ci2 = ci.replace_obsolete()
+        self.assertEqual(
+            len(ci2),
+            5
+        )
+        self.assertEqual(
+            ci2,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[41],
+                self.ontology[21],
+                self.ontology[31]
+            ])
+        )
+
+        self.ontology[12].is_obsolete = 'False'
+        self.ontology[12].replaced_by = 'HP:0041'
+        ci2 = ci.replace_obsolete()
+        self.assertEqual(
+            len(ci2),
+            5
+        )
+        self.assertEqual(
+            ci2,
+            set([
+                self.ontology[1],
+                self.ontology[11],
+                self.ontology[12],
+                self.ontology[21],
+                self.ontology[31]
+            ])
+        )
+
+    def test_removing_obsolete(self):
+        ci = self.ci
+        self.assertEqual(
+            len(ci),
+            len(self.ontology)
+        )
+        ci2 = ci.replace_obsolete()
+        self.assertEqual(
+            len(ci2),
+            len(self.ontology)
+        )
+
+        self.ontology[12].is_obsolete = True
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            ci2 = ci.replace_obsolete()
+            self.assertEqual(
+                len(ci2),
+                len(self.ontology)-1
+            )
+
+
+class BasicHPOSetTests(unittest.TestCase):
+    def test_init(self):
+        ontology = make_ontology()
+        ci = BasicHPOSet([
+            term for term in ontology
+        ])
+        self.assertEqual(
+            ci,
+            set([ontology[41], ontology[13]])
+        )
+
+    def test_remove_modifiers(self):
+        ontology = make_ontology_with_modifiers()
+        ci = BasicHPOSet([
+            term for term in ontology
+        ])
+        self.assertEqual(
+            ci,
+            set([ontology[41], ontology[13]])
+        )
+
+    def test_remove_duplicate_terms(self):
+        ontology = make_ontology()
+        ci = BasicHPOSet([
+            term for term in ontology
+        ] + [ontology[41]])
+        self.assertEqual(
+            ci,
+            set([ontology[41], ontology[13]])
+        )
 
 
 class SetMetricsTests(unittest.TestCase):
@@ -249,3 +428,337 @@ class SetMetricsTests(unittest.TestCase):
         assert res['total'] == 42
         assert res['max'] == 12
         assert res['all'] == [0, 2, 4, 6, 8, 10, 12]
+
+
+class SimilarityTests(unittest.TestCase):
+    def setUp(self):
+        self.terms = make_terms()
+
+    def test_simsilarity_arg_forwarding(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=Matrix(1, 1, [1])
+        ) as mock_simscore:
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            _ = set1.similarity(set2)
+            mock_simscore.assert_called_once_with(
+                set1, set2, None, None
+            )
+            mock_simscore.reset_mock()
+
+            _ = set1.similarity(set2, 'foo')
+            mock_simscore.assert_called_once_with(
+                set1, set2, 'foo', None
+            )
+            mock_simscore.reset_mock()
+
+            _ = set1.similarity(set2, kind='foo')
+            mock_simscore.assert_called_once_with(
+                set1, set2, 'foo', None
+            )
+            mock_simscore.reset_mock()
+
+            _ = set1.similarity(set2, 'foo', 'bar')
+            mock_simscore.assert_called_once_with(
+                set1, set2, 'foo', 'bar'
+            )
+            mock_simscore.reset_mock()
+
+            _ = set1.similarity(set2, kind='foo', method='bar')
+            mock_simscore.assert_called_once_with(
+                set1, set2, 'foo', 'bar'
+            )
+            mock_simscore.reset_mock()
+
+            _ = set1.similarity(set2, method='bar')
+            mock_simscore.assert_called_once_with(
+                set1, set2, None, 'bar'
+            )
+            mock_simscore.reset_mock()
+
+            _ = set1.similarity(set2, None, 'bar')
+            mock_simscore.assert_called_once_with(
+                set1, set2, None, 'bar'
+            )
+            mock_simscore.reset_mock()
+
+    def test_equality_score_call(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=None
+        ) as mock_simscore, patch.object(
+            HPOSet,
+            '_equality_score',
+            return_value=12
+        ) as mock_equality_score:
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            res = set1.similarity(set2, method='equal')
+            mock_simscore.assert_not_called()
+            mock_equality_score.assert_called_once_with(
+                set2
+            )
+            self.assertEqual(res, 12)
+
+    def test_funSimAvg(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=Matrix(2, 4, [1, 0.5, 2, 4, 2, 3, 1, 1])
+        ) as mock_simscore:
+            """
+            Row maxes: 4, 3 ==> 7 ==> 7/2 = 3.5
+            Col maxes: 2, 3, 2, 4 ==> 11 ==> 11/4 = 2.75
+            """
+
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            res = set1.similarity(set2)
+            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            self.assertEqual(res, 3.125)
+
+    def test_funSimMax(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=Matrix(2, 4, [1, 0.5, 2, 4, 2, 3, 1, 1])
+        ) as mock_simscore:
+            """
+            Row maxes: 4, 3 ==> 7 ==> 7/2 = 3.5
+            Col maxes: 2, 3, 2, 4 ==> 11 ==> 11/4 = 2.75
+            """
+
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            res = set1.similarity(set2, combine='funSimMax')
+            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            self.assertEqual(res, 3.5)
+
+    def test_funSimBMA(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=Matrix(2, 4, [1, 0.5, 2, 4, 2, 3, 1, 1])
+        ) as mock_simscore:
+            """
+            Row maxes: 4, 3 ==> 7 ==> 7
+            Col maxes: 2, 3, 2, 4 ==> 11 ==> 11
+            ==> 18 / 6
+            """
+
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            res = set1.similarity(set2, combine='BMA')
+            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            self.assertEqual(res, 3)
+
+    def test_invalid_combine_method(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=Matrix(2, 4, [1, 0.5, 2, 4, 2, 3, 1, 1])
+        ) as mock_simscore:
+            with self.assertRaises(
+                RuntimeError
+            ) as context:
+                set1 = HPOSet([self.terms[0]])
+                set2 = HPOSet([self.terms[1]])
+
+                _ = set1.similarity(set2, combine='invalid')
+            mock_simscore.assert_called_once_with(set1, set2, None, None)
+        self.assertEqual(
+            str(context.exception),
+            'Invalid combine method specified'
+        )
+
+
+class SimScoreTests(unittest.TestCase):
+    def setUp(self):
+        self.terms = make_terms()
+
+    def test_empty_sim_score(self):
+        with patch.object(
+            HPOTerm,
+            'similarity_score',
+            side_effect=[1, 0.5, 2, 4, 2, 3, 1, 1]
+        ) as mock_simscore:
+            set1 = HPOSet([])
+            set2 = HPOSet(self.terms[2:6])
+            scores = HPOSet._sim_score(set1, set2, 'omim')
+            self.assertEqual(
+                scores._data,
+                []
+            )
+            mock_simscore.assert_not_called()
+            mock_simscore.reset_mock()
+
+            set1 = HPOSet(self.terms[0:2])
+            set2 = HPOSet([])
+            scores = HPOSet._sim_score(set1, set2, 'omim')
+            self.assertEqual(
+                scores._data,
+                []
+            )
+            mock_simscore.assert_not_called()
+            mock_simscore.reset_mock()
+
+            set1 = HPOSet([])
+            set2 = HPOSet([])
+            scores = HPOSet._sim_score(set1, set2, 'omim')
+            self.assertEqual(
+                scores._data,
+                []
+            )
+            mock_simscore.assert_not_called()
+
+    def test_sim_score(self):
+        with patch.object(
+            HPOTerm,
+            'similarity_score',
+            side_effect=[1, 0.5, 2, 4, 2, 3, 1, 1]
+        ) as mock_simscore:
+            set1 = HPOSet(self.terms[0:2])
+            set2 = HPOSet(self.terms[2:6])
+            scores = HPOSet._sim_score(set1, set2)
+
+            calls = [
+                call(self.terms[2], None, None),
+                call(self.terms[3], None, None),
+                call(self.terms[4], None, None),
+                call(self.terms[5], None, None)
+            ]
+            mock_simscore.assert_has_calls(calls, any_order=True)
+            self.assertEqual(
+                mock_simscore.call_count,
+                8
+            )
+            self.assertEqual(
+                list(scores.columns),
+                [
+                    [1, 2],
+                    [0.5, 3],
+                    [2, 1],
+                    [4, 1]
+                ]
+            )
+            self.assertEqual(
+                list(scores.rows),
+                [
+                    [1, 0.5, 2, 4],
+                    [2, 3, 1, 1]
+                ]
+            )
+
+    def test_single_comparison_sim_score(self):
+        with patch.object(
+            HPOTerm,
+            'similarity_score',
+            side_effect=[5, 0.5, 2, 4, 2, 3, 1, 1]
+        ) as mock_simscore:
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+            scores = HPOSet._sim_score(set1, set2)
+
+            mock_simscore.assert_called_once_with(
+                self.terms[1], None, None
+            )
+            self.assertEqual(
+                mock_simscore.call_count,
+                1
+            )
+            self.assertEqual(
+                list(scores.columns),
+                [[5]]
+            )
+            self.assertEqual(
+                list(scores.rows),
+                [[5]]
+            )
+
+    def test_simscore_arg_forwarding(self):
+        with patch.object(
+            HPOTerm,
+            'similarity_score',
+            return_value=None
+        ) as mock_simscore:
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            _ = HPOSet._sim_score(set1, set2)
+            mock_simscore.assert_called_once_with(
+                self.terms[1], None, None
+            )
+            mock_simscore.reset_mock()
+
+            _ = HPOSet._sim_score(set1, set2, 'foo')
+            mock_simscore.assert_called_once_with(
+                self.terms[1], 'foo', None
+            )
+            mock_simscore.reset_mock()
+
+            _ = HPOSet._sim_score(set1, set2, kind='foo')
+            mock_simscore.assert_called_once_with(
+                self.terms[1], 'foo', None
+            )
+            mock_simscore.reset_mock()
+
+            _ = HPOSet._sim_score(set1, set2, 'foo', 'bar')
+            mock_simscore.assert_called_once_with(
+                self.terms[1], 'foo', 'bar'
+            )
+            mock_simscore.reset_mock()
+
+            _ = HPOSet._sim_score(set1, set2, kind='foo', method='bar')
+            mock_simscore.assert_called_once_with(
+                self.terms[1], 'foo', 'bar'
+            )
+            mock_simscore.reset_mock()
+
+            _ = HPOSet._sim_score(set1, set2, method='bar')
+            mock_simscore.assert_called_once_with(
+                self.terms[1], None, 'bar'
+            )
+            mock_simscore.reset_mock()
+
+            _ = HPOSet._sim_score(set1, set2, None, 'bar')
+            mock_simscore.assert_called_once_with(
+                self.terms[1], None, 'bar'
+            )
+            mock_simscore.reset_mock()
+
+
+class EqualityScoreTests(unittest.TestCase):
+    def setUp(self):
+        self.terms = make_terms()
+
+    def test_empty_sets(self):
+        set1 = HPOSet([])
+        set2 = HPOSet(self.terms[2:6])
+        res = set1._equality_score(HPOSet(self.terms[2:6]))
+        self.assertEqual(res, 0)
+
+        res = set1._equality_score(HPOSet([]))
+        self.assertEqual(res, 0)
+
+        res = set2._equality_score(HPOSet([]))
+        self.assertEqual(res, 0)
+
+        res = set2._equality_score(set2)
+        self.assertEqual(res, 1)
+
+        res = set2._equality_score(HPOSet(self.terms[3:7]))
+        self.assertEqual(res, 0.75)
+
+        res = set2._equality_score(HPOSet(self.terms[4:8]))
+        self.assertEqual(res, 0.5)
+
+        res = set2._equality_score(HPOSet(self.terms[5:8]))
+        self.assertEqual(res, 0.25)
