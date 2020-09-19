@@ -1,7 +1,4 @@
 import unittest
-from unittest.mock import patch, call
-
-from pyhpo.annotations import Gene, Omim
 
 
 @unittest.skip('TODO')

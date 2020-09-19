@@ -120,7 +120,9 @@ class OntologyClass():
                     orpha_excluded[term._index]
                 )
             if term._index in decipher_excluded:
-                term.decipher_excluded_diseases = decipher_excluded[term._index]
+                term.decipher_excluded_diseases = decipher_excluded[
+                    term._index
+                ]
                 self._decipher_excluded_diseases.update(
                     decipher_excluded[term._index]
                 )
@@ -320,7 +322,9 @@ class OntologyClass():
 
         if synonym_hit:
             return synonym_hit
-        raise RuntimeError('No HPO entry with term or synonym {}'.format(query))
+        raise RuntimeError('No HPO entry with term or synonym {}'.format(
+            query)
+        )
 
     def synonym_search(self, term, query):
         """

@@ -36,10 +36,10 @@ print('===== LOADING ONTOLOGY ======')
 cProfile.run('build_ontology()')
 
 print('===== BUILDING DISEASE SETS ======')
-#cProfile.run('diseases2sets(Ontology.omim_diseases)')
+# cProfile.run('diseases2sets(Ontology.omim_diseases)')
 
 print('===== BUILDING DISEASE BasicSETS ======')
-#cProfile.run('diseases2basicsets(Ontology.omim_diseases)')
+# cProfile.run('diseases2basicsets(Ontology.omim_diseases)')
 
 print('===== COMPARING SETS ======')
 cProfile.run('compare_set(Ontology.omim_diseases)')

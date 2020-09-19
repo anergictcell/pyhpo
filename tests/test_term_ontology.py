@@ -114,30 +114,44 @@ class OntologyTreeTraversal(unittest.TestCase):
     def test_hierarchy(self):
         self.terms._connect_all()
 
-        assert self.root.hierarchy() == (
-            (self.root,),
+        self.assertEqual(
+            self.root.hierarchy(),
+            ((self.root,),)
         )
 
-        assert self.child_1_1.hierarchy() == (
-            (self.child_1_1, self.root),
+        self.assertEqual(
+            self.child_1_1.hierarchy(),
+            ((self.child_1_1, self.root),)
         )
 
-        assert self.child_1_2.hierarchy() == (
-            (self.child_1_2, self.root),
+        self.assertEqual(
+            self.child_1_2.hierarchy(),
+            ((self.child_1_2, self.root),)
         )
 
-        assert self.child_2_1.hierarchy() == (
-            (self.child_2_1, self.child_1_1, self.root),
+        self.assertEqual(
+            self.child_2_1.hierarchy(),
+            ((self.child_2_1, self.child_1_1, self.root),)
         )
 
-        assert self.child_3.hierarchy() == (
-            (self.child_3, self.child_2_1, self.child_1_1, self.root),
-            (self.child_3, self.child_1_2, self.root)
+        self.assertEqual(
+            self.child_3.hierarchy(),
+            (
+                (self.child_3, self.child_2_1, self.child_1_1, self.root),
+                (self.child_3, self.child_1_2, self.root))
         )
 
-        assert self.child_4.hierarchy() == (
-            (self.child_4, self.child_3, self.child_2_1, self.child_1_1, self.root),
-            (self.child_4, self.child_3, self.child_1_2, self.root)
+        self.assertEqual(
+            self.child_4.hierarchy(),
+            (
+                (
+                    self.child_4,
+                    self.child_3,
+                    self.child_2_1,
+                    self.child_1_1,
+                    self.root
+                ),
+                (self.child_4, self.child_3, self.child_1_2, self.root))
         )
 
     def test_path_to_root_finding(self):
@@ -474,9 +488,18 @@ class OntologyQueries(unittest.TestCase):
 
     def test_get_hpo_object(self):
         self.terms._connect_all()
-        assert self.terms.get_hpo_object('Test child level 1-2') == self.child_1_2
-        assert self.terms.get_hpo_object('HP:00012') == self.child_1_2
-        assert self.terms.get_hpo_object(12) == self.child_1_2
+        self.assertEqual(
+            self.terms.get_hpo_object('Test child level 1-2'),
+            self.child_1_2
+        )
+        self.assertEqual(
+            self.terms.get_hpo_object('HP:00012'),
+            self.child_1_2
+        )
+        self.assertEqual(
+            self.terms.get_hpo_object(12),
+            self.child_1_2
+        )
         with self.assertRaises(SyntaxError) as err:
             self.terms.get_hpo_object([1, 2, 3])
         assert 'Invalid type' in str(err.exception)
@@ -487,13 +510,34 @@ class OntologyQueries(unittest.TestCase):
 
     def test_matching(self):
         self.terms._connect_all()
-        assert self.terms.match(self.root.name) == self.root
-        assert self.terms.match(self.child_1_1.name) == self.child_1_1
-        assert self.terms.match(self.child_1_2.name) == self.child_1_2
-        assert self.terms.match(self.child_1_3.name) == self.child_1_3
-        assert self.terms.match(self.child_1_2.name) == self.child_1_2
-        assert self.terms.match(self.child_3.name) == self.child_3
-        assert self.terms.match(self.child_4.name) == self.child_4
+        self.assertEqual(
+            self.terms.match(self.root.name),
+            self.root
+        )
+        self.assertEqual(
+            self.terms.match(self.child_1_1.name),
+            self.child_1_1
+        )
+        self.assertEqual(
+            self.terms.match(self.child_1_2.name),
+            self.child_1_2
+        )
+        self.assertEqual(
+            self.terms.match(self.child_1_3.name),
+            self.child_1_3
+        )
+        self.assertEqual(
+            self.terms.match(self.child_1_2.name),
+            self.child_1_2
+        )
+        self.assertEqual(
+            self.terms.match(self.child_3.name),
+            self.child_3
+        )
+        self.assertEqual(
+            self.terms.match(self.child_4.name),
+            self.child_4
+        )
 
         with self.assertRaises(RuntimeError) as err:
             self.terms.match('Some invalid term')
@@ -502,8 +546,16 @@ class OntologyQueries(unittest.TestCase):
     def test_path_unit(self):
         self.terms._connect_all()
 
-        with patch.object(Ontology, 'get_hpo_object', return_value=self.child_1_1) as mock_gho:
-            with patch.object(self.child_1_1, 'path_to_other', return_value=1) as mock_pto:
+        with patch.object(
+            Ontology,
+            'get_hpo_object',
+            return_value=self.child_1_1
+        ) as mock_gho:
+            with patch.object(
+                self.child_1_1,
+                'path_to_other',
+                return_value=1
+            ) as mock_pto:
                 self.terms.path('first query', 'second query')
 
                 mock_gho.assert_any_call('first query')
@@ -541,7 +593,11 @@ class OntologyQueries(unittest.TestCase):
 
     def test_search(self):
         self.terms._connect_all()
-        with patch.object(self.terms, 'synonym_search', return_value=False) as mock_syn_search:
+        with patch.object(
+            self.terms,
+            'synonym_search',
+            return_value=False
+        ) as mock_syn_search:
 
             assert list(self.terms.search('something')) == []
             # All terms will be searched for in synonyms
@@ -580,12 +636,24 @@ class OntologyQueries(unittest.TestCase):
         self.child_1_1.synonym = '"Test child level 1-2"'
         self.terms._connect_all()
 
-        assert self.terms.synonym_match('Test child level 1-2') == self.child_1_2
-        assert self.terms.synonym_match('another name') == self.child_1_2
-        assert self.terms.synonym_match('third name') == self.child_1_2
+        self.assertEqual(
+            self.terms.synonym_match('Test child level 1-2'),
+            self.child_1_2
+        )
+        self.assertEqual(
+            self.terms.synonym_match('another name'),
+            self.child_1_2
+        )
+        self.assertEqual(
+            self.terms.synonym_match('third name'),
+            self.child_1_2
+        )
 
         self.child_1_2.name = 'something else'
-        assert self.terms.synonym_match('Test child level 1-2') == self.child_1_1
+        self.assertEqual(
+            self.terms.synonym_match('Test child level 1-2'),
+            self.child_1_1
+        )
 
     @unittest.skip('TODO')
     def test_common_ancestors(self):

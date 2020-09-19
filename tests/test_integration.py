@@ -14,24 +14,24 @@ N_TERMS = 15530
 N_GENES = 4366
 
 # Number of OMIM diseases in the annotation dataset
-# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
 N_OMIM = 7801
 # Number of excluded OMIM diseases in the annotation dataset
-# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_OMIM_EXL = 652
 
 # Number of ORPHA diseases in the annotation dataset
-# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
 N_ORPHA = 3956
 # Number of excluded ORPHA diseases in the annotation dataset
-# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_ORPHA_EXL = 255
 
 # Number of DECIPHER diseases in the annotation dataset
-# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep -v "NOT" | wc -l
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
 N_DECIPHER = 47
 # Number of excluded DECIPHER diseases in the annotation dataset
-# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep "NOT" | wc -l
+# cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_DECIPHER_EXL = 0
 
 
@@ -161,7 +161,9 @@ class IntegrationFullTest(unittest.TestCase):
                     assert child.orpha_diseases.issubset(term.orpha_diseases)
 
                     assert ld >= len(child.decipher_diseases)
-                    assert child.decipher_diseases.issubset(term.decipher_diseases)
+                    assert child.decipher_diseases.issubset(
+                        term.decipher_diseases
+                    )
 
     def test_relationships(self):
         kidney = self.terms.get_hpo_object(123)
