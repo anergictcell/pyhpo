@@ -140,6 +140,62 @@ Working with sets
     # Calculate the similarity of two Sets
     sim_score = clinical_info.similarity(other_set)
 
+Statistics
+-----------------
+``PyHPO`` includes some basic statics method for gene, disease and HPO-Term enrichment analysis.
+
+
+.. code-block:: python
+
+    # Let's say you have a patient with a couple of symptoms and 
+    # you want to find out the most likely affected genes 
+    # or most likely diseases
+    
+    from pyhpo import stats
+    from pyhpo.ontology import Ontology
+    from pyhpo.set import HPOSet, BasicHPOSet
+    _ = Ontology()
+
+    hpo_terms = [
+        'Decreased circulating antibody level',
+        'Abnormal immunoglobulin level',
+        'Abnormality of B cell physiology',
+        'Abnormal lymphocyte physiology',
+        'Abnormality of humoral immunity',
+        'Lymphoma',
+        'Lymphopenia',
+        'Autoimmunity',
+        'Increased circulating IgG level',
+        'Abnormal lymphocyte count'
+    ]
+    
+    # you can either use a HPOSet for this
+    hposet = HPOSet.from_queries(hpo_terms)
+    
+    # or just a plain list of HPO Terms
+    hposet = [Ontology.match(q) for q in hpo_terms]
+    
+    # Initialize an Enrichment model for genes
+    gene_model = stats.EnrichmentModel('gene')
+    
+    # You can also do enrichment for diseases
+    disease_model = stats.EnrichmentModel('omim')
+    
+    # Calculate the Hypergeometric distribution test enrichment
+    gene_results = gene_model.enrichment(
+        'hypergeom',
+        hposet
+    )
+    disease_results = disease_model.enrichment(
+        'hypergeom',
+        hposet
+    )
+    
+    # and print the Top-10 results
+    for x in gene_results[0:10]:
+        print(x)
+    for x in disease_results[0:10]:
+        print(x)
 
 and many more examples in the `PyHPO Documentation`_
 
