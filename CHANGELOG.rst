@@ -18,7 +18,6 @@ Changelog
     - DECIPHER: 47 ==> 47
     - Negative DECIPHER: 0 ==> 0
 
-
 2.3
 ---
 - Added GraphIC similarity measure
