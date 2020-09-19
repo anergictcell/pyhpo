@@ -330,7 +330,7 @@ class HPOTerm():
 
     @is_obsolete.setter
     def is_obsolete(self, value):
-        if value.lower() in TRUTH:
+        if str(value).lower() in TRUTH:
             self._is_obsolete = True
             self.name = self.name.replace('obsolete', '').strip()
         else:
@@ -755,7 +755,8 @@ class HPOTerm():
         """
         if len(self.children):
             return max([
-                child.longest_path_to_bottom(level + 1) for child in self.children
+                child.longest_path_to_bottom(level + 1)
+                for child in self.children
             ])
         else:
             return level
