@@ -29,7 +29,10 @@ class GeneSingleton:
         [None, None, id, name]
     """
     def __init__(self, columns):
-        self.id = int(columns[2])
+        try:
+            self.id = int(columns[2])
+        except TypeError:
+            self.id = None
         self.name = columns[3]
         self._hpo = set()
 
@@ -88,6 +91,11 @@ class GeneDict(dict):
 
     def __call__(self, cols):
         gene = GeneSingleton(cols)
+        if gene.id is None:
+            for x in self:
+                if x.name == gene.name:
+                    return x
+            raise RuntimeError('Invalid Gene entry without ID')
         if gene not in self:
             self[gene] = gene
         return self[gene]
