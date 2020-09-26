@@ -1,5 +1,6 @@
 from pyhpo.term import HPOTerm
 from pyhpo.ontology import Ontology
+from pyhpo.annotations import Gene, Omim, GeneDict, OmimDict
 
 
 """
@@ -117,3 +118,20 @@ def make_ontology_with_modifiers():
     terms._connect_all()
 
     return terms
+
+
+def make_genes(n):
+    # Ensure to remove all items from Gene object
+    Gene.clear()
+    return [
+        Gene([None, None, i, 'Gene{}'.format(i)])
+        for i in range(n)
+    ]
+
+
+def make_omim(n):
+    Omim.clear()
+    return [
+        Omim([None, i, 'Omim{}'.format(i)])
+        for i in range(n)
+    ]
