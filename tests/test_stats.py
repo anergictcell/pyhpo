@@ -1,12 +1,20 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from pyhpo import stats
+try:
+    from pyhpo import stats
+except ImportError:
+    import sys
+    sys.modules['scipy.stats'] = MagicMock()
+    sys.modules['scipy.stats'].hypergeom.sf = MagicMock(return_value=0.0000235)
+    from pyhpo import stats
+
 from pyhpo.stats import HPOEnrichment, EnrichmentModel
+
 from tests.mockontology import make_ontology, make_genes, make_omim
 
 
-class TestHYypergeometricStats(unittest.TestCase):
+class TestHypergeometricStats(unittest.TestCase):
     def test_hypergeom_test(self):
         self.assertLess(
             stats.hypergeom_test(8, 10, 20, 100),
