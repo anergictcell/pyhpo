@@ -48,6 +48,17 @@ class GeneSingleton:
     def hpo(self, term):
         self._hpo.add(term)
 
+    def toJSON(self, verbose=False):
+        res = {
+            'id': self.id,
+            'name': self.name,
+            'symbol': self.name
+        }
+        if verbose:
+            res['hpo'] = self.hpo
+
+        return res
+
     def __eq__(self, other):
         if isinstance(other, int):
             return self.id == other
@@ -88,6 +99,17 @@ class GeneDict(dict):
     """
     def __init__(self):
         pass
+
+    def get(self, identifier):
+        try:
+            return self[int(identifier)]
+        except ValueError:
+            for gene in self:
+                if gene.name == identifier:
+                    return gene
+        except KeyError:
+            pass
+        return None
 
     def __call__(self, cols):
         gene = GeneSingleton(cols)
@@ -130,6 +152,16 @@ class Disease:
     @hpo.setter
     def hpo(self, term):
         self._hpo.add(term)
+
+    def toJSON(self, verbose=False):
+        res = {
+            'id': self.id,
+            'name': self.name
+        }
+        if verbose:
+            res['hpo'] = self.hpo
+
+        return res
 
     def __eq__(self, other):
         if isinstance(other, int):
@@ -185,6 +217,17 @@ class DiseaseDict(dict):
     """
     def __init__(self):
         pass
+
+    def get(self, identifier):
+        try:
+            return self[int(identifier)]
+        except ValueError:
+            for disease in self:
+                if disease.name == identifier:
+                    return disease
+        except KeyError:
+            pass
+        return None
 
     def __call__(self, cols):
         disease = self.disease_class(cols)
