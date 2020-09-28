@@ -921,6 +921,7 @@ class HPOTerm():
             res['synonym'] = self._synonym
             res['xref'] = self._xref
             res['is_a'] = self._is_a
+            res['ic'] = self.information_content
 
         return res
 
