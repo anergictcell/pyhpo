@@ -916,7 +916,7 @@ class HPOTerm():
         }
 
         if verbose:
-            res['def'] = self.definition
+            res['definition'] = self.definition
             res['comment'] = self.comment
             res['synonym'] = self._synonym
             res['xref'] = self._xref

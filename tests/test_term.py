@@ -185,7 +185,7 @@ class SingleTermAttributes(unittest.TestCase):
                 'int',
                 'id',
                 'name',
-                'def',
+                'definition',
                 'comment',
                 'synonym',
                 'xref',
@@ -206,7 +206,7 @@ class SingleTermAttributes(unittest.TestCase):
             term.name
         )
         self.assertEqual(
-            term.toJSON(verbose=True)['def'],
+            term.toJSON(verbose=True)['definition'],
             term.definition
         )
         self.assertEqual(
