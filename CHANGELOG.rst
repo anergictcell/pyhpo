@@ -5,6 +5,15 @@ Changelog
 ---
 - Added combination methods for HPOset similarities
 - Added Matrix module for row/column based operations
+- Data update to ``hp/releases/2020-10-12``
+    - HPO: 15530 ==> 15656
+    - Genes: 4366 ==> 4484
+    - OMIM: 7801 ==> 7860
+    - Negative OMIM: 652 ==> 660
+    - ORPHANET: 3956 ==> 3989
+    - Negative ORPHANET: 255 ==> 259
+    - DECIPHER: 47 ==> 47
+    - Negative DECIPHER: 0 ==> 0
 
 2.4
 ---
