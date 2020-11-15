@@ -579,6 +579,25 @@ class SimilarityTests(unittest.TestCase):
             'Invalid combine method specified'
         )
 
+    def test_empty_sets(self):
+        with patch.object(
+            HPOSet,
+            '_sim_score',
+            return_value=Matrix(0, 0, [])
+        ) as mock_simscore:
+            """
+            Row maxes: 4, 3 ==> 7 ==> 7
+            Col maxes: 2, 3, 2, 4 ==> 11 ==> 11
+            ==> 18 / 6
+            """
+
+            set1 = HPOSet([self.terms[0]])
+            set2 = HPOSet([self.terms[1]])
+
+            res = set1.similarity(set2, combine='BMA')
+            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            self.assertEqual(res, 0)
+
 
 class SimScoreTests(unittest.TestCase):
     def setUp(self):

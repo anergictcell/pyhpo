@@ -370,23 +370,26 @@ class HPOSet(set):
             for col in score_matrix.columns
         ]
 
-        if combine == 'funSimAvg':
-            return (
-                sum(row_maxes)/len(row_maxes) +
-                sum(col_maxes)/len(col_maxes)
-            )/2
+        try:
+            if combine == 'funSimAvg':
+                return (
+                    sum(row_maxes)/len(row_maxes) +
+                    sum(col_maxes)/len(col_maxes)
+                )/2
 
-        if combine == 'funSimMax':
-            return max([
-                sum(row_maxes)/len(row_maxes),
-                sum(col_maxes)/len(col_maxes)
-            ])
+            if combine == 'funSimMax':
+                return max([
+                    sum(row_maxes)/len(row_maxes),
+                    sum(col_maxes)/len(col_maxes)
+                ])
 
-        if combine == 'BMA':
-            return (
-                (sum(row_maxes) + sum(col_maxes)) /
-                (len(row_maxes) + len(col_maxes))
-            )
+            if combine == 'BMA':
+                return (
+                    (sum(row_maxes) + sum(col_maxes)) /
+                    (len(row_maxes) + len(col_maxes))
+                )
+        except ZeroDivisionError:
+            return 0
 
         raise RuntimeError('Invalid combine method specified')
 
