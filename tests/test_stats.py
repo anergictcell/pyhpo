@@ -275,18 +275,14 @@ class TestAnnotationEnrichment(unittest.TestCase):
         )
         res = EnrichmentModel.enrichment(that, 'foo', 'bar')
         self.assertEqual(
-            res,
-            [{
-                'item': self.genes[1],
-                'count': 2,
-                'enrichment': 11
-            }, {
-                'item': self.genes[0],
-                'count': 2,
-                'enrichment': 22
-            }, {
-                'item': self.genes[2],
-                'count': 1,
-                'enrichment': 33
-            }]
+            res[0]['enrichment'],
+            11
+        )
+        self.assertEqual(
+            res[1]['enrichment'],
+            22
+        )
+        self.assertEqual(
+            res[2]['enrichment'],
+            33
         )

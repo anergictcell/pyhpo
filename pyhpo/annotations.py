@@ -28,13 +28,14 @@ class GeneSingleton:
     columns: list
         [None, None, id, name]
     """
-    def __init__(self, columns):
-        try:
-            self.id = int(columns[2])
-        except TypeError:
-            self.id = None
-        self.name = columns[3]
+    def __init__(self, idx, name):
+        self.id = idx
+        self.name = name
         self._hpo = set()
+        self._hash = hash((
+            self.id,
+            self.name
+        ))
 
     @property
     def symbol(self):
@@ -64,17 +65,20 @@ class GeneSingleton:
             return self.id == other
 
         if isinstance(other, str):
-            return self.id == other or self.name == other
+            return self.name == other
 
         try:
-            return self.id == other.id
+            return (
+                (self.id and self.id == other.id) or
+                (self.name and self.name == other.name)
+            )
         except AttributeError:
             return False
 
         return False
 
     def __hash__(self):
-        return self.id
+        return self._hash
 
     def __str__(self):
         return self.name
@@ -98,29 +102,37 @@ class GeneDict(dict):
     ``annotations.Gene``.
     """
     def __init__(self):
-        pass
-
-    def get(self, identifier):
-        try:
-            return self[int(identifier)]
-        except ValueError:
-            for gene in self:
-                if gene.name == identifier:
-                    return gene
-        except KeyError:
-            pass
-        return None
+        self._indicies = {}
+        self._names = {}
 
     def __call__(self, cols):
-        gene = GeneSingleton(cols)
-        if gene.id is None:
-            for x in self:
-                if x.name == gene.name:
-                    return x
-            raise RuntimeError('Invalid Gene entry without ID')
-        if gene not in self:
-            self[gene] = gene
-        return self[gene]
+        name = cols[3]
+        try:
+            idx = int(cols[2])
+        except TypeError:
+            idx = None
+
+        try:
+            return self._names[name]
+        except KeyError:
+            pass
+        try:
+            return self._indicies[idx]
+        except KeyError:
+            pass
+
+        gene = GeneSingleton(idx, name)
+
+        self[gene] = gene
+        self._indicies[idx] = gene
+        self._names[name] = gene
+
+        return gene
+
+    def clear(self):
+        self._indicies.clear()
+        self._names.clear()
+        dict.clear(self)
 
 
 class Disease:
@@ -140,10 +152,14 @@ class Disease:
     columns: list
         [None, id, name]
     """
-    def __init__(self, cols):
-        self.id = int(cols[1])
-        self.name = cols[2]
+    def __init__(self, idx, name):
+        self.id = idx
+        self.name = name
         self._hpo = set()
+        self._hash = hash((
+            self.id,
+            self.diseasetype
+        ))
 
     @property
     def hpo(self):
@@ -168,20 +184,23 @@ class Disease:
             return self.id == other
 
         if isinstance(other, str):
-            return self.id == other or self.name == other
+            return self.name == other
 
         try:
-            return self.id == other.id
+            return (
+                (self.id and self.id == other.id) or
+                (self.name and self.name == other.name)
+            )
         except AttributeError:
             return False
 
         return False
 
     def __hash__(self):
-        return self.id
+        return self._hash
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return '{}(["", {}, "{}"])'.format(
@@ -216,24 +235,30 @@ class DiseaseDict(dict):
     ``annotations.Omim``.
     """
     def __init__(self):
-        pass
-
-    def get(self, identifier):
-        try:
-            return self[int(identifier)]
-        except ValueError:
-            for disease in self:
-                if disease.name == identifier:
-                    return disease
-        except KeyError:
-            pass
-        return None
+        self._indicies = {}
 
     def __call__(self, cols):
-        disease = self.disease_class(cols)
-        if disease not in self:
-            self[disease] = disease
-        return self[disease]
+        name = cols[2]
+        try:
+            idx = int(cols[1])
+        except TypeError:
+            idx = None
+
+        try:
+            return self._indicies[idx]
+        except KeyError:
+            pass
+
+        disease = self.disease_class(idx, name)
+
+        self[disease] = disease
+        self._indicies[idx] = disease
+
+        return disease
+
+    def clear(self):
+        self._indicies.clear()
+        dict.clear(self)
 
 
 class OmimDict(DiseaseDict):
