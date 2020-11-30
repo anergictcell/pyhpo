@@ -12,21 +12,34 @@ FILENAMES = {
 
 class GeneSingleton:
     """
-    Representation of a Gene
+    This class represents a single gene.
+
+    .. note::
+
+        ``GeneSingleton`` should never be initiated directly,
+        but only via :class:`.GeneDict`
+        to ensure that every gene is only created once.
 
     Attributes
     ----------
     id: int
-        HGNC id
+        HGNC gene ID
+
     name: str
         HGNC gene synbol
+
     symbol: str
-        HGNC gene symbol (alias of ``name``)
+        HGNC gene symbol (alias of :attr:`.GeneSingleton.name`)
+
+    hpo: set of :class:`pyhpo.term.HPOTerm`
+        all HPOTerms associated to the gene
 
     Parameters
     ----------
-    columns: list
-        [None, None, id, name]
+    idx: int
+        HGNC gene ID
+    name: str
+        HGNC gene synbol
     """
     def __init__(self, idx, name):
         self.id = idx
@@ -50,6 +63,24 @@ class GeneSingleton:
         self._hpo.add(term)
 
     def toJSON(self, verbose=False):
+        """
+        JSON (dict) representation of ``Gene``
+
+        Parameters
+        ----------
+        verbose: bool, default: ``False``
+            Return all associated HPOTerms
+
+        Returns
+        -------
+        dict
+            A dict with the following keys
+
+            * **id** - The HGNC ID
+            * **name** - The gene symbol
+            * **symbol** - The gene symbol (same as ``name``)
+            * **hpo** - (If ``verbose == True``): set of :class:`pyhpo.term.HPOTerm`
+        """
         res = {
             'id': self.id,
             'name': self.name,
@@ -98,8 +129,40 @@ class GeneDict(dict):
     and no duplicate instances are generated during parsing of the
     Gen-Pheno-HPO associations.
 
-    This class is initilized once and then the dict is accessible as
-    ``annotations.Gene``.
+    This class is initilized once and genes are created by calling
+    the instance of GeneDict to ensure that the same gene exists only once.
+
+    For example ::
+
+        Gene = GeneDict()
+        gba = Gene(symbol='GBA')
+        ezh2 = Gene(symbol='EZH2')
+        gba_2 = Gene(symbol='GBA')
+
+        gba is ezh2
+        >> False
+        gba is gba_2
+        >> True
+
+    Parameters
+    ----------
+    cols: list, default: ``None``
+        Only used for backwards compatibility reasons.
+        Should have the following entries
+
+        * None
+        * None
+        * HGNC-ID
+        * Gene symbol
+
+    hgncid: int
+        The HGNC ID
+    symbol: str
+        The gene symbol (alternative to name)
+
+    Returns
+    -------
+    :class:`.GeneSingleton`
     """
     def __init__(self):
         self._indicies = {}
@@ -147,23 +210,37 @@ class GeneDict(dict):
         dict.clear(self)
 
 
-class Disease:
-    diseasetype = 'Undefined'
+class DiseaseSingleton:
     """
-    Representation of a disease
+    This class represents a single disease.
+
+    .. note::
+
+        ``DiseaseSingleton`` should never be initiated directly,
+        but only via the appropriate disease dictionary, e.g.
+        :class:`.OmimDict` (:class:`.DiseaseDict`)
+        to ensure that every disease is only created once.
 
     Attributes
     ----------
     id: int
-        id
+        Disease ID
+
     name: str
         disease name
 
+    hpo: set of :class:`pyhpo.term.HPOTerm`
+        all HPOTerms associated to the disease
+
     Parameters
     ----------
-    columns: list
-        [None, id, name]
+    idx: int
+        Disease ID
+    name: str
+        Disease name
     """
+    diseasetype = 'Undefined'
+
     def __init__(self, idx, name):
         self.id = idx
         self.name = name
@@ -182,6 +259,24 @@ class Disease:
         self._hpo.add(term)
 
     def toJSON(self, verbose=False):
+        """
+        JSON (dict) representation of ``Disease``
+
+        Parameters
+        ----------
+        verbose: bool, default: ``False``
+            Return all associated HPOTerms
+
+        Returns
+        -------
+        dict
+            A dict with the following keys
+
+            * **id** - The Disease ID
+            * **name** - The disease name
+            * **hpo** - (If ``verbose == True``):
+              set of :class:`pyhpo.term.HPOTerm`
+        """
         res = {
             'id': self.id,
             'name': self.name
@@ -222,20 +317,19 @@ class Disease:
         )
 
 
-class OmimDisease(Disease):
+class OmimDisease(DiseaseSingleton):
     diseasetype = 'Omim'
 
 
-class OrphaDisease(Disease):
+class OrphaDisease(DiseaseSingleton):
     diseasetype = 'Orpha'
 
 
-class DecipherDisease(Disease):
+class DecipherDisease(DiseaseSingleton):
     diseasetype = 'Decipher'
 
 
 class DiseaseDict(dict):
-    disease_class = None
     """
     An associative dict of all Omim Diseases
 
@@ -243,9 +337,44 @@ class DiseaseDict(dict):
     and no duplicate instances are generated during parsing of the
     Gen-Pheno-HPO associations.
 
-    This class is initilized once and then the dict is accessible as
-    ``annotations.Omim``.
+    This class is initilized once and diseases are created by calling
+    the instance of ``DiseaseDict`` to ensure that the same disease
+    exists only once.
+
+    For example ::
+
+        Disease = OmimDict()
+        gaucher = Disease(diseaseid=1)
+        fabry = Disease(diseaseid=2)
+        gaucher_2 = Disease(diseaseid=1)
+
+        gaucher is fabry
+        >> False
+        gaucher is gaucher_2
+        >> True
+
+
+    Parameters
+    ----------
+    cols: list, default: ``None``
+        Only used for backwards compatibility reasons.
+        Should have the following entries
+
+        * None
+        * Disease ID
+        * Disease Name
+
+    diseaseid: int
+        The Disease ID
+    name: str
+        The disease name
+
+    Returns
+    -------
+    :class:`.DiseaseSingleton`
     """
+    disease_class = None
+
     def __init__(self):
         self._indicies = {}
 
