@@ -105,7 +105,19 @@ class GeneDict(dict):
         self._indicies = {}
         self._names = {}
 
-    def __call__(self, cols):
+    def __call__(self, cols=None, hgncid=None, symbol=None):
+        if not any([cols, hgncid, symbol]):
+            raise TypeError('GeneDict requires at least one argument')
+
+        # for backwards compatibility
+        # we need to create and use this weird list
+        if cols is None:
+            cols = [
+                None,
+                None,
+                hgncid,
+                symbol
+            ]
         name = cols[3]
         try:
             idx = int(cols[2])
@@ -237,7 +249,18 @@ class DiseaseDict(dict):
     def __init__(self):
         self._indicies = {}
 
-    def __call__(self, cols):
+    def __call__(self, cols=None, diseaseid=None, name=None):
+        if not any([cols, diseaseid, name]):
+            raise TypeError('DiseaseDict requires at least one argument')
+
+        # for backwards compatibility
+        # we need to create and use this weird list
+        if cols is None:
+            cols = [
+                None,
+                diseaseid,
+                name
+            ]
         name = cols[2]
         try:
             idx = int(cols[1])
