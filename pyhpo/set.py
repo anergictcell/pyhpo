@@ -555,12 +555,12 @@ class HPOSet(set):
             a list of HPOTerm dict objects
 
         """
-        return [t.toJSON(verbose) for t in self]
+        return [t.toJSON(verbose) for t in self._list]
 
     def __str__(self):
         return '{}: {}'.format(
             self.__class__.__name__,
-            ', '.join([x.name for x in self])
+            ', '.join([x.name for x in self._list])
         )
 
     def __repr__(self):

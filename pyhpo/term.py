@@ -233,6 +233,7 @@ class HPOTerm():
         self.comment = None
         self._id = None
         self._index = 0
+        self._hash = None
 
         self._alt_id = []
         self._alt_index = []
@@ -1070,7 +1071,13 @@ class HPOTerm():
 
     __int__ = __index__
 
-    __hash__ = __index__
+    def __hash__(self):
+        if not self._hash:
+            self._hash = hash((
+                self._index,
+                self.name
+            ))
+        return self._hash
 
     def __eq__(self, t2):
         return self.__hash__() == t2.__hash__() and isinstance(t2, HPOTerm)

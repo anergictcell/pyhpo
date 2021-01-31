@@ -12,29 +12,43 @@ FILENAMES = {
 
 class GeneSingleton:
     """
-    Representation of a Gene
+    This class represents a single gene.
+
+    .. note::
+
+        ``GeneSingleton`` should never be initiated directly,
+        but only via :class:`.GeneDict`
+        to ensure that every gene is only created once.
 
     Attributes
     ----------
     id: int
-        HGNC id
+        HGNC gene ID
+
     name: str
         HGNC gene synbol
+
     symbol: str
-        HGNC gene symbol (alias of ``name``)
+        HGNC gene symbol (alias of :attr:`.GeneSingleton.name`)
+
+    hpo: set of :class:`pyhpo.term.HPOTerm`
+        all HPOTerms associated to the gene
 
     Parameters
     ----------
-    columns: list
-        [None, None, id, name]
+    idx: int
+        HGNC gene ID
+    name: str
+        HGNC gene synbol
     """
-    def __init__(self, columns):
-        try:
-            self.id = int(columns[2])
-        except TypeError:
-            self.id = None
-        self.name = columns[3]
+    def __init__(self, idx, name):
+        self.id = idx
+        self.name = name
         self._hpo = set()
+        self._hash = hash((
+            self.id,
+            self.name
+        ))
 
     @property
     def symbol(self):
@@ -49,6 +63,24 @@ class GeneSingleton:
         self._hpo.add(term)
 
     def toJSON(self, verbose=False):
+        """
+        JSON (dict) representation of ``Gene``
+
+        Parameters
+        ----------
+        verbose: bool, default: ``False``
+            Return all associated HPOTerms
+
+        Returns
+        -------
+        dict
+            A dict with the following keys
+
+            * **id** - The HGNC ID
+            * **name** - The gene symbol
+            * **symbol** - The gene symbol (same as ``name``)
+            * **hpo** - (If ``verbose == True``): set of :class:`pyhpo.term.HPOTerm`
+        """
         res = {
             'id': self.id,
             'name': self.name,
@@ -64,17 +96,20 @@ class GeneSingleton:
             return self.id == other
 
         if isinstance(other, str):
-            return self.id == other or self.name == other
+            return self.name == other
 
         try:
-            return self.id == other.id
+            return (
+                (self.id and self.id == other.id) or
+                (self.name and self.name == other.name)
+            )
         except AttributeError:
             return False
 
         return False
 
     def __hash__(self):
-        return self.id
+        return self._hash
 
     def __str__(self):
         return self.name
@@ -94,56 +129,126 @@ class GeneDict(dict):
     and no duplicate instances are generated during parsing of the
     Gen-Pheno-HPO associations.
 
-    This class is initilized once and then the dict is accessible as
-    ``annotations.Gene``.
+    This class is initilized once and genes are created by calling
+    the instance of GeneDict to ensure that the same gene exists only once.
+
+    For example ::
+
+        Gene = GeneDict()
+        gba = Gene(symbol='GBA')
+        ezh2 = Gene(symbol='EZH2')
+        gba_2 = Gene(symbol='GBA')
+
+        gba is ezh2
+        >> False
+        gba is gba_2
+        >> True
+
+    Parameters
+    ----------
+    cols: list, default: ``None``
+        Only used for backwards compatibility reasons.
+        Should have the following entries
+
+        * None
+        * None
+        * HGNC-ID
+        * Gene symbol
+
+    hgncid: int
+        The HGNC ID
+    symbol: str
+        The gene symbol (alternative to name)
+
+    Returns
+    -------
+    :class:`.GeneSingleton`
     """
     def __init__(self):
-        pass
+        self._indicies = {}
+        self._names = {}
 
-    def get(self, identifier):
+    def __call__(self, cols=None, hgncid=None, symbol=None):
+        if not any([cols, hgncid, symbol]):
+            raise TypeError('GeneDict requires at least one argument')
+
+        # for backwards compatibility
+        # we need to create and use this weird list
+        if cols is None:
+            cols = [
+                None,
+                None,
+                hgncid,
+                symbol
+            ]
+        name = cols[3]
         try:
-            return self[int(identifier)]
-        except ValueError:
-            for gene in self:
-                if gene.name == identifier:
-                    return gene
+            idx = int(cols[2])
+        except TypeError:
+            idx = None
+
+        try:
+            return self._names[name]
         except KeyError:
             pass
-        return None
+        try:
+            return self._indicies[idx]
+        except KeyError:
+            pass
 
-    def __call__(self, cols):
-        gene = GeneSingleton(cols)
-        if gene.id is None:
-            for x in self:
-                if x.name == gene.name:
-                    return x
-            raise RuntimeError('Invalid Gene entry without ID')
-        if gene not in self:
-            self[gene] = gene
-        return self[gene]
+        gene = GeneSingleton(idx, name)
+
+        self[gene] = gene
+        self._indicies[idx] = gene
+        self._names[name] = gene
+
+        return gene
+
+    def clear(self):
+        self._indicies.clear()
+        self._names.clear()
+        dict.clear(self)
 
 
-class Disease:
-    diseasetype = 'Undefined'
+class DiseaseSingleton:
     """
-    Representation of a disease
+    This class represents a single disease.
+
+    .. note::
+
+        ``DiseaseSingleton`` should never be initiated directly,
+        but only via the appropriate disease dictionary, e.g.
+        :class:`.OmimDict` (:class:`.DiseaseDict`)
+        to ensure that every disease is only created once.
 
     Attributes
     ----------
     id: int
-        id
+        Disease ID
+
     name: str
         disease name
 
+    hpo: set of :class:`pyhpo.term.HPOTerm`
+        all HPOTerms associated to the disease
+
     Parameters
     ----------
-    columns: list
-        [None, id, name]
+    idx: int
+        Disease ID
+    name: str
+        Disease name
     """
-    def __init__(self, cols):
-        self.id = int(cols[1])
-        self.name = cols[2]
+    diseasetype = 'Undefined'
+
+    def __init__(self, idx, name):
+        self.id = idx
+        self.name = name
         self._hpo = set()
+        self._hash = hash((
+            self.id,
+            self.diseasetype
+        ))
 
     @property
     def hpo(self):
@@ -154,6 +259,24 @@ class Disease:
         self._hpo.add(term)
 
     def toJSON(self, verbose=False):
+        """
+        JSON (dict) representation of ``Disease``
+
+        Parameters
+        ----------
+        verbose: bool, default: ``False``
+            Return all associated HPOTerms
+
+        Returns
+        -------
+        dict
+            A dict with the following keys
+
+            * **id** - The Disease ID
+            * **name** - The disease name
+            * **hpo** - (If ``verbose == True``):
+              set of :class:`pyhpo.term.HPOTerm`
+        """
         res = {
             'id': self.id,
             'name': self.name
@@ -168,20 +291,23 @@ class Disease:
             return self.id == other
 
         if isinstance(other, str):
-            return self.id == other or self.name == other
+            return self.name == other
 
         try:
-            return self.id == other.id
+            return (
+                (self.id and self.id == other.id) or
+                (self.name and self.name == other.name)
+            )
         except AttributeError:
             return False
 
         return False
 
     def __hash__(self):
-        return self.id
+        return self._hash
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return '{}(["", {}, "{}"])'.format(
@@ -191,20 +317,19 @@ class Disease:
         )
 
 
-class OmimDisease(Disease):
+class OmimDisease(DiseaseSingleton):
     diseasetype = 'Omim'
 
 
-class OrphaDisease(Disease):
+class OrphaDisease(DiseaseSingleton):
     diseasetype = 'Orpha'
 
 
-class DecipherDisease(Disease):
+class DecipherDisease(DiseaseSingleton):
     diseasetype = 'Decipher'
 
 
 class DiseaseDict(dict):
-    disease_class = None
     """
     An associative dict of all Omim Diseases
 
@@ -212,28 +337,80 @@ class DiseaseDict(dict):
     and no duplicate instances are generated during parsing of the
     Gen-Pheno-HPO associations.
 
-    This class is initilized once and then the dict is accessible as
-    ``annotations.Omim``.
-    """
-    def __init__(self):
-        pass
+    This class is initilized once and diseases are created by calling
+    the instance of ``DiseaseDict`` to ensure that the same disease
+    exists only once.
 
-    def get(self, identifier):
+    For example ::
+
+        Disease = OmimDict()
+        gaucher = Disease(diseaseid=1)
+        fabry = Disease(diseaseid=2)
+        gaucher_2 = Disease(diseaseid=1)
+
+        gaucher is fabry
+        >> False
+        gaucher is gaucher_2
+        >> True
+
+
+    Parameters
+    ----------
+    cols: list, default: ``None``
+        Only used for backwards compatibility reasons.
+        Should have the following entries
+
+        * None
+        * Disease ID
+        * Disease Name
+
+    diseaseid: int
+        The Disease ID
+    name: str
+        The disease name
+
+    Returns
+    -------
+    :class:`.DiseaseSingleton`
+    """
+    disease_class = None
+
+    def __init__(self):
+        self._indicies = {}
+
+    def __call__(self, cols=None, diseaseid=None, name=None):
+        if not any([cols, diseaseid, name]):
+            raise TypeError('DiseaseDict requires at least one argument')
+
+        # for backwards compatibility
+        # we need to create and use this weird list
+        if cols is None:
+            cols = [
+                None,
+                diseaseid,
+                name
+            ]
+        name = cols[2]
         try:
-            return self[int(identifier)]
-        except ValueError:
-            for disease in self:
-                if disease.name == identifier:
-                    return disease
+            idx = int(cols[1])
+        except TypeError:
+            idx = None
+
+        try:
+            return self._indicies[idx]
         except KeyError:
             pass
-        return None
 
-    def __call__(self, cols):
-        disease = self.disease_class(cols)
-        if disease not in self:
-            self[disease] = disease
-        return self[disease]
+        disease = self.disease_class(idx, name)
+
+        self[disease] = disease
+        self._indicies[idx] = disease
+
+        return disease
+
+    def clear(self):
+        self._indicies.clear()
+        dict.clear(self)
 
 
 class OmimDict(DiseaseDict):
