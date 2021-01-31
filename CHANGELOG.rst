@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.6
+---
+- Refactored Gene and Disease annotations
+- Added proper hashing methods to ``HPOTerm``, ``Disease`` and ``Gene``
+- Bugfix for similarity score when one set does not contain any HPOTerm
+
 2.5
 ---
 - Added combination methods for HPOset similarities
