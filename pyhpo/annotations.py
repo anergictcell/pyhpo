@@ -209,6 +209,34 @@ class GeneDict(dict):
         self._names.clear()
         dict.clear(self)
 
+    def get(self, query):
+        """
+        Allows client to query for a gene by both ID and symbol.
+        This method is useful for client that do not want to add new
+        genes
+
+        Parameters
+        ----------
+        query: int or str
+            The (most likely user supplied) query.
+            Can be either the HGNC-ID or the gene symbol
+
+        Returns
+        -------
+        GeneSingleton
+            If a gene is found, it is returned. Otherwise an Error is raised
+        """
+        try:
+            idx = int(query)
+            return self._indicies[idx]
+        except (ValueError, KeyError):
+            idx = None
+
+        try:
+            return self._names[query]
+        except KeyError:
+            raise KeyError('No gene found for query')
+
 
 class DiseaseSingleton:
     """
@@ -411,6 +439,30 @@ class DiseaseDict(dict):
     def clear(self):
         self._indicies.clear()
         dict.clear(self)
+
+    def get(self, query):
+        """
+        Allows client to query for a disease by ID.
+        This method is useful for client that do not want to add new
+        diseases
+
+        Parameters
+        ----------
+        query: int
+            The (most likely user supplied) query for Disease ID.
+
+        Returns
+        -------
+        DiseaseSingleton
+            If a disease is found, it is returned. Otherwise an Error is raised
+        """
+        try:
+            idx = int(query)
+            return self._indicies[idx]
+        except ValueError:
+            raise ValueError('Invalid Disease ID supplied')
+        except KeyError:
+            raise KeyError('No disease found for query')
 
 
 class OmimDict(DiseaseDict):

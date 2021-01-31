@@ -6,6 +6,7 @@ Changelog
 - Refactored Gene and Disease annotations
 - Added proper hashing methods to ``HPOTerm``, ``Disease`` and ``Gene``
 - Bugfix for similarity score when one set does not contain any HPOTerm
+- 2.6.1: Re-add (Gene/Omim).get method for single gene/disease fetching. Needed in pyhpoapi
 
 2.5
 ---
