@@ -82,6 +82,24 @@ class OmimTests(unittest.TestCase):
     def test_hpo_association(self):
         pass
 
+    def test_get_omim(self):
+        Omim.clear()
+        d1 = Omim([None, 1, 'Gaucher'])
+        d2 = Omim([None, 2, 'Fabry'])
+
+        self.assertEqual(Omim.get(1), d1)
+        self.assertEqual(Omim.get(2), d2)
+        self.assertEqual(Omim.get('1'), d1)
+
+        self.assertRaises(
+            ValueError,
+            lambda: Omim.get('Fabry')
+        )
+        self.assertRaises(
+            KeyError,
+            lambda: Omim.get(12)
+        )
+
 
 class GeneTests(unittest.TestCase):
     def test_gene_building(self):
@@ -212,6 +230,26 @@ class GeneTests(unittest.TestCase):
 
     def test_hpo_association(self):
         pass
+
+    def test_get_gene(self):
+        Gene.clear()
+        g1 = Gene([None, None, 1, 'EZH1'])
+        g2 = Gene([None, None, 2, 'EZH2'])
+
+        self.assertEqual(Gene.get(1), g1)
+        self.assertEqual(Gene.get(2), g2)
+        self.assertEqual(Gene.get('1'), g1)
+        self.assertEqual(Gene.get('EZH1'), g1)
+        self.assertEqual(Gene.get('EZH2'), g2)
+
+        self.assertRaises(
+            KeyError,
+            lambda: Gene.get('GBA')
+        )
+        self.assertRaises(
+            KeyError,
+            lambda: Gene.get(12)
+        )
 
 
 @unittest.skip('TODO')
