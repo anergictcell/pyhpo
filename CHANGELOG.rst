@@ -1,6 +1,10 @@
 Changelog
 =========
 
+2.7
+---
+- Added type annotation to all methods
+
 2.6
 ---
 - Refactored Gene and Disease annotations
