@@ -134,7 +134,11 @@ class TermInit(unittest.TestCase):
         b = HPOTerm()
         a.add_line('')
         for attrs in a.__dict__:
-            assert a.__getattribute__(attrs) == b.__getattribute__(attrs)
+            self.assertEqual(
+                a.__getattribute__(attrs),
+                b.__getattribute__(attrs),
+                f'Difference in {attrs=}'
+            )
 
 
 class SingleTermAttributes(unittest.TestCase):
@@ -234,10 +238,16 @@ class TermAnnotations(unittest.TestCase):
             self.term.add_line(line)
 
     def test_empty_genes(self):
-        assert self.term._annotations['genes'] == [set(), False]
+        self.assertEqual(
+            self.term._annotations['genes'],
+            [set(), False]
+        )
 
         _ = self.term.genes
-        assert self.term._annotations['genes'] == [set(), True]
+        self.assertEqual(
+            self.term._annotations['genes'],
+            [set(), True]
+        )
 
     def test_gene_setting(self):
         self.term.genes = set([1, 2])
@@ -318,8 +328,8 @@ class TermAnnotations(unittest.TestCase):
         self.term.parents = term2
 
         # Both terms should not have a cache-flag yet
-        assert not self.term._annotations['genes'][1]
-        assert not term2._annotations['genes'][1]
+        self.assertFalse(self.term._annotations['genes'][1])
+        self.assertFalse(term2._annotations['genes'][1])
 
         # Adding genes to one term should not affect the caches
         self.term.genes = set(['Gene1', 'Gene2'])

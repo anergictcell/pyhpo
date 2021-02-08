@@ -1,15 +1,17 @@
 import os
 import math
 import warnings
+from typing import Set, Tuple, Optional, Union, Dict, Iterator
 
 try:
-    import pandas as pd
+    import pandas as pd  # type: ignore
 except ImportError:
     warnings.warn(
         'Some functionality requires pandas, which is currently not available',
         UserWarning)
 
-from pyhpo.term import HPOTerm
+import pyhpo
+from pyhpo import HPOTerm
 from pyhpo.annotations import HPO_Gene, parse_pheno_file
 
 
@@ -28,15 +30,19 @@ class OntologyClass():
 
     """
 
-    def __call__(self, filename='hp.obo', data_folder=None):
-        self._map = {}
-        self._genes = set()
-        self._omim_diseases = set()
-        self._orpha_diseases = set()
-        self._decipher_diseases = set()
-        self._omim_excluded_diseases = set()
-        self._orpha_excluded_diseases = set()
-        self._decipher_excluded_diseases = set()
+    def __call__(
+        self,
+        filename: str = 'hp.obo',
+        data_folder: Optional[str] = None
+    ) -> 'OntologyClass':
+        self._map: Dict[int, HPOTerm] = {}
+        self._genes: Set['pyhpo.GeneSingleton'] = set()
+        self._omim_diseases: Set['pyhpo.DiseaseSingleton'] = set()
+        self._orpha_diseases: Set['pyhpo.DiseaseSingleton'] = set()
+        self._decipher_diseases: Set['pyhpo.DiseaseSingleton'] = set()
+        self._omim_excluded_diseases: Set['pyhpo.DiseaseSingleton'] = set()
+        self._orpha_excluded_diseases: Set['pyhpo.DiseaseSingleton'] = set()
+        self._decipher_excluded_diseases: Set['pyhpo.DiseaseSingleton'] = set()
 
         if data_folder is None:
             data_folder = os.path.join(os.path.dirname(__file__), 'data')
@@ -49,7 +55,7 @@ class OntologyClass():
             ))
         return self
 
-    def add_annotations(self, data_folder=None):
+    def add_annotations(self, data_folder: Optional[str] = None) -> None:
         warnings.warn(
             'The method `ontology.add_annotations` is deprecated. '
             'The functionality is included by default when the Ontology '
@@ -58,7 +64,7 @@ class OntologyClass():
             stacklevel=2
         )
 
-    def _add_annotations(self, data_folder=None):
+    def _add_annotations(self, data_folder: Optional[str] = None) -> None:
         """
         Add secondary annotations to each HPO Term.
         They currently include:
@@ -129,7 +135,7 @@ class OntologyClass():
 
         self._add_information_content()
 
-    def _add_information_content(self):
+    def _add_information_content(self) -> None:
         """
         Calculates the information content for each HPO Term
         According to Robinson et al, American Journal of Human Genetics, 2008
@@ -169,7 +175,7 @@ class OntologyClass():
             else:
                 term.information_content['gene'] = -math.log(p_gene)
 
-    def get_hpo_object(self, query):
+    def get_hpo_object(self, query: Union[int, str]) -> HPOTerm:
         """
         Matches a single HPO term based on its name, synonym or id
 
@@ -208,21 +214,27 @@ class OntologyClass():
                 HP:0000003 | Multicystic kidney dysplasia
 
         """
-
+        res: Optional[HPOTerm] = None
         if isinstance(query, str):
             if query.startswith('HP:'):
-                return self[HPOTerm.id_from_string(query)]
+                res = self[HPOTerm.id_from_string(query)]
             else:
-                return self.synonym_match(query)
+                res = self.synonym_match(query)
 
-        if isinstance(query, int):
-            return self[query]
+        elif isinstance(query, int):
+            res = self[query]
 
-        raise SyntaxError('Invalid type {} for parameter "query"'.format(
-            type(query)
-        ))
+        else:
+            raise SyntaxError('Invalid type {} for parameter "query"'.format(
+                type(query)
+            ))
 
-    def match(self, query):
+        if res:
+            return res
+        else:
+            raise RuntimeError('Unknown HPO term')
+
+    def match(self, query: str) -> HPOTerm:
         """
         Matches a single HPO term based on its name
 
@@ -243,7 +255,11 @@ class OntologyClass():
                 return term
         raise RuntimeError('No HPO entry with name {}'.format(query))
 
-    def path(self, query1, query2):
+    def path(
+        self,
+        query1: Union[int, str],
+        query2: Union[int, str]
+    ) -> Tuple[int, Tuple[HPOTerm, ...], int, int]:
         """
         Returns the shortest connection between
         two HPO terms
@@ -263,8 +279,8 @@ class OntologyClass():
         -------
         int
             Length of path
-        tuple
-            Tuple of HPOTerms in the path
+        list
+            List of HPOTerms in the path
         int
             Number of steps from term-1 to the common parent
         int
@@ -276,7 +292,7 @@ class OntologyClass():
         term2 = self.get_hpo_object(query2)
         return term1.path_to_other(term2)
 
-    def search(self, query):
+    def search(self, query: str) -> Iterator[HPOTerm]:
         """
         Iterator function for substring search
         for terms and synonyms in the ontology
@@ -295,7 +311,7 @@ class OntologyClass():
             if query in term.name or self.synonym_search(term, query):
                 yield term
 
-    def synonym_match(self, query):
+    def synonym_match(self, query: str) -> HPOTerm:
         """
         Searches for actual and synonym term matches
         If a match is found in any term, that one is returned
@@ -326,7 +342,7 @@ class OntologyClass():
             query)
         )
 
-    def synonym_search(self, term, query):
+    def synonym_search(self, term: HPOTerm, query: str) -> bool:
         """
         Indicates whether a term has a synonym that contains the query.
         Substring search in synonym
@@ -349,7 +365,7 @@ class OntologyClass():
                 return True
         return False
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> 'pd.DataFrame':
         """
         Creates a Pandas DataFrame from the most important features
 
@@ -383,7 +399,7 @@ class OntologyClass():
               OMIM diseases. Separated by ``|``
         """
 
-        data = {
+        data: Dict = {
             'id': [],
             'name': [],
             'parents': [],
@@ -429,55 +445,55 @@ class OntologyClass():
         return pd.DataFrame(data).set_index('id')
 
     @property
-    def genes(self):
+    def genes(self) -> Set['pyhpo.GeneSingleton']:
         return self._genes
 
     @property
-    def omim_diseases(self):
+    def omim_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
         return self._omim_diseases
 
     @property
-    def omim_excluded_diseases(self):
+    def omim_excluded_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
         return self._omim_excluded_diseases
 
     @property
-    def orpha_diseases(self):
+    def orpha_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
         return self._orpha_diseases
 
     @property
-    def orpha_excluded_diseases(self):
+    def orpha_excluded_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
         return self._orpha_excluded_diseases
 
     @property
-    def decipher_diseases(self):
+    def decipher_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
         return self._decipher_diseases
 
     @property
-    def decipher_excluded_diseases(self):
+    def decipher_excluded_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
         return self._decipher_excluded_diseases
 
-    def _append(self, item):
+    def _append(self, item: HPOTerm) -> None:
         """
         Adds one HPO term to the ontology
         """
         self._map[item._index] = item
 
-    def _connect_all(self):
+    def _connect_all(self) -> None:
         """
         Connects all parent-child associations in the Ontology
         Called by default after loading the ontology from a file
         """
         for term in self._map.values():
             for parent in term.parent_ids():
-                term.parents = self._map[parent]
-                self._map[parent].children = term
+                term.parents = self._map[parent]  # type: ignore[assignment]
+                self._map[parent].children = term  # type: ignore[assignment]
 
         for term in self._map.values():
             # Build caches of hierarchy to speed
             # up performance
             term.all_parents
 
-    def _load_from_file(self, filename):
+    def _load_from_file(self, filename: str) -> None:
         """
         Reads an obo file line by line to add
         HPO terms to the Ontology
@@ -501,20 +517,21 @@ class OntologyClass():
                 if not term:
                     continue
                 term.add_line(line)
+            assert term
             self._append(term)
         self._connect_all()
         self._add_annotations()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int) -> Optional[HPOTerm]:
         if key in self._map:
             return self._map[key]
         else:
             return None
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[HPOTerm]:
         return iter(self._map.values())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._map.keys())
 
 

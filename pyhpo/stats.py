@@ -1,5 +1,7 @@
+from typing import List, Union, Tuple
+
 try:
-    from scipy.stats import hypergeom
+    from scipy.stats import hypergeom  # type: ignore[import]
 except ImportError:
     print(
         'The pyhpo.stats module requires that you install scipy.',
@@ -9,11 +11,18 @@ except ImportError:
     )
     raise ImportError()
 
-from pyhpo.ontology import Ontology
+import pyhpo
+from pyhpo import Ontology
 from pyhpo import annotations
+from pyhpo import HPOSet
 
 
-def hypergeom_test(positive_samples, samples, positive_total, total):
+def hypergeom_test(
+    positive_samples: int,
+    samples: int,
+    positive_total: int,
+    total: int
+) -> float:
     """
     Wrapper function to call the scipy hypergeometric stats function
 
@@ -66,14 +75,20 @@ class HPOEnrichment():
         * **omim**
 
     """
-    def __init__(self, category):
+    def __init__(self, category: str) -> None:
         category_lookup = {
             'gene': Ontology.genes,
             'omim': Ontology.omim_diseases
         }
-        self.hpos, self.total = self._hpo_count(category_lookup[category])
+        self.hpos, self.total = self._hpo_count(
+            category_lookup[category]  # type: ignore[arg-type]
+        )
 
-    def enrichment(self, method, annotation_sets):
+    def enrichment(
+        self,
+        method: str,
+        annotation_sets: List['pyhpo.Annotation']
+    ) -> List[dict]:
         """
         Calculates the enrichment of HPO terms in the provided annotation set
 
@@ -113,7 +128,10 @@ class HPOEnrichment():
 
         return sorted(res, key=lambda x: x['enrichment'])
 
-    def _hpo_count(self, annotation_sets):
+    def _hpo_count(
+        self,
+        annotation_sets: List['pyhpo.Annotation']
+    ) -> Tuple[dict, int]:
         """
         Counts the number of occurrenes of every HPO term
         in the ``annotation_sets``
@@ -140,7 +158,13 @@ class HPOEnrichment():
                 hpos[term] += 1
         return (hpos, sum(hpos.values()))
 
-    def _single_enrichment(self, method, hpo_id, positives, samples):
+    def _single_enrichment(
+        self,
+        method: str,
+        hpo_id: Union[int, 'pyhpo.HPOTerm'],
+        positives: int,
+        samples: int
+    ) -> float:
         """
         Calculates the enrichment of a single HPO term compared to
         the reference set
@@ -178,6 +202,8 @@ class HPOEnrichment():
                 positive_total,
                 self.total
             )
+        else:
+            raise NotImplementedError('Enrichment method not implemented')
 
 
 class EnrichmentModel():
@@ -216,12 +242,16 @@ class EnrichmentModel():
         'decipher': lambda x: annotations.Decipher([None, x, None])
     }
 
-    def __init__(self, category):
+    def __init__(self, category: str) -> None:
         self.attribute = self.attribute_lookup[category]
         self.base = self.base_lookup[category]
-        self.base_count, self.total = self._population_count(Ontology)
+        self.base_count, self.total = self._population_count(HPOSet(Ontology))
 
-    def enrichment(self, method, hposet):
+    def enrichment(
+        self,
+        method: str,
+        hposet: HPOSet
+    ) -> List[dict]:
         """
         Calculates the enrichment of annotations in the provided HPOSet
 
@@ -258,7 +288,7 @@ class EnrichmentModel():
         ]
         return sorted(res, key=lambda x: x['enrichment'])
 
-    def _population_count(self, hopset):
+    def _population_count(self, hopset: HPOSet) -> Tuple[dict, int]:
         """
         Counts the number of occurrenes of every annotation item
         in the HPOSet
@@ -283,7 +313,13 @@ class EnrichmentModel():
                 population[item] += 1
         return population, sum(population.values())
 
-    def _single_enrichment(self, method, item_id, positives, samples):
+    def _single_enrichment(
+        self,
+        method: str,
+        item_id: int,
+        positives: int,
+        samples: int
+    ) -> float:
         """
         Calculates the enrichment of annotations in an HPO set
 
@@ -320,3 +356,5 @@ class EnrichmentModel():
                 positive_total,
                 self.total
             )
+        else:
+            raise NotImplementedError('Enrichment method not implemented')

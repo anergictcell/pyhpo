@@ -445,19 +445,19 @@ class SimilarityTests(unittest.TestCase):
 
             _ = set1.similarity(set2)
             mock_simscore.assert_called_once_with(
-                set1, set2, None, None
+                set1, set2, '', ''
             )
             mock_simscore.reset_mock()
 
             _ = set1.similarity(set2, 'foo')
             mock_simscore.assert_called_once_with(
-                set1, set2, 'foo', None
+                set1, set2, 'foo', ''
             )
             mock_simscore.reset_mock()
 
             _ = set1.similarity(set2, kind='foo')
             mock_simscore.assert_called_once_with(
-                set1, set2, 'foo', None
+                set1, set2, 'foo', ''
             )
             mock_simscore.reset_mock()
 
@@ -475,7 +475,7 @@ class SimilarityTests(unittest.TestCase):
 
             _ = set1.similarity(set2, method='bar')
             mock_simscore.assert_called_once_with(
-                set1, set2, None, 'bar'
+                set1, set2, '', 'bar'
             )
             mock_simscore.reset_mock()
 
@@ -520,7 +520,7 @@ class SimilarityTests(unittest.TestCase):
             set2 = HPOSet([self.terms[1]])
 
             res = set1.similarity(set2)
-            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            mock_simscore.assert_called_once_with(set1, set2, '', '')
             self.assertEqual(res, 3.125)
 
     def test_funSimMax(self):
@@ -538,7 +538,7 @@ class SimilarityTests(unittest.TestCase):
             set2 = HPOSet([self.terms[1]])
 
             res = set1.similarity(set2, combine='funSimMax')
-            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            mock_simscore.assert_called_once_with(set1, set2, '', '')
             self.assertEqual(res, 3.5)
 
     def test_funSimBMA(self):
@@ -557,7 +557,7 @@ class SimilarityTests(unittest.TestCase):
             set2 = HPOSet([self.terms[1]])
 
             res = set1.similarity(set2, combine='BMA')
-            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            mock_simscore.assert_called_once_with(set1, set2, '', '')
             self.assertEqual(res, 3)
 
     def test_invalid_combine_method(self):
@@ -573,7 +573,7 @@ class SimilarityTests(unittest.TestCase):
                 set2 = HPOSet([self.terms[1]])
 
                 _ = set1.similarity(set2, combine='invalid')
-            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            mock_simscore.assert_called_once_with(set1, set2, '', '')
         self.assertEqual(
             str(context.exception),
             'Invalid combine method specified'
@@ -595,7 +595,7 @@ class SimilarityTests(unittest.TestCase):
             set2 = HPOSet([self.terms[1]])
 
             res = set1.similarity(set2, combine='BMA')
-            mock_simscore.assert_called_once_with(set1, set2, None, None)
+            mock_simscore.assert_called_once_with(set1, set2, '', '')
             self.assertEqual(res, 0)
 
 
@@ -649,10 +649,10 @@ class SimScoreTests(unittest.TestCase):
             scores = HPOSet._sim_score(set1, set2)
 
             calls = [
-                call(self.terms[2], None, None),
-                call(self.terms[3], None, None),
-                call(self.terms[4], None, None),
-                call(self.terms[5], None, None)
+                call(self.terms[2], '', ''),
+                call(self.terms[3], '', ''),
+                call(self.terms[4], '', ''),
+                call(self.terms[5], '', '')
             ]
             mock_simscore.assert_has_calls(calls, any_order=True)
             self.assertEqual(
@@ -687,7 +687,7 @@ class SimScoreTests(unittest.TestCase):
             scores = HPOSet._sim_score(set1, set2)
 
             mock_simscore.assert_called_once_with(
-                self.terms[1], None, None
+                self.terms[1], '', ''
             )
             self.assertEqual(
                 mock_simscore.call_count,
@@ -713,19 +713,19 @@ class SimScoreTests(unittest.TestCase):
 
             _ = HPOSet._sim_score(set1, set2)
             mock_simscore.assert_called_once_with(
-                self.terms[1], None, None
+                self.terms[1], '', ''
             )
             mock_simscore.reset_mock()
 
             _ = HPOSet._sim_score(set1, set2, 'foo')
             mock_simscore.assert_called_once_with(
-                self.terms[1], 'foo', None
+                self.terms[1], 'foo', ''
             )
             mock_simscore.reset_mock()
 
             _ = HPOSet._sim_score(set1, set2, kind='foo')
             mock_simscore.assert_called_once_with(
-                self.terms[1], 'foo', None
+                self.terms[1], 'foo', ''
             )
             mock_simscore.reset_mock()
 
@@ -743,7 +743,7 @@ class SimScoreTests(unittest.TestCase):
 
             _ = HPOSet._sim_score(set1, set2, method='bar')
             mock_simscore.assert_called_once_with(
-                self.terms[1], None, 'bar'
+                self.terms[1], '', 'bar'
             )
             mock_simscore.reset_mock()
 

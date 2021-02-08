@@ -1,6 +1,7 @@
 import os
 import urllib.request
 import logging
+from typing import Optional
 
 from pyhpo.annotations import FILENAMES
 
@@ -18,11 +19,11 @@ URLS = {
 }
 
 
-def make_backup(filename):
+def make_backup(filename: str) -> None:
     logger.debug('Backup not yet implemented')
 
 
-def download_data(data_dir=None):
+def download_data(data_dir: Optional[str] = None) -> None:
     if data_dir is None:
         data_dir = os.path.realpath(os.path.join(
             os.path.dirname(os.path.realpath(__file__)),

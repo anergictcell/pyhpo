@@ -1,3 +1,6 @@
+from typing import Iterable, Any, Optional, List, Union, Tuple
+
+
 class Matrix:
     """
     # noqa: E501
@@ -94,9 +97,15 @@ class Matrix:
             >> [14, 24, 34]
 
     """
-    def __init__(self, rows, cols, data=None):
+    def __init__(
+        self,
+        rows: int,
+        cols: int,
+        data: Optional[List[Any]] = None
+    ):
         self.n_rows = rows
         self.n_cols = cols
+        self._data: List[Any]
         if data is None:
             self._data = [None] * rows * cols
         elif len(data) == rows * cols:
@@ -104,11 +113,15 @@ class Matrix:
         else:
             raise RuntimeError('Wrong number of data items in `data`')
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Tuple[Optional[int], Optional[int]]) -> Any:
         idx = self._get_key_indicies(key)
         return self._data[idx]
 
-    def __setitem__(self, key, val):
+    def __setitem__(
+        self,
+        key: Tuple[Optional[int], Optional[int]],
+        val: Any
+    ) -> None:
         idx = self._get_key_indicies(key)
 
         if isinstance(idx, int) or len(self._data[idx]) == len(val):
@@ -116,7 +129,10 @@ class Matrix:
         else:
             raise ValueError('Different length of matrix subset and values')
 
-    def _get_key_indicies(self, key):
+    def _get_key_indicies(
+        self,
+        key: Tuple[Optional[int], Optional[int]]
+    ) -> Union[int, slice]:
         row = key[0]
         col = key[1]
 
@@ -146,16 +162,16 @@ class Matrix:
         raise RuntimeError('Invalid arguments for Matrix subset')
 
     @property
-    def rows(self):
+    def rows(self) -> Iterable[Any]:
         for x in range(self.n_rows):
             yield self[x, None]
 
     @property
-    def columns(self):
+    def columns(self) -> Iterable[Any]:
         for x in range(self.n_cols):
             yield self[None, x]
 
-    def __str__(self):
+    def __str__(self) -> str:
         maxlength = max(
             [len(str(self.n_cols))] +
             [len(str(x)) for x in self._data]
