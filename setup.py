@@ -37,6 +37,11 @@ setuptools.setup(
     url="https://github.com/anergictcell/pyhpo",
     packages=PACKAGES,
     classifiers=CLASSIFIERS,
-    python_requires='>=3.5.3',
-    include_package_data=True
+    python_requires='>=3.6',
+    include_package_data=True,
+    extras_require={
+        'pandas': ['pandas'],
+        'scipy': ['scipy'],
+        'all': ['pandas', 'scipy']
+    }
 )

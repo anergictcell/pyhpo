@@ -882,6 +882,9 @@ class HPOTerm():
         for term in common:
             path1 = self.shortest_path_to_parent(term)
             path2 = other.shortest_path_to_parent(term)
+
+            # path1 and path2 can't be empty, since the common ancestor
+            # is a parent of self and other
             assert path1[1] is not None
             assert path2[1] is not None
 
