@@ -279,8 +279,8 @@ class OntologyClass():
         -------
         int
             Length of path
-        list
-            List of HPOTerms in the path
+        tuple
+            Tuple of HPOTerms in the path
         int
             Number of steps from term-1 to the common parent
         int
