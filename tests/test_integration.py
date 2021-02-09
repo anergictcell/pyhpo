@@ -7,25 +7,25 @@ from pyhpo.set import HPOSet
 
 # Number of terms in HPO Ontology
 # grep "^\[Term\]$" pyhpo/data/hp.obo | wc -l
-N_TERMS = 15656
+N_TERMS = 16083
 
 # Number of genes in the annotation dataset
 # cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | sort -u | wc -l
-N_GENES = 4484
+N_GENES = 4531
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_OMIM = 7860
+N_OMIM = 7941
 # Number of excluded OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
-N_OMIM_EXL = 660
+N_OMIM_EXL = 663
 
 # Number of ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_ORPHA = 3989
+N_ORPHA = 4094
 # Number of excluded ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
-N_ORPHA_EXL = 259
+N_ORPHA_EXL = 272
 
 # Number of DECIPHER diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
@@ -138,7 +138,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert sum(genes)/len(genes) > 36, sum(genes)/len(genes)
         assert sum(omim)/len(omim) > 29, sum(omim)/len(omim)
         assert sum(orpha)/len(orpha) > 24, sum(orpha)/len(orpha)
-        assert sum(decipher)/len(decipher) > 0.1, sum(decipher)/len(decipher)
+        assert sum(decipher)/len(decipher) > 0.05, sum(decipher)/len(decipher)
         assert sum(excluded_omim)/len(excluded_omim) > 0.05, \
             sum(excluded_omim)/len(excluded_omim)
 
