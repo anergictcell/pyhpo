@@ -53,8 +53,8 @@ jobs:
           asset_path: ./dist/pyhpo-${{ github.ref }}-py3-none-any.whl
           asset_name: pyhpo-${{ github.ref }}-py3-none-any.whl
           asset_content_type: application/wheel
-      - name: Publish distribution 📦 to PyPI
-        id: Upload package to PyPI 
+      - name: Publish distribution to PyPI
+        id: upload-package-to-PyPI 
         if: startsWith(github.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@master
         with:
