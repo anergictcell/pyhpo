@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 URLS = {
     'HPO_ONTOLOGY': 'http://purl.obolibrary.org/obo/hp.obo',
-    'HPO_GENE': 'http://compbio.charite.de/jenkins/job/hpo.annotations/lastSuccessfulBuild/artifact/util/annotation/phenotype_to_genes.txt',  # noqa: E501
-    'HPO_PHENO': 'http://compbio.charite.de/jenkins/job/hpo.annotations.current/lastSuccessfulBuild/artifact/current/phenotype.hpoa'  # noqa: E501
+    'HPO_GENE': 'http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt',  # noqa: E501
+    'HPO_PHENO': 'http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa'
 }
 
 

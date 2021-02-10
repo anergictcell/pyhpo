@@ -570,6 +570,10 @@ def remove_outcommented_rows(
     for row in fh:
         if row[0:len(ignorechar)] != ignorechar:
             yield row
+        else:
+            if row.startswith('#DatabaseID'):
+                # The header row in phenotype.hpoa file starts with a # as well
+                yield row[1:]
 
 
 def parse_pheno_file(
