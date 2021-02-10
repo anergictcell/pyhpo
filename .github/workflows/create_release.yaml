@@ -1,0 +1,66 @@
+on:
+  create:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: Create and upload release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Build project
+        id: build_package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install sdist wheel
+          python setup.py sdist bdist_wheel
+          TARNAME=$(ls -1 dist/pyhpo*.tar.gz | head -n 1)
+          echo "::set-output name=tar_filename::$TARNAME"
+          WHEELNAME=$(ls -1 dist/pyhpo*.whl | head -n 1)
+          echo "::set-output name=wheel_filename::$WHEELNAME"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload tar.gz Asset
+        id: upload-targz-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./${{ steps.build_package.outputs.tar_filename }}
+          asset_name: ${{ steps.build_package.outputs.tar_filename }}
+          asset_content_type: application/x-tgz
+      - name: Upload wheel Asset
+        id: upload-wheel-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./${{ steps.build_package.outputs.wheel_filename }}
+          asset_name: ${{ steps.build_package.outputs.wheel_filename }}
+          asset_content_type: application/wheel
+      - name: Publish distribution to PyPI
+        id: upload-package-to-PyPI 
+        if: startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

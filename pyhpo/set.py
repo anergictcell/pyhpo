@@ -1,16 +1,17 @@
 import warnings
+from typing import Iterable, Set, List, Iterator, Union, Tuple, Dict
 
-from pyhpo.ontology import Ontology
-from pyhpo.term import HPOTerm
+import pyhpo
+from pyhpo import Ontology
 from pyhpo.matrix import Matrix
 
 
 class HPOSet(set):
-    def __init__(self, items):
+    def __init__(self, items: Iterable['pyhpo.HPOTerm']) -> None:
         set.__init__(self, items)
-        self._list = list(items)
+        self._list: List['pyhpo.HPOTerm'] = list(items)
 
-    def add(self, item):
+    def add(self, item: 'pyhpo.HPOTerm') -> None:
         """
         Overwrites ``set.add`` to ensure we keep the
         ``self._list`` property updated as well.
@@ -19,7 +20,10 @@ class HPOSet(set):
             set.add(self, item)
             self._list.append(item)
 
-    def update(self, items):
+    def update(  # type: ignore[override]
+        self,
+        items: Iterable['pyhpo.HPOTerm']
+    ) -> None:
         """
         Overwrites ``set.update`` to ensure we keep the
         ``self._list`` property updated as well.
@@ -27,7 +31,7 @@ class HPOSet(set):
         for item in items:
             self.add(item)
 
-    def child_nodes(self):
+    def child_nodes(self) -> 'HPOSet':
         """
         Return a new HPOSet tha contains only
         the most specific HPO term for each subtree
@@ -50,7 +54,7 @@ class HPOSet(set):
             term for term in self if counter[term.id] == 0
         ])
 
-    def remove_modifier(self):
+    def remove_modifier(self) -> 'HPOSet':
         """
         Removes all modifier terms. By default, this includes
 
@@ -74,7 +78,7 @@ class HPOSet(set):
             term for term in self if not term.is_modifier
         ])
 
-    def replace_obsolete(self, verbose=False):
+    def replace_obsolete(self, verbose: bool = False) -> 'HPOSet':
         """
         Replaces obsolete terms with the replacement term
 
@@ -93,13 +97,13 @@ class HPOSet(set):
             A new HPOSet
 
         """
-        ids = set()
+        ids: Set['pyhpo.HPOTerm'] = set()
         for term in self:
             if term.is_obsolete:
                 try:
-                    replaced = Ontology[
-                        HPOTerm.id_from_string(term.replaced_by)
-                    ]
+                    replaced = Ontology.get_hpo_object(
+                        term.replaced_by
+                    )
                     ids.add(replaced)
                 except AttributeError:
                     warnings.warn(
@@ -111,7 +115,7 @@ class HPOSet(set):
                 ids.add(term)
         return HPOSet(ids)
 
-    def all_genes(self):
+    def all_genes(self) -> Set['pyhpo.GeneSingleton']:
         """
         Calculates the union of the genes
         attached to the HPO Terms in this set
@@ -126,7 +130,7 @@ class HPOSet(set):
             genes.update(term.genes)
         return genes
 
-    def omim_diseases(self):
+    def omim_diseases(self) -> Set['pyhpo.OmimDisease']:
         """
         Calculates the union of the Omim diseases
         attached to the HPO Terms in this set
@@ -141,7 +145,7 @@ class HPOSet(set):
             omims.update(term.omim_diseases)
         return omims
 
-    def orpha_diseases(self):
+    def orpha_diseases(self) -> Set['pyhpo.OrphaDisease']:
         """
         Calculates the union of the Omim diseases
         attached to the HPO Terms in this set
@@ -156,7 +160,7 @@ class HPOSet(set):
             orphas.update(term.orpha_diseases)
         return orphas
 
-    def decipher_diseases(self):
+    def decipher_diseases(self) -> Set['pyhpo.DecipherDisease']:
         """
         Calculates the union of the Omim diseases
         attached to the HPO Terms in this set
@@ -171,7 +175,7 @@ class HPOSet(set):
             deciphers.update(term.decipher_diseases)
         return deciphers
 
-    def information_content(self, kind=None):
+    def information_content(self, kind: str = '') -> Dict:
         """
         Gives back basic information content stats about the
         HPOTerms within the set
@@ -194,7 +198,7 @@ class HPOSet(set):
             * **all** - list of float -
               List with all information content values
         """
-        if kind is None:
+        if not kind:
             kind = 'omim'
 
         res = {
@@ -203,12 +207,12 @@ class HPOSet(set):
             'max': 0,
             'all': [term.information_content[kind] for term in self]
         }
-        res['total'] = sum(res['all'])
-        res['max'] = max(res['all'])
-        res['mean'] = res['total']/len(self)
+        res['total'] = sum(res['all'])  # type: ignore
+        res['max'] = max(res['all'])  # type: ignore
+        res['mean'] = res['total']/len(self)  # type: ignore
         return res
 
-    def variance(self):
+    def variance(self) -> Tuple[float, int, int, List[int]]:
         """
         Calculates the distances between all its term-pairs. It also provides
         basic calculations for variances among the pairs.
@@ -218,7 +222,7 @@ class HPOSet(set):
         tuple of (int, int, int, list of int)
             Tuple with the variance metrices
 
-            * **int** Average distance between pairs
+            * **float** Average distance between pairs
             * **int** Smallest distance between pairs
             * **int** Largest distance between pairs
             * **list of int** List of all distances between pairs
@@ -238,7 +242,10 @@ class HPOSet(set):
         else:
             return (0, 0, 0, [])
 
-    def combinations(self):
+    def combinations(self) -> Iterator[Tuple[
+        'pyhpo.HPOTerm',
+        'pyhpo.HPOTerm'
+    ]]:
         """
         Helper generator function that returns all possible two-pair
         combination between all its terms
@@ -280,7 +287,10 @@ class HPOSet(set):
                     continue
                 yield (term_a, term_b)
 
-    def combinations_one_way(self):
+    def combinations_one_way(self) -> Iterator[Tuple[
+        'pyhpo.HPOTerm',
+        'pyhpo.HPOTerm'
+    ]]:
         """
         Helper generator function that returns all possible two-pair
         combination between all its terms
@@ -316,7 +326,13 @@ class HPOSet(set):
             for term_b in self._list[i+1:]:
                 yield (term_a, term_b)
 
-    def similarity(self, other, kind=None, method=None, combine='funSimAvg'):
+    def similarity(
+        self,
+        other: 'HPOSet',
+        kind: str = '',
+        method: str = '',
+        combine: str = 'funSimAvg'
+    ) -> float:
         """
         Calculates the similarity to another HPOSet
         According to Robinson et al, American Journal of Human Genetics, (2008)
@@ -327,12 +343,12 @@ class HPOSet(set):
         other: HPOSet
             Another HPOSet to measure the similarity to
 
-        kind: str, default ``None``
+        kind: str, default ``''``
             Which kind of information content should be calculated.
             Options are ['omim', 'orpha', 'decipher', 'gene']
             See :func:`pyhpo.HPOTerm.similarity_score` for options
 
-        method: string, default ``None``
+        method: string, default ``''``
             The method to use to calculate the similarity.
             See :func:`pyhpo.HPOTerm.similarity_score` for options
 
@@ -393,7 +409,7 @@ class HPOSet(set):
 
         raise RuntimeError('Invalid combine method specified')
 
-    def _equality_score(self, other):
+    def _equality_score(self, other: 'HPOSet') -> float:
         """
         Returns an equality similarity score.
         Only exact matches between both sets are counted
@@ -426,7 +442,12 @@ class HPOSet(set):
         return matches / max([len(self), len(other)])
 
     @staticmethod
-    def _sim_score(set1, set2, kind=None, method=None):
+    def _sim_score(
+        set1: 'HPOSet',
+        set2: 'HPOSet',
+        kind: str = '',
+        method: str = ''
+    ) -> Matrix:
         """
         Calculates similarity matrix between HPOSets
 
@@ -470,7 +491,7 @@ class HPOSet(set):
         return Matrix(len(set1), len(set2), scores)
 
     @classmethod
-    def from_queries(cls, queries):
+    def from_queries(cls, queries: List[Union[int, str]]) -> 'HPOSet':
         """
         Builds an HPO set by specifying a list of queries to run on the
         :class:`pyhpo.ontology.Ontology`
@@ -501,7 +522,7 @@ class HPOSet(set):
         ])
 
     @classmethod
-    def from_serialized(cls, pickle):
+    def from_serialized(cls, pickle: str) -> 'HPOSet':
         """
         Re-Builds an HPO set from a serialized HPOSet object
 
@@ -523,10 +544,10 @@ class HPOSet(set):
 
         """
         return cls([
-            Ontology[int(query)] for query in pickle.split('+')
+            Ontology.get_hpo_object(int(query)) for query in pickle.split('+')
         ])
 
-    def serialize(self):
+    def serialize(self) -> str:
         """
         Creates a string serialization that can be used to
         rebuild the same HPOSet via :func:`pyhpo.set.HPOSet.from_serialized`
@@ -540,7 +561,7 @@ class HPOSet(set):
         ids = [str(x) for x in sorted([int(x) for x in self])]
         return '+'.join(ids)
 
-    def toJSON(self, verbose=False):
+    def toJSON(self, verbose: bool = False) -> List[dict]:
         """
         Creates a JSON-like object of the HPOSet
 
@@ -557,13 +578,13 @@ class HPOSet(set):
         """
         return [t.toJSON(verbose) for t in self._list]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}: {}'.format(
             self.__class__.__name__,
             ', '.join([x.name for x in self._list])
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '{}.from_serialized("{}")'.format(
             self.__class__.__name__,
             self.serialize()
@@ -579,12 +600,12 @@ class BasicHPOSet(HPOSet):
     * replaces obsolete terms
     """
 
-    def __init__(self, items):
+    def __init__(self, items: Iterable['pyhpo.HPOTerm']) -> None:
         HPOSet.__init__(self, [])
         for item in items:
             self.add(item)
 
-    def add(self, item):
+    def add(self, item: 'pyhpo.HPOTerm') -> None:
         """
         Overwrites ``set.add`` to ensure we keep the
         ``self._list`` property updated and
@@ -592,12 +613,12 @@ class BasicHPOSet(HPOSet):
         as well
         """
         if item in self:
-            return self
+            return None
         if item.is_modifier:
-            return self
+            return None
         for term in self:
             if item.parent_of(term):
-                return self
+                return None
         for p in item.all_parents:
             if p in self:
                 self.remove(p)

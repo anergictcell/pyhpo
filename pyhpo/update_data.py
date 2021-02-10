@@ -1,6 +1,7 @@
 import os
 import urllib.request
 import logging
+from typing import Optional
 
 from pyhpo.annotations import FILENAMES
 
@@ -13,16 +14,16 @@ logger = logging.getLogger(__name__)
 
 URLS = {
     'HPO_ONTOLOGY': 'http://purl.obolibrary.org/obo/hp.obo',
-    'HPO_GENE': 'http://compbio.charite.de/jenkins/job/hpo.annotations/lastSuccessfulBuild/artifact/util/annotation/phenotype_to_genes.txt',  # noqa: E501
-    'HPO_PHENO': 'http://compbio.charite.de/jenkins/job/hpo.annotations.current/lastSuccessfulBuild/artifact/current/phenotype.hpoa'  # noqa: E501
+    'HPO_GENE': 'http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt',  # noqa: E501
+    'HPO_PHENO': 'http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa'
 }
 
 
-def make_backup(filename):
+def make_backup(filename: str) -> None:
     logger.debug('Backup not yet implemented')
 
 
-def download_data(data_dir=None):
+def download_data(data_dir: Optional[str] = None) -> None:
     if data_dir is None:
         data_dir = os.path.realpath(os.path.join(
             os.path.dirname(os.path.realpath(__file__)),

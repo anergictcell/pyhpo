@@ -1,13 +1,26 @@
 import os
 import csv
+from typing import Any, ClassVar, Dict, Iterator, List
+from typing import Optional, Set, Tuple, Union
 
-from pyhpo.term import HPOTerm
+
+from pyhpo import HPOTerm
 
 FILENAMES = {
     'HPO_ONTOLOGY': 'hp.obo',
     'HPO_GENE': 'phenotype_to_genes.txt',
     'HPO_PHENO': 'phenotype.hpoa'
 }
+
+
+class Annotation:
+    @property
+    def hpo(self) -> Set[int]:
+        ...
+
+    @hpo.setter
+    def hpo(self, term: int) -> None:
+        ...
 
 
 class GeneSingleton:
@@ -41,28 +54,28 @@ class GeneSingleton:
     name: str
         HGNC gene synbol
     """
-    def __init__(self, idx, name):
+    def __init__(self, idx: Union[int, None], name: str) -> None:
         self.id = idx
-        self.name = name
-        self._hpo = set()
+        self.name: str = name
+        self._hpo: Set[int] = set()
         self._hash = hash((
             self.id,
             self.name
         ))
 
     @property
-    def symbol(self):
+    def symbol(self) -> str:
         return self.name
 
     @property
-    def hpo(self):
+    def hpo(self) -> Set[int]:
         return self._hpo
 
     @hpo.setter
-    def hpo(self, term):
+    def hpo(self, term: int) -> None:
         self._hpo.add(term)
 
-    def toJSON(self, verbose=False):
+    def toJSON(self, verbose: bool = False) -> Dict:
         """
         JSON (dict) representation of ``Gene``
 
@@ -79,7 +92,8 @@ class GeneSingleton:
             * **id** - The HGNC ID
             * **name** - The gene symbol
             * **symbol** - The gene symbol (same as ``name``)
-            * **hpo** - (If ``verbose == True``): set of :class:`pyhpo.term.HPOTerm`
+            * **hpo** - (If ``verbose == True``):
+              set of :class:`pyhpo.term.HPOTerm`
         """
         res = {
             'id': self.id,
@@ -87,11 +101,11 @@ class GeneSingleton:
             'symbol': self.name
         }
         if verbose:
-            res['hpo'] = self.hpo
+            res['hpo'] = self.hpo  # type: ignore[assignment]
 
         return res
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, int):
             return self.id == other
 
@@ -99,22 +113,20 @@ class GeneSingleton:
             return self.name == other
 
         try:
-            return (
+            return bool(
                 (self.id and self.id == other.id) or
                 (self.name and self.name == other.name)
             )
         except AttributeError:
             return False
 
-        return False
-
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self._hash
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Gene(["", "", {}, "{}"])'.format(
             self.id,
             self.name
@@ -164,11 +176,16 @@ class GeneDict(dict):
     -------
     :class:`.GeneSingleton`
     """
-    def __init__(self):
-        self._indicies = {}
-        self._names = {}
+    def __init__(self) -> None:
+        self._indicies: Dict[int, GeneSingleton] = {}
+        self._names: Dict[str, GeneSingleton] = {}
 
-    def __call__(self, cols=None, hgncid=None, symbol=None):
+    def __call__(
+        self,
+        cols: List = None,
+        hgncid: Optional[int] = None,
+        symbol: Optional[str] = None
+    ) -> GeneSingleton:
         if not any([cols, hgncid, symbol]):
             raise TypeError('GeneDict requires at least one argument')
 
@@ -183,9 +200,9 @@ class GeneDict(dict):
             ]
         name = cols[3]
         try:
-            idx = int(cols[2])
+            idx: int = int(cols[2])
         except TypeError:
-            idx = None
+            idx = None  # type: ignore[assignment] # desired behaviour
 
         try:
             return self._names[name]
@@ -204,12 +221,16 @@ class GeneDict(dict):
 
         return gene
 
-    def clear(self):
+    def clear(self) -> None:
         self._indicies.clear()
         self._names.clear()
         dict.clear(self)
 
-    def get(self, query):
+    def get(
+        self,
+        query: Union[int, str],
+        default: Any = None
+    ) -> GeneSingleton:
         """
         Allows client to query for a gene by both ID and symbol.
         This method is useful for client that do not want to add new
@@ -227,13 +248,13 @@ class GeneDict(dict):
             If a gene is found, it is returned. Otherwise an Error is raised
         """
         try:
-            idx = int(query)
+            idx: int = int(query)
             return self._indicies[idx]
         except (ValueError, KeyError):
-            idx = None
+            idx = None  # type: ignore[assignment]  # desired
 
         try:
-            return self._names[query]
+            return self._names[str(query)]
         except KeyError:
             raise KeyError('No gene found for query')
 
@@ -269,24 +290,24 @@ class DiseaseSingleton:
     """
     diseasetype = 'Undefined'
 
-    def __init__(self, idx, name):
-        self.id = idx
-        self.name = name
-        self._hpo = set()
+    def __init__(self, idx: int, name: str) -> None:
+        self.id: int = idx
+        self.name: str = name
+        self._hpo: Set[int] = set()
         self._hash = hash((
             self.id,
             self.diseasetype
         ))
 
     @property
-    def hpo(self):
+    def hpo(self) -> Set[int]:
         return self._hpo
 
     @hpo.setter
-    def hpo(self, term):
+    def hpo(self, term: int) -> None:
         self._hpo.add(term)
 
-    def toJSON(self, verbose=False):
+    def toJSON(self, verbose: bool = False) -> Dict:
         """
         JSON (dict) representation of ``Disease``
 
@@ -314,7 +335,7 @@ class DiseaseSingleton:
 
         return res
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, int):
             return self.id == other
 
@@ -322,22 +343,20 @@ class DiseaseSingleton:
             return self.name == other
 
         try:
-            return (
+            return bool(
                 (self.id and self.id == other.id) or
                 (self.name and self.name == other.name)
             )
         except AttributeError:
             return False
 
-        return False
-
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self._hash
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '{}(["", {}, "{}"])'.format(
             self.diseasetype,
             self.id,
@@ -401,12 +420,19 @@ class DiseaseDict(dict):
     -------
     :class:`.DiseaseSingleton`
     """
-    disease_class = None
+    disease_class: ClassVar = None
 
-    def __init__(self):
-        self._indicies = {}
+    def __init__(self) -> None:
+        self._indicies: Dict[int, DiseaseSingleton] = {}
 
-    def __call__(self, cols=None, diseaseid=None, name=None):
+    def __call__(
+        self,
+        cols: List = None,
+        diseaseid: int = None,
+        name: str = None
+    ) -> DiseaseSingleton:
+        assert self.disease_class
+
         if not any([cols, diseaseid, name]):
             raise TypeError('DiseaseDict requires at least one argument')
 
@@ -420,9 +446,9 @@ class DiseaseDict(dict):
             ]
         name = cols[2]
         try:
-            idx = int(cols[1])
+            idx: int = int(cols[1])
         except TypeError:
-            idx = None
+            idx = None  # type: ignore[assignment]
 
         try:
             return self._indicies[idx]
@@ -436,11 +462,15 @@ class DiseaseDict(dict):
 
         return disease
 
-    def clear(self):
+    def clear(self) -> None:
         self._indicies.clear()
         dict.clear(self)
 
-    def get(self, query):
+    def get(
+        self,
+        query: Union[int, str],
+        default: Any = None
+    ) -> DiseaseSingleton:
         """
         Allows client to query for a disease by ID.
         This method is useful for client that do not want to add new
@@ -490,12 +520,16 @@ class HPO_Gene(dict):
         Path to data files.
         Defaults to './'
     """
-    def __init__(self, filename=None, path='./'):
+    def __init__(
+        self,
+        filename: Optional[str] = None,
+        path: str = './'
+    ) -> None:
         if filename is None:
             filename = os.path.join(path, FILENAMES['HPO_GENE'])
         self.load_from_file(filename)
 
-    def load_from_file(self, filename):
+    def load_from_file(self, filename: str) -> None:
         with open(filename) as fh:
             for line in fh:
                 if line.startswith('#'):
@@ -505,12 +539,15 @@ class HPO_Gene(dict):
                 if idx not in self:
                     self[idx] = set()
                 gene = Gene(cols)
-                gene.hpo = idx
+                gene.hpo = idx  # type: ignore[assignment]
                 if gene not in self[idx]:
                     self[idx].add(gene)
 
 
-def remove_outcommented_rows(fh, ignorechar='#'):
+def remove_outcommented_rows(
+    fh: Iterator[str],
+    ignorechar: str = '#'
+) -> Iterator[str]:
     """
     Removes all rows from a filereader object that start
     with a comment character
@@ -533,9 +570,17 @@ def remove_outcommented_rows(fh, ignorechar='#'):
     for row in fh:
         if row[0:len(ignorechar)] != ignorechar:
             yield row
+        else:
+            if row.startswith('#DatabaseID'):
+                # The header row in phenotype.hpoa file starts with a # as well
+                yield row[1:]
 
 
-def parse_pheno_file(filename=None, path='./', delimiter='\t'):
+def parse_pheno_file(
+    filename: Optional[str] = None,
+    path: str = './',
+    delimiter: str = '\t'
+) -> Tuple[Any, ...]:
     """
     Parses OMIM-HPO assoation file and generates a positive
     and negative annotation dictionary
@@ -567,12 +612,12 @@ def parse_pheno_file(filename=None, path='./', delimiter='\t'):
             delimiter=delimiter
         )
 
-        negative_omim_dict = {}
-        omim_dict = {}
-        negative_orpha_dict = {}
-        orpha_dict = {}
-        negative_decipher_dict = {}
-        decipher_dict = {}
+        negative_omim_dict: dict = {}
+        omim_dict: dict = {}
+        negative_orpha_dict: dict = {}
+        orpha_dict: dict = {}
+        negative_decipher_dict: dict = {}
+        decipher_dict: dict = {}
 
         for row in reader:
             idx = HPOTerm.id_from_string(row['HPO_ID'])
@@ -617,7 +662,7 @@ def parse_pheno_file(filename=None, path='./', delimiter='\t'):
                 if pheno not in neg_assoc[idx]:
                     neg_assoc[idx].add(pheno)
             if qualifier == '':
-                pheno.hpo = idx
+                pheno.hpo = idx  # type: ignore[assignment]
                 if idx not in pos_assoc:
                     pos_assoc[idx] = set()
                 if pheno not in pos_assoc[idx]:

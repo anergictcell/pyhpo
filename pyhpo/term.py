@@ -1,8 +1,94 @@
 import warnings
 import math
+from typing import List, Set, Tuple, Optional, Union, Dict, Any
+
+import pyhpo
 
 
 TRUTH = ('true', 't', 'yes', 'y', '1')
+
+
+class HPOAnnotation:
+    """
+    Guarantees proper type annotations and backwards compatibility of
+    :func:`pyhpo.term.HPOTerm._annotations
+    Even though it's a class, it provides mappings of dict, such
+    ``__getitem__``, ``setitem__`` etc.
+    Those methods will be removed eventually and should not be used.
+    After all, it's a private method anyway
+    """
+    def __init__(self) -> None:
+        self.items: Set[Any] = set()
+        self.cached: bool = False
+
+    def __getitem__(self, key: int) -> Union[Set[Any], bool]:
+        """
+        Backwards compatibility of ``dict`` features
+        """
+        key = int(key)
+        if key == 0:
+            return self.items
+        elif key == 1:
+            return self.cached
+        else:
+            raise KeyError(f'Invalid key for HPO Term annotation {key}')
+
+    def __setitem__(self, key: int, value: Any) -> None:
+        """
+        Backwards compatibility of ``dict`` features
+        """
+        key = int(key)
+        if key == 0:
+            self.items = value
+        elif key == 1:
+            self.cached = value
+        else:
+            raise KeyError(f'Invalid key for HPO Term annotation {key}')
+
+    def __str__(self) -> str:
+        return f'{self.items=} | {self.cached=}'
+
+    def __eq__(self, other: Any) -> bool:
+        """
+        Backwards compatibility of ``dict`` features
+        """
+        return bool([self.items, self.cached] == other)
+
+
+class HPOAnnotationCollection:
+    def __init__(self) -> None:
+        self.genes: HPOAnnotation = HPOAnnotation()
+        self.omim_diseases: HPOAnnotation = HPOAnnotation()
+        self.orpha_diseases: HPOAnnotation = HPOAnnotation()
+        self.decipher_diseases: HPOAnnotation = HPOAnnotation()
+        self.omim_excluded_diseases: HPOAnnotation = HPOAnnotation()
+        self.orpha_excluded_diseases: HPOAnnotation = HPOAnnotation()
+        self.decipher_excluded_diseases: HPOAnnotation = HPOAnnotation()
+
+    def __getitem__(self, key: str) -> HPOAnnotation:
+        try:
+            return self.__getattribute__(key)
+        except AttributeError:
+            raise KeyError(f'Invalid key {key}')
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in self.__dict__:
+            self.__setattr__(key, value)
+        else:
+            raise KeyError(f'Invalid key {key}')
+
+    def __eq__(self, other: Any) -> bool:
+        return all([
+            self[x] == other[x] for x in (
+                'genes',
+                'omim_diseases',
+                'orpha_diseases',
+                'decipher_diseases',
+                'omim_excluded_diseases',
+                'orpha_excluded_diseases',
+                'decipher_excluded_diseases'
+            )
+        ])
 
 
 class HPOTerm():
@@ -227,42 +313,34 @@ class HPOTerm():
     # IDs of root modifier terms
     _modifier_ids = {5, 12823, 40279, 31797, 32223, 32443}
 
-    def __init__(self):
-        self.name = None
-        self.definition = None
-        self.comment = None
-        self._id = None
-        self._index = 0
-        self._hash = None
+    def __init__(self) -> None:
+        self.name: str = ''
+        self.definition: str = ''
+        self.comment: str = ''
+        self._id: str = ''
+        self._index: int = 0
+        self._hash: Optional[int] = None
 
-        self._alt_id = []
-        self._alt_index = []
-        self._synonym = []
-        self._xref = []
-        self._is_a = []
-        self._is_obsolete = False
-        self._parents = []
-        self._all_parents = None
-        self._children = []
-        self._hierarchy = None
+        self._alt_id: List[str] = []
+        self._alt_index: List[int] = []
+        self._synonym: List[str] = []
+        self._xref: List[str] = []
+        self._is_a: List[str] = []
+        self._is_obsolete: bool = False
+        self._parents: List['HPOTerm'] = []
+        self._all_parents: Optional[Set['HPOTerm']] = None
+        self._children: List['HPOTerm'] = []
+        self._hierarchy: Optional[Tuple[Tuple['HPOTerm', ...], ...]] = None
 
         # External annotations
-        self._annotations = {
-            'genes': [set(), False],
-            'omim_diseases': [set(), False],
-            'orpha_diseases': [set(), False],
-            'decipher_diseases': [set(), False],
-            'omim_excluded_diseases': [set(), False],
-            'orpha_excluded_diseases': [set(), False],
-            'decipher_excluded_diseases': [set(), False]
-        }
+        self._annotations = HPOAnnotationCollection()
 
         self.information_content = {
-            'omim': None,
-            'gene': None
+            'omim': 0.0,
+            'gene': 0.0
         }
 
-    def add_line(self, line):
+    def add_line(self, line: str) -> None:
         """
         Adds one line of information to ``self``.
 
@@ -282,55 +360,55 @@ class HPOTerm():
         self.__setattr__(key, value)
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @id.setter
-    def id(self, value):
+    def id(self, value: str) -> None:
         if self._id and self._id != value:
             raise RuntimeError('Unable to update existing ID')
         self._id = value
         self._index = HPOTerm.id_from_string(value)
 
     @property
-    def alt_id(self):
+    def alt_id(self) -> List[str]:
         return self._alt_id
 
     @alt_id.setter
-    def alt_id(self, value):
+    def alt_id(self, value: str) -> None:
         self._alt_id.append(value)
         self._alt_index.append(HPOTerm.id_from_string(value))
 
     @property
-    def synonym(self):
+    def synonym(self) -> List[str]:
         return self._synonym
 
     @synonym.setter
-    def synonym(self, value):
+    def synonym(self, value: str) -> None:
         self._synonym.append(HPOTerm.parse_synonym(value))
 
     @property
-    def xref(self):
+    def xref(self) -> List[str]:
         return self._xref
 
     @xref.setter
-    def xref(self, value):
+    def xref(self, value: str) -> None:
         self._xref.append(value)
 
     @property
-    def is_a(self):
+    def is_a(self) -> List[str]:
         return self._is_a
 
     @is_a.setter
-    def is_a(self, value):
+    def is_a(self, value: str) -> None:
         self._is_a.append(value)
 
     @property
-    def is_obsolete(self):
+    def is_obsolete(self) -> bool:
         return self._is_obsolete
 
     @is_obsolete.setter
-    def is_obsolete(self, value):
+    def is_obsolete(self, value: str) -> None:
         if str(value).lower() in TRUTH:
             self._is_obsolete = True
             self.name = self.name.replace('obsolete', '').strip()
@@ -338,112 +416,112 @@ class HPOTerm():
             self._is_obsolete = False
 
     @property
-    def parents(self):
+    def parents(self) -> List['HPOTerm']:
         return self._parents
 
     @parents.setter
-    def parents(self, hpo):
+    def parents(self, hpo: 'HPOTerm') -> None:
         self._parents.append(hpo)
 
     @property
-    def children(self):
+    def children(self) -> List['HPOTerm']:
         return self._children
 
     @children.setter
-    def children(self, hpo):
+    def children(self, hpo: 'HPOTerm') -> None:
         self._children.append(hpo)
 
     @property
-    def genes(self):
+    def genes(self) -> Set[Any]:
         return self._get_annotations('genes')
 
     @genes.setter
-    def genes(self, genes):
+    def genes(self, genes: Set[Any]) -> None:
         self._update_annotations('genes', genes)
 
     @property
-    def omim_diseases(self):
+    def omim_diseases(self) -> Set[Any]:
         return self._get_annotations('omim_diseases')
 
     @omim_diseases.setter
-    def omim_diseases(self, diseases):
+    def omim_diseases(self, diseases: Set[Any]) -> None:
         self._update_annotations('omim_diseases', diseases)
 
     @property
-    def orpha_diseases(self):
+    def orpha_diseases(self) -> Set[Any]:
         return self._get_annotations('orpha_diseases')
 
     @orpha_diseases.setter
-    def orpha_diseases(self, diseases):
+    def orpha_diseases(self, diseases: Set[Any]) -> None:
         self._update_annotations('orpha_diseases', diseases)
 
     @property
-    def decipher_diseases(self):
+    def decipher_diseases(self) -> Set[Any]:
         return self._get_annotations('decipher_diseases')
 
     @decipher_diseases.setter
-    def decipher_diseases(self, diseases):
+    def decipher_diseases(self, diseases: Set[Any]) -> None:
         self._update_annotations('decipher_diseases', diseases)
 
     @property
-    def omim_excluded_diseases(self):
+    def omim_excluded_diseases(self) -> Set[Any]:
         """
         Since excluded diseased do not follow the general model
         of ontology inheritance, the associated annotations
         are not inherited from or passed on to parents or children
         """
-        return self._annotations['omim_excluded_diseases'][0]
+        return self._annotations.omim_excluded_diseases.items
 
     @omim_excluded_diseases.setter
-    def omim_excluded_diseases(self, diseases):
+    def omim_excluded_diseases(self, diseases: Set[Any]) -> None:
         """
         Since excluded diseased do not follow the general model
         of ontology inheritance, the associated annotations
         are not inherited from or passed on to parents or children
         """
-        self._annotations['omim_excluded_diseases'][0].update(diseases)
+        self._annotations.omim_excluded_diseases.items.update(diseases)
 
     @property
-    def orpha_excluded_diseases(self):
+    def orpha_excluded_diseases(self) -> Set[Any]:
         """
         Since excluded diseased do not follow the general model
         of ontology inheritance, the associated annotations
         are not inherited from or passed on to parents or children
         """
-        return self._annotations['orpha_excluded_diseases'][0]
+        return self._annotations.orpha_excluded_diseases.items
 
     @orpha_excluded_diseases.setter
-    def orpha_excluded_diseases(self, diseases):
+    def orpha_excluded_diseases(self, diseases: Set[Any]) -> None:
         """
         Since excluded diseased do not follow the general model
         of ontology inheritance, the associated annotations
         are not inherited from or passed on to parents or children
         """
-        self._annotations['orpha_excluded_diseases'][0].update(diseases)
+        self._annotations.orpha_excluded_diseases.items.update(diseases)
 
     @property
-    def decipher_excluded_diseases(self):
+    def decipher_excluded_diseases(self) -> Set[Any]:
         """
         Since excluded diseased do not follow the general model
         of ontology inheritance, the associated annotations
         are not inherited from or passed on to parents or children
         """
-        return self._annotations['decipher_excluded_diseases'][0]
+        return self._annotations.decipher_excluded_diseases.items
 
     @decipher_excluded_diseases.setter
-    def decipher_excluded_diseases(self, diseases):
+    def decipher_excluded_diseases(self, diseases: Set[Any]) -> None:
         """
         Since excluded diseased do not follow the general model
         of ontology inheritance, the associated annotations
         are not inherited from or passed on to parents or children
         """
-        self._annotations['decipher_excluded_diseases'][0].update(diseases)
+        self._annotations.decipher_excluded_diseases.items.update(diseases)
 
     @property
-    def is_modifier(self):
+    def is_modifier(self) -> bool:
         return bool(self._modifier_ids & {int(x) for x in self.all_parents})
 
-    def _get_annotations(self, kind):
+    def _get_annotations(self, kind: str) -> Set['pyhpo.Annotation']:
         """
         Retrieves the associated annotations from itself and all child terms
 
@@ -462,12 +540,12 @@ class HPOTerm():
         :func:`pyhpo.term.HPOTerm._build_annotation_cache`
         """
 
-        if not self._annotations[kind][1]:
+        if not self._annotations[kind].cached:
             # Cache not yet built
             self._build_annotation_cache(kind)
-        return self._annotations[kind][0]
+        return self._annotations[kind].items
 
-    def _build_annotation_cache(self, kind):
+    def _build_annotation_cache(self, kind: str) -> None:
         """
         Traverses through all child terms to retrieve their
         annotations and build a local cache of all annotations
@@ -484,14 +562,18 @@ class HPOTerm():
 
         """
         for child in self.children:
-            self._annotations[kind][0].update(
+            self._annotations[kind].items.update(
                 child.__getattribute__(kind)
             )
 
         # Set cache-flag to True
-        self._annotations[kind][1] = True
+        self._annotations[kind].cached = True
 
-    def _update_annotations(self, kind, annotations):
+    def _update_annotations(
+        self,
+        kind: str,
+        annotations: Set['pyhpo.Annotation']
+    ) -> None:
         """
         Adds additional annotations of the given kind
 
@@ -515,10 +597,10 @@ class HPOTerm():
         if not isinstance(annotations, set):
             raise RuntimeError('{} must be specified as set'.format(kind))
 
-        self._annotations[kind][0].update(annotations)
+        self._annotations[kind].items.update(annotations)
 
         # If cache-flag is set we need to update the parents as well
-        if self._annotations[kind][1]:
+        if self._annotations[kind].cached:
             warnings.warn(
                 (
                     'It is strongly discouraged to update annotation'
@@ -532,9 +614,9 @@ class HPOTerm():
 
             # Update all parents
             for parent in self.parents:
-                parent.__setattr__(kind, self._annotations[kind][0])
+                parent.__setattr__(kind, self._annotations[kind].items)
 
-    def parent_of(self, other):
+    def parent_of(self, other: 'HPOTerm') -> bool:
         """
         Checks if ``self`` is a direct or indirect parent of ``other``.
 
@@ -550,7 +632,7 @@ class HPOTerm():
         """
         return other.child_of(self)
 
-    def child_of(self, other):
+    def child_of(self, other: 'HPOTerm') -> bool:
         """
         Checks if ``self`` is a direct or indirect child of ``other``.
 
@@ -569,7 +651,7 @@ class HPOTerm():
 
         return other in self.all_parents
 
-    def parent_ids(self):
+    def parent_ids(self) -> List[int]:
         """
         List of IDs of parent HPO Terms
 
@@ -583,7 +665,7 @@ class HPOTerm():
         ]
 
     @property
-    def all_parents(self):
+    def all_parents(self) -> Set['HPOTerm']:
         if self._all_parents is None:
             self._all_parents = set()
             for path in self.hierarchy():
@@ -591,7 +673,7 @@ class HPOTerm():
 
         return self._all_parents
 
-    def common_ancestors(self, other):
+    def common_ancestors(self, other: 'HPOTerm') -> Set['HPOTerm']:
         """
         Identifies all common ancestors
         of two HPO terms
@@ -610,7 +692,7 @@ class HPOTerm():
         # common ancestors
         return self.all_parents & other.all_parents
 
-    def count_parents(self):
+    def count_parents(self) -> int:
         """
         Calculates total number of ancestral HPO Terms
 
@@ -624,7 +706,11 @@ class HPOTerm():
             for parent in self.parents
         ])
 
-    def print_hierarchy(self, indent=0, indent_increase=2):
+    def print_hierarchy(
+        self,
+        indent: int = 0,
+        indent_increase: int = 2
+    ) -> None:
         """
         Prints hierarchy diagram of current and
         all ancestral HPO Terms
@@ -646,7 +732,7 @@ class HPOTerm():
         for parent in self.parents:
             parent.print_hierarchy(indent + indent_increase, indent_increase)
 
-    def hierarchy(self):
+    def hierarchy(self) -> Tuple[Tuple['HPOTerm', ...], ...]:
         """
         Calculates all paths from current term to Root term
         and returns each path as a Tuple of HPOTerms
@@ -679,7 +765,7 @@ class HPOTerm():
         self._hierarchy = tuple(paths)
         return self._hierarchy
 
-    def longest_path_to_root(self):
+    def longest_path_to_root(self) -> int:
         """
         Calculates the longest path to root
 
@@ -692,7 +778,7 @@ class HPOTerm():
             len(h)-1 for h in self.hierarchy()
         ])
 
-    def shortest_path_to_root(self):
+    def shortest_path_to_root(self) -> int:
         """
         Calculates the shortest path to root
 
@@ -705,7 +791,10 @@ class HPOTerm():
             len(h)-1 for h in self.hierarchy()
         ])
 
-    def shortest_path_to_parent(self, other):
+    def shortest_path_to_parent(
+        self,
+        other: 'HPOTerm'
+    ) -> Tuple[Union[int, float], Optional[Tuple['HPOTerm', ...]]]:
         """
         Calculates the shortest path to another HPO Term
 
@@ -738,7 +827,7 @@ class HPOTerm():
 
         return (steps, shortest_path)
 
-    def longest_path_to_bottom(self, level=0):
+    def longest_path_to_bottom(self, level: int = 0) -> int:
         """
         Calculates how far the most distant child is apart
 
@@ -762,7 +851,10 @@ class HPOTerm():
         else:
             return level
 
-    def path_to_other(self, other):
+    def path_to_other(
+        self,
+        other: 'HPOTerm'
+    ) -> Tuple[int, Tuple['HPOTerm', ...], int, int]:
         """
         Identifies the shortest connection between
         two HPO terms
@@ -790,16 +882,27 @@ class HPOTerm():
         for term in common:
             path1 = self.shortest_path_to_parent(term)
             path2 = other.shortest_path_to_parent(term)
+
+            # path1 and path2 can't be empty, since the common ancestor
+            # is a parent of self and other
+            assert path1[1] is not None
+            assert path2[1] is not None
+
             total_path = path1[1] + tuple(reversed(path2[1]))[1:]
             paths.append((
-                path1[0] + path2[0],
+                int(path1[0] + path2[0]),
                 total_path,
-                path1[0],
-                path2[0]
+                int(path1[0]),
+                int(path2[0])
             ))
         return sorted(paths, key=lambda x: x[0])[0]
 
-    def similarity_score(self, other, kind=None, method=None):
+    def similarity_score(
+        self,
+        other: 'HPOTerm',
+        kind: str = '',
+        method: str = ''
+    ) -> float:
         """
         According to Robinson et al, American Journal of Human Genetics, (2008)
         and Resnik et at, Proceedings of the 14th IJCAI, (1995)
@@ -840,10 +943,10 @@ class HPOTerm():
         float
             The similarity score of the two terms.
         """
-        if method is None:
+        if not method:
             method = 'resnik'
 
-        if kind is None:
+        if not kind:
             kind = 'omim'
 
         if method == 'resnik':
@@ -873,7 +976,10 @@ class HPOTerm():
         else:
             raise RuntimeError('Unknown method to calculate similarity')
 
-    def toJSON(self, verbose=False):
+    def toJSON(
+        self,
+        verbose: bool = False
+    ) -> Dict:
         """
         Creates a JSON-like object of the HPOTerm
 
@@ -926,8 +1032,8 @@ class HPOTerm():
 
         return res
 
-    def _resnik_similarity_score(self, other, kind):
-        sim = 0
+    def _resnik_similarity_score(self, other: 'HPOTerm', kind: str) -> float:
+        sim = 0.0
         for term in self.common_ancestors(other):
             ic = term.information_content[kind]
             if ic > sim:
@@ -935,7 +1041,7 @@ class HPOTerm():
 
         return sim
 
-    def _lin_similarity_score(self, other, kind):
+    def _lin_similarity_score(self, other: 'HPOTerm', kind: str) -> float:
         mica = self._resnik_similarity_score(other, kind)
         ic_t1 = self.information_content[kind]
         ic_t2 = other.information_content[kind]
@@ -944,7 +1050,7 @@ class HPOTerm():
         except ZeroDivisionError:
             return 0
 
-    def _jc_similarity_score(self, other, kind):
+    def _jc_similarity_score(self, other: 'HPOTerm', kind: str) -> float:
         """
         This method is the same as the source code in
         the R package ``hposim``
@@ -968,7 +1074,7 @@ class HPOTerm():
 
         return -1 / (1 + (2 * mica) - ic_t1 - ic_t2)
 
-    def _jc_similarity_score_2(self, other, kind):
+    def _jc_similarity_score_2(self, other: 'HPOTerm', kind: str) -> float:
         """
         This method is the same as the description
         in the paper for the R package ``hposim``
@@ -991,19 +1097,19 @@ class HPOTerm():
 
         return 1 - (ic_t1 + ic_t2 - (2 * mica))
 
-    def _rel_similarity_score(self, other, kind):
+    def _rel_similarity_score(self, other: 'HPOTerm', kind: str) -> float:
         mica = self._resnik_similarity_score(other, kind)
         lin = self._lin_similarity_score(other, kind)
 
         return lin * (1 - (math.exp(mica * -1)))
 
-    def _ic_similarity_score(self, other, kind):
+    def _ic_similarity_score(self, other: 'HPOTerm', kind: str) -> float:
         mica = self._resnik_similarity_score(other, kind)
         lin = self._lin_similarity_score(other, kind)
 
         return lin * (1 - (1 / (1 + mica)))
 
-    def _graph_ic_similarity_score(self, other, kind):
+    def _graph_ic_similarity_score(self, other: 'HPOTerm', kind: str) -> float:
         common = sum([
             x.information_content[kind] for x in
             self.common_ancestors(other)
@@ -1018,12 +1124,12 @@ class HPOTerm():
         except ZeroDivisionError:
             return 0
 
-    def _dist_similarity_score(self, other):
+    def _dist_similarity_score(self, other: 'HPOTerm') -> float:
         dist = self.path_to_other(other)[0]
         return 1/(dist + 1)
 
     @staticmethod
-    def id_from_string(hpo_string):
+    def id_from_string(hpo_string: str) -> int:
         """
         Formats the HPO-type Term-ID into an integer id
 
@@ -1046,7 +1152,7 @@ class HPOTerm():
         return int(idx.split(':')[1].strip())
 
     @staticmethod
-    def parse_synonym(synonym):
+    def parse_synonym(synonym: str) -> str:
         """
         Extracts the synonym from the synonym data line in the obo file format
 
@@ -1066,12 +1172,12 @@ class HPOTerm():
         """
         return synonym.split('"')[1]
 
-    def __index__(self):
+    def __index__(self) -> int:
         return self._index
 
     __int__ = __index__
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         if not self._hash:
             self._hash = hash((
                 self._index,
@@ -1079,16 +1185,16 @@ class HPOTerm():
             ))
         return self._hash
 
-    def __eq__(self, t2):
+    def __eq__(self, t2: Any) -> bool:
         return self.__hash__() == t2.__hash__() and isinstance(t2, HPOTerm)
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         return self.__int__() < int(other)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{} | {}'.format(self._id, self.name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '\n'.join([
             '\n[Term]',
             'id: {}'.format(self._id),

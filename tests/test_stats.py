@@ -10,6 +10,7 @@ except ImportError:
     from pyhpo import stats
 
 from pyhpo.stats import HPOEnrichment, EnrichmentModel
+from pyhpo.set import HPOSet
 
 from tests.mockontology import make_ontology, make_genes, make_omim
 
@@ -181,7 +182,7 @@ class TestAnnotationEnrichment(unittest.TestCase):
         ) as patch_count:
             res = EnrichmentModel('gene')
             patch_count.assert_called_once_with(
-                self.ontology
+                HPOSet(self.ontology)
             )
             self.assertEqual(
                 res.attribute,
