@@ -46,7 +46,7 @@ class HPOAnnotation:
             raise KeyError(f'Invalid key for HPO Term annotation {key}')
 
     def __str__(self) -> str:
-        return f'{self.items=} | {self.cached=}'
+        return f'items={self.items} | cached={self.cached}'
 
     def __eq__(self, other: Any) -> bool:
         """
