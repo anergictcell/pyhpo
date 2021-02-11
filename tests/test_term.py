@@ -137,7 +137,7 @@ class TermInit(unittest.TestCase):
             self.assertEqual(
                 a.__getattribute__(attrs),
                 b.__getattribute__(attrs),
-                f'Difference in {attrs=}'
+                f'Difference in {attrs}'
             )
 
 
