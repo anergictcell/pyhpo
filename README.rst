@@ -62,42 +62,48 @@ Getting started
     from pyhpo.ontology import Ontology
 
     # initilize the Ontology (you can specify config parameters if needed here)
-    ontology = Ontology()
+    _ = Ontology()
     
     # Iterate through all HPO terms
-    for term in ontology:
+    for term in Ontology:
         # do something, e.g.
         print(term.name)
 
-There are multiple ways to retrieve a single term out of an ontology:
+There are multiple ways to retrieve a single term out of an Ontology:
 
 .. code:: python
 
     # Retrieve a term via its HPO-ID
-    term = ontology.get_hpo_object('HP:0002650')
+    term = Ontology.get_hpo_object('HP:0002650')
 
     # ...or via the Integer representation of the ID
-    term = ontology.get_hpo_object(2650)
-
-    # ...or via shortcut
-    term = ontology[2650]
+    term = Ontology.get_hpo_object(2650)
 
     # ...or by term name
-    term = ontology.get_hpo_object('Scoliosis')
+    term = Ontology.get_hpo_object('Scoliosis')
+
+    # ...or via shortcut
+    term = Ontology[2650]
 
 You can also do substring search on term names and synonyms:
 
 .. code:: python
 
-    # ontology.search returns an Iterator over all matches
-    for term in ontology.search('Abn'):
+    # Ontology.search returns an Iterator over all matches
+    for term in Ontology.search('Abn'):
         print(term.name)
 
 Find the shortest path between two terms:
 
 .. code:: python
 
-    ontology.path(
+    Ontology.path(
+        'Abnormality of the nervous system',
+        'Scoliosis'
+    )
+
+    # or use HP identifiers
+    Ontology.path(
         'Abnormality of the nervous system',
         'HP:0002650'
     )
@@ -107,8 +113,11 @@ Working with terms
 
 .. code-block:: python
 
+    # Get a single HPO Term:
+    term = Ontology.get_hpo_object('HP:0002650')
+
     # check the relationship of two terms
-    term.path_to_other(ontology[11])
+    term.path_to_other(Ontology[11])
 
     # get the information content for OMIM diseases
     term.information_content['omim']
@@ -126,9 +135,9 @@ Working with sets
 
     # Create a clinical information set of HPO Terms
     clinical_info = pyhpo.HPOSet([
-        ontology[12],
-        ontology[14],
-        ontology.get_hpo_object(2650)
+        Ontology[12],
+        Ontology[14],
+        Ontology.get_hpo_object(2650)
     ])
 
     # Extract only child nodes and leave out all parent terms
@@ -203,7 +212,7 @@ and many more examples in the `PyHPO Documentation`_
 Contributing
 ============
 
-Yes, please do so. I would appreciate any help, suggestions for improvement or other feedback. Just create a pull-request or open an issue.
+Yes, please do so. We appreciate any help, suggestions for improvement or other feedback. Just create a pull-request or open an issue.
 
 License
 =======
@@ -215,6 +224,6 @@ PyHPO is using the Human Phenotype Ontology. Find out more at http://www.human-p
 
 Sebastian Köhler, Leigh Carmody, Nicole Vasilevsky, Julius O B Jacobsen, et al. Expansion of the Human Phenotype Ontology (HPO) knowledge base and resources. Nucleic Acids Research. (2018) doi: 10.1093/nar/gky1105
 
-.. _PyHPO Documentation: https://esbme.com/pyhpo/docs/ 
+.. _PyHPO Documentation: https://centogene.github.io/pyhpo/
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Human Phenotype Ontology: https://hpo.jax.org/

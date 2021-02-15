@@ -22,4 +22,4 @@ build:
 	@echo "Building packages"
 	python setup.py sdist bdist_wheel
 
-.PHONY: tests fulltests check html build
+.PHONY: tests fulltests check docs build

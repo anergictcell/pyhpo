@@ -56,8 +56,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyHPO'
-copyright = '2019, Jonas Marcello'
-author = 'Jonas Marcello'
+copyright = '2021, CENTOGENE GmbH'
+author = pyhpo.__author__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
