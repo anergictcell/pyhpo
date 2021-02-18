@@ -4,6 +4,8 @@ import unittest
 from pyhpo import ontology as ont
 from pyhpo.ontology import Ontology
 from pyhpo.set import HPOSet
+from pyhpo.stats import EnrichmentModel
+from pyhpo import annotations as an
 
 # Number of terms in HPO Ontology
 # grep "^\[Term\]$" pyhpo/data/hp.obo | wc -l
@@ -43,6 +45,8 @@ class IntegrationFullTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.terms = Ontology()
+        cls.gene_model = EnrichmentModel('gene')
+        cls.omim_model = EnrichmentModel('omim')
 
     def test_terms_present(self):
         """
@@ -251,3 +255,25 @@ class IntegrationFullTest(unittest.TestCase):
             for other in self.terms:
                 with self.subTest(t=term.id, c=other.id):
                     assert term.similarity_score(other, method='resnik') >= 0
+
+    def test_gene_enrichment(self):
+        hposet = HPOSet.from_queries('HP:0007401,HP:0010885'.split(','))
+        res = self.gene_model.enrichment('hypergeom', hposet)
+        self.assertIsInstance(res, list)
+        self.assertIn('item', res[0])
+        self.assertIn('count', res[0])
+        self.assertIn('enrichment', res[0])
+        self.assertIsInstance(res[0]['item'], an.GeneSingleton)
+        self.assertIsInstance(res[0]['count'], int)
+        self.assertIsInstance(res[0]['enrichment'], float)
+
+    def test_omim_enrichment(self):
+        hposet = HPOSet.from_queries('HP:0007401,HP:0010885'.split(','))
+        res = self.omim_model.enrichment('hypergeom', hposet)
+        self.assertIsInstance(res, list)
+        self.assertIn('item', res[0])
+        self.assertIn('count', res[0])
+        self.assertIn('enrichment', res[0])
+        self.assertIsInstance(res[0]['item'], an.OmimDisease)
+        self.assertIsInstance(res[0]['count'], int)
+        self.assertIsInstance(res[0]['enrichment'], float)

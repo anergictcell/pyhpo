@@ -5,6 +5,7 @@ Changelog
 ---
 - Added type annotation to all methods
 - ``Ontology.get_hpo_object`` now behaves as documented and raises an error if the term is not found instead of silently returning None
+- 2.7.3 Fixes a bug in ``EnrichmentModel.enrichment`` method.
 
 2.6
 ---
