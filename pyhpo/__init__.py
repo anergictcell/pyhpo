@@ -11,7 +11,7 @@ from pyhpo.annotations import OmimDisease, OrphaDisease, DecipherDisease
 
 # The following info will be used by setup.py and sphinx documentation
 __author__ = 'CENTOGENE GmbH'
-__version__ = '2.7.2'
+__version__ = '2.7.3'
 
 __all__ = (
     'Annotation',

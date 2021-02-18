@@ -281,7 +281,7 @@ class EnrichmentModel():
             'count': count,
             'enrichment': self._single_enrichment(
                 method,
-                item.id,
+                item,
                 count,
                 list_total
             )} for item, count in list_counts.items()
