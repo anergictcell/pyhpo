@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Set, List, Iterator, Union, Tuple, Dict
+from typing import Iterable, Set, List, Iterator, Union, Tuple
 
 import pyhpo
 from pyhpo import Ontology
@@ -105,7 +105,7 @@ class HPOSet(set):
                         term.replaced_by
                     )
                     ids.add(replaced)
-                except AttributeError:
+                except RuntimeError:
                     warnings.warn(
                         'The term {} is obsolete and has no replacement.'
                             .format(term),
@@ -175,7 +175,7 @@ class HPOSet(set):
             deciphers.update(term.decipher_diseases)
         return deciphers
 
-    def information_content(self, kind: str = '') -> Dict:
+    def information_content(self, kind: str = '') -> dict:
         """
         Gives back basic information content stats about the
         HPOTerms within the set

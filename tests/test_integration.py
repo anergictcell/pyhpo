@@ -72,16 +72,6 @@ class IntegrationFullTest(unittest.TestCase):
             N_OMIM
         )
 
-    def test_omim_excluded(self):
-        """
-        These test will most likely need to be updated
-        after every data update
-        """
-        self.assertEqual(
-            len(self.terms.omim_excluded_diseases),
-            N_OMIM_EXL
-        )
-
     def test_orpha_associated(self):
         """
         These test will most likely need to be updated
@@ -92,16 +82,6 @@ class IntegrationFullTest(unittest.TestCase):
             N_ORPHA
         )
 
-    def test_orpha_excluded(self):
-        """
-        These test will most likely need to be updated
-        after every data update
-        """
-        self.assertEqual(
-            len(self.terms.orpha_excluded_diseases),
-            N_ORPHA_EXL
-        )
-
     def test_decipher_associated(self):
         """
         These test will most likely need to be updated
@@ -110,16 +90,6 @@ class IntegrationFullTest(unittest.TestCase):
         self.assertEqual(
             len(self.terms.decipher_diseases),
             N_DECIPHER
-        )
-
-    def test_decipher_excluded(self):
-        """
-        These test will most likely need to be updated
-        after every data update
-        """
-        self.assertEqual(
-            len(self.terms.decipher_excluded_diseases),
-            N_DECIPHER_EXL
         )
 
     def test_average_annotation_numbers(self):

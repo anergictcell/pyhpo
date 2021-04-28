@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pyhpo
 from pyhpo.ontology import Ontology
@@ -18,12 +18,12 @@ class MockPrint:
 
 class MockOntology:
     def __init__(self, id):
-        self._index = int(id)
+        self.index = int(id)
 
 
-class OntologyInitTests(unittest.TestCase):
+class TestOntologyInit(unittest.TestCase):
     def test_sizes(self):
-        a = Ontology(filename=None)
+        a = Ontology(from_obo_file=False)
         assert len(a) == 0
         a._append(MockOntology(1))
         assert len(a) == 1
@@ -33,15 +33,31 @@ class OntologyInitTests(unittest.TestCase):
         assert len(a) == 3
 
     def test_index(self):
-        a = Ontology(filename=None)
+        a = Ontology(from_obo_file=False)
         a._append(MockOntology(3))
-        assert a[3]._index == 3
-        assert a[0] is None
-        assert a[2] is None
-        assert a[4] is None
+        assert a[3].index == 3
+        with self.assertRaises(KeyError) as err:
+            a[0]
+            self.assertEqual(
+                'No HPOTerm for index 0',
+                str(err.exception)
+            )
+        with self.assertRaises(KeyError) as err:
+            a[2]
+            self.assertEqual(
+                'No HPOTerm for index 2',
+                str(err.exception)
+            )
+
+        with self.assertRaises(KeyError) as err:
+            a[4]
+            self.assertEqual(
+                'No HPOTerm for index 4',
+                str(err.exception)
+            )
 
 
-class BasicOntologyFeatures(unittest.TestCase):
+class TestBasicOntologyFeatures(unittest.TestCase):
     def setUp(self):
         items = make_terms()
         self.root = items[0]
@@ -50,48 +66,72 @@ class BasicOntologyFeatures(unittest.TestCase):
         self.child_2_1 = items[3]
         self.child_3 = items[4]
 
-        self.terms = Ontology(filename=None)
+        self.terms = Ontology(from_obo_file=False)
         self.terms._append(self.root)
         self.terms._append(self.child_1_1)
         self.terms._append(self.child_1_2)
         self.terms._append(self.child_2_1)
         self.terms._append(self.child_3)
 
-    def test_parents(self):
         self.terms._connect_all()
 
+    def test_parents(self):
         assert len(self.child_3.parents) == 2
-        assert self.child_3.parents[0] == self.child_2_1
-        assert self.child_3.parents[1] == self.child_1_2
+        self.assertIn(
+            self.child_2_1,
+            self.child_3.parents
+        )
+        self.assertIn(
+            self.child_1_2,
+            self.child_3.parents
+        )
 
         assert len(self.child_2_1.parents) == 1
-        assert self.child_2_1.parents[0] == self.child_1_1
-        assert self.child_2_1.parents[0].parents[0] == self.root
+        self.assertEqual(
+            self.child_2_1.parents,
+            set([self.child_1_1])
+        )
+
+        for p in self.child_2_1.parents:
+            self.assertIn(
+                self.root,
+                p.parents
+            )
 
         assert len(self.child_1_1.parents) == 1
-        assert self.child_1_1.parents[0] == self.root
+        self.assertIn(
+            self.root,
+            self.child_1_1.parents
+        )
 
         assert len(self.child_1_2.parents) == 1
-        assert self.child_1_2.parents[0] == self.root
+        self.assertIn(
+            self.root,
+            self.child_1_2.parents
+        )
 
-        assert self.root.parents == []
+        self.assertEqual(
+            self.root.parents,
+            set()
+        )
 
     def test_children(self):
-        self.terms._connect_all()
         assert len(self.root.children) == 2
-        assert self.root.children[0] == self.child_1_1
-        assert self.root.children[1] == self.child_1_2
+        self.assertEqual(
+            set([self.child_1_1, self.child_1_2]),
+            self.root.children
+        )
 
-        assert self.child_1_1.children == [self.child_2_1]
+        assert self.child_1_1.children == set([self.child_2_1])
 
-        assert self.child_1_2.children == [self.child_3]
+        assert self.child_1_2.children == set([self.child_3])
 
-        assert self.child_2_1.children == [self.child_3]
+        assert self.child_2_1.children == set([self.child_3])
 
-        assert self.child_3.children == []
+        assert self.child_3.children == set()
 
 
-class OntologyTreeTraversal(unittest.TestCase):
+class TestOntologyTreeTraversal(unittest.TestCase):
     def setUp(self):
         items = make_terms()
         self.root = items[0]
@@ -102,7 +142,7 @@ class OntologyTreeTraversal(unittest.TestCase):
         self.child_4 = items[5]
         self.child_1_3 = items[6]
 
-        self.terms = Ontology(filename=None)
+        self.terms = Ontology(from_obo_file=False)
         self.terms._append(self.root)
         self.terms._append(self.child_1_1)
         self.terms._append(self.child_1_2)
@@ -111,51 +151,57 @@ class OntologyTreeTraversal(unittest.TestCase):
         self.terms._append(self.child_4)
         self.terms._append(self.child_1_3)
 
-    def test_hierarchy(self):
         self.terms._connect_all()
 
+    def test_hierarchy(self):
+
         self.assertEqual(
-            self.root.hierarchy(),
+            self.root.hierarchy,
             ((self.root,),)
         )
 
         self.assertEqual(
-            self.child_1_1.hierarchy(),
+            self.child_1_1.hierarchy,
             ((self.child_1_1, self.root),)
         )
 
         self.assertEqual(
-            self.child_1_2.hierarchy(),
+            self.child_1_2.hierarchy,
             ((self.child_1_2, self.root),)
         )
 
         self.assertEqual(
-            self.child_2_1.hierarchy(),
+            self.child_2_1.hierarchy,
             ((self.child_2_1, self.child_1_1, self.root),)
         )
 
-        self.assertEqual(
-            self.child_3.hierarchy(),
-            (
-                (self.child_3, self.child_2_1, self.child_1_1, self.root),
-                (self.child_3, self.child_1_2, self.root))
+        self.assertEqual(len(self.child_3.hierarchy), 2)
+        self.assertIn(
+            (self.child_3, self.child_2_1, self.child_1_1, self.root),
+            self.child_3.hierarchy
+        )
+        self.assertIn(
+            (self.child_3, self.child_1_2, self.root),
+            self.child_3.hierarchy,
         )
 
-        self.assertEqual(
-            self.child_4.hierarchy(),
+        self.assertEqual(len(self.child_4.hierarchy), 2)
+        self.assertIn(
             (
-                (
-                    self.child_4,
-                    self.child_3,
-                    self.child_2_1,
-                    self.child_1_1,
-                    self.root
-                ),
-                (self.child_4, self.child_3, self.child_1_2, self.root))
+                self.child_4,
+                self.child_3,
+                self.child_2_1,
+                self.child_1_1,
+                self.root
+            ),
+            self.child_4.hierarchy
+        )
+        self.assertIn(
+            (self.child_4, self.child_3, self.child_1_2, self.root),
+            self.child_4.hierarchy
         )
 
     def test_path_to_root_finding(self):
-        self.terms._connect_all()
 
         assert self.root.longest_path_to_root() == 0
         assert self.root.shortest_path_to_root() == 0
@@ -179,7 +225,6 @@ class OntologyTreeTraversal(unittest.TestCase):
         assert self.child_1_3.shortest_path_to_root() == 1
 
     def test_path_to_bottom_finding(self):
-        self.terms._connect_all()
         assert self.root.longest_path_to_bottom() == 4
         assert self.child_1_1.longest_path_to_bottom() == 3
         assert self.child_1_2.longest_path_to_bottom() == 2
@@ -189,7 +234,6 @@ class OntologyTreeTraversal(unittest.TestCase):
         assert self.child_1_3.longest_path_to_bottom() == 0
 
     def test_path_to_parent(self):
-        self.terms._connect_all()
         assert self.child_1_1.shortest_path_to_parent(self.root) == (
             1,
             (self.child_1_1, self.root)
@@ -235,18 +279,21 @@ class OntologyTreeTraversal(unittest.TestCase):
             (self.child_4, self.child_3, self.child_1_2)
         )
 
-        assert self.child_4.shortest_path_to_parent(self.child_1_3) == (
-            float('inf'),
-            None
+        with self.assertRaises(RuntimeError) as err:
+            _ = self.child_4.shortest_path_to_parent(self.child_1_3)
+        self.assertEqual(
+            str(err.exception),
+            'HP:0013 is not a parent of HP:0041'
         )
 
-        assert self.child_1_2.shortest_path_to_parent(self.child_4) == (
-            float('inf'),
-            None
+        with self.assertRaises(RuntimeError) as err:
+            _ = self.child_1_2.shortest_path_to_parent(self.child_4)
+        self.assertEqual(
+            str(err.exception),
+            'HP:0041 is not a parent of HP:0012'
         )
 
     def test_path_to_other(self):
-        self.terms._connect_all()
 
         path = self.child_1_1.path_to_other(self.root)
         assert path == (
@@ -317,7 +364,6 @@ class OntologyTreeTraversal(unittest.TestCase):
         )
 
     def test_child_parent_checking(self):
-        self.terms._connect_all()
 
         assert self.root.parent_of(self.child_1_1)
         assert self.root.parent_of(self.child_1_2)
@@ -407,7 +453,6 @@ class OntologyTreeTraversal(unittest.TestCase):
         assert str(err.exception) == err_msg
 
     def test_parent_listing(self):
-        self.terms._connect_all()
 
         assert self.root.count_parents() == 0
         assert self.child_1_1.count_parents() == 1
@@ -446,15 +491,15 @@ class OntologyTreeTraversal(unittest.TestCase):
         assert self.child_3 == self.child_3
 
         assert str(self.root) == 'HP:0001 | Test root'
-        string = repr(self.root)
-        assert '\n[Term]\n' in string
-        assert '\nid: HP:0001\n' in string
-        assert '\nname: Test root\n' in string
+        self.assertEqual(
+            repr(self.root),
+            "HPOTerm(id='HP:0001', name='Test root', is_a=[])"
+        )
 
+    @unittest.skip('Deprecating print_hierarchy')
     def test_hierarchy_printing(self):
         pyhpo.term.print = MockPrint()
 
-        self.terms._connect_all()
         self.child_3.print_hierarchy()
         assert pyhpo.term.print.counter == 6
         assert pyhpo.term.print.strings[0] == '-Test child level 3'
@@ -466,7 +511,7 @@ class OntologyTreeTraversal(unittest.TestCase):
         pyhpo.term.print = print
 
 
-class OntologyQueries(unittest.TestCase):
+class TestOntologyQueries(unittest.TestCase):
     def setUp(self):
         items = make_terms()
         self.root = items[0]
@@ -477,7 +522,7 @@ class OntologyQueries(unittest.TestCase):
         self.child_4 = items[5]
         self.child_1_3 = items[6]
 
-        self.terms = Ontology(filename=None)
+        self.terms = Ontology(from_obo_file=False)
         self.terms._append(self.root)
         self.terms._append(self.child_1_1)
         self.terms._append(self.child_1_2)
@@ -485,9 +530,9 @@ class OntologyQueries(unittest.TestCase):
         self.terms._append(self.child_3)
         self.terms._append(self.child_4)
         self.terms._append(self.child_1_3)
+        self.terms._connect_all()
 
     def test_get_hpo_object(self):
-        self.terms._connect_all()
         self.assertEqual(
             self.terms.get_hpo_object('Test child level 1-2'),
             self.child_1_2
@@ -500,7 +545,7 @@ class OntologyQueries(unittest.TestCase):
             self.terms.get_hpo_object(12),
             self.child_1_2
         )
-        with self.assertRaises(SyntaxError) as err:
+        with self.assertRaises(RuntimeError) as err:
             self.terms.get_hpo_object([1, 2, 3])
         assert 'Invalid type' in str(err.exception)
 
@@ -509,7 +554,6 @@ class OntologyQueries(unittest.TestCase):
         assert 'No HPO entry with term' in str(err.exception)
 
     def test_matching(self):
-        self.terms._connect_all()
         self.assertEqual(
             self.terms.match(self.root.name),
             self.root
@@ -543,80 +587,89 @@ class OntologyQueries(unittest.TestCase):
             self.terms.match('Some invalid term')
         assert 'No HPO entry with name' in str(err.exception)
 
-    def test_path_unit(self):
-        self.terms._connect_all()
+    @patch('pyhpo.Ontology.get_hpo_object')
+    def test_path_unit(self, mock_gho):
+        mock_term = MagicMock()
+        mock_gho.return_value = mock_term
+        self.terms.path('first query', 'second query')
 
-        with patch.object(
-            Ontology,
-            'get_hpo_object',
-            return_value=self.child_1_1
-        ) as mock_gho:
-            with patch.object(
-                self.child_1_1,
-                'path_to_other',
-                return_value=1
-            ) as mock_pto:
-                self.terms.path('first query', 'second query')
+        mock_gho.assert_any_call('first query')
+        mock_gho.assert_any_call('second query')
+        assert mock_gho.call_count == 2
 
-                mock_gho.assert_any_call('first query')
-                mock_gho.assert_any_call('second query')
-                assert mock_gho.call_count == 2
-
-                mock_pto.assert_called_once_with(self.child_1_1)
+        mock_term.path_to_other.assert_called_once_with(mock_term)
 
     def test_path_integration(self):
-        self.terms._connect_all()
-
         path = self.terms.path('Test child level 1-1', 'Test root')
-        assert path == (
-            1,
-            (self.child_1_1, self.root),
-            1,
-            0
+        self.assertEqual(
+            path,
+            (
+                1,
+                (self.child_1_1, self.root),
+                1,
+                0
+            )
         )
 
         path = self.terms.path('Test root', 'Test child level 1-1')
-        assert path == (
-            1,
-            (self.root, self.child_1_1),
-            0,
-            1
+        self.assertEqual(
+            path,
+            (
+                1,
+                (self.root, self.child_1_1),
+                0,
+                1
+            )
         )
 
         path = self.terms.path('Test child level 1-1', 'Test child level 1-2')
-        assert path == (
-            2,
-            (self.child_1_1, self.root, self.child_1_2),
-            1,
-            1
+        self.assertEqual(
+            path,
+            (
+                2,
+                (self.child_1_1, self.root, self.child_1_2),
+                1,
+                1
+            )
         )
 
-    def test_search(self):
-        self.terms._connect_all()
-        with patch.object(
-            self.terms,
-            'synonym_search',
-            return_value=False
-        ) as mock_syn_search:
+    @patch('pyhpo.Ontology.synonym_search')
+    def test_search(self, mock_syn_search):
+        mock_syn_search.return_value = False
 
-            assert list(self.terms.search('something')) == []
-            # All terms will be searched for in synonyms
-            assert mock_syn_search.call_count == 7
-            mock_syn_search.reset_mock()
+        self.assertEqual(
+            list(self.terms.search('something')),
+            []
+        )
+        # All terms will be searched for in synonyms
+        self.assertEqual(
+            mock_syn_search.call_count,
+            7
+        )
+        mock_syn_search.reset_mock()
 
-            assert list(self.terms.search('Test root')) == [self.root]
-            # Root term will not be searched for in synonyms
-            assert mock_syn_search.call_count == 6
-            mock_syn_search.reset_mock()
+        self.assertEqual(
+            list(self.terms.search('Test root')),
+            [self.root]
+        )
+        # Root term will not be searched for in synonyms
+        self.assertEqual(
+            mock_syn_search.call_count,
+            6
+        )
+        mock_syn_search.reset_mock()
 
-            assert list(self.terms.search('Test child level 1-1')) == [
-                self.child_1_1
-            ]
-            # Matched term will not be searched for in synonyms
-            assert mock_syn_search.call_count == 6
+        self.assertEqual(
+            list(self.terms.search('Test child level 1-1')),
+            [self.child_1_1]
+        )
+        # Matched term will not be searched for in synonyms
+        self.assertEqual(
+            mock_syn_search.call_count,
+            6
+        )
 
     def test_synonym_search(self):
-        self.terms._connect_all()
         assert self.terms.synonym_search(self.child_1_2, 'not')
         assert self.terms.synonym_search(self.child_1_2, 'ther na')
         assert self.terms.synonym_search(self.child_1_2, 'another name')
@@ -630,11 +683,9 @@ class OntologyQueries(unittest.TestCase):
         assert not self.terms.synonym_search(self.child_1_3, 'name')
         assert not self.terms.synonym_search(self.child_1_3, 'third name')
         assert not self.terms.synonym_search(self.child_1_3, 'xyz')
-        pass
 
     def test_synonym_match(self):
-        self.child_1_1.synonym = '"Test child level 1-2"'
-        self.terms._connect_all()
+        self.child_1_1.synonym.append('Test child level 1-2')
 
         self.assertEqual(
             self.terms.synonym_match('Test child level 1-2'),
@@ -649,6 +700,7 @@ class OntologyQueries(unittest.TestCase):
             self.child_1_2
         )
 
+        self.child_1_2.Config.allow_mutation = True
         self.child_1_2.name = 'something else'
         self.assertEqual(
             self.terms.synonym_match('Test child level 1-2'),
@@ -666,3 +718,7 @@ class OntologyQueries(unittest.TestCase):
     @unittest.skip('TODO')
     def test_loading_from_file(self):
         pass
+
+
+if __name__ == "__main__":
+    unittest.main()

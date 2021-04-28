@@ -3,7 +3,9 @@ import urllib.request
 import logging
 from typing import Optional
 
-from pyhpo.annotations import FILENAMES
+from pyhpo.parser.obo import FILENAME as hpo_file
+from pyhpo.parser.genes import FILENAME as gene_file
+from pyhpo.parser.diseases import FILENAME as pheno_file
 
 
 """
@@ -16,6 +18,12 @@ URLS = {
     'HPO_ONTOLOGY': 'http://purl.obolibrary.org/obo/hp.obo',
     'HPO_GENE': 'http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt',  # noqa: E501
     'HPO_PHENO': 'http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa'
+}
+
+FILENAMES = {
+    'HPO_ONTOLOGY': hpo_file,
+    'HPO_GENE': gene_file,
+    'HPO_PHENO': pheno_file
 }
 
 

@@ -244,6 +244,7 @@ class SetInitTests(unittest.TestCase):
             5
         )
 
+        self.ontology[12].Config.allow_mutation = True
         self.ontology[12].is_obsolete = True
         self.ontology[12].replaced_by = 'HP:0041'
         ci2 = ci.replace_obsolete()
@@ -262,7 +263,7 @@ class SetInitTests(unittest.TestCase):
             ])
         )
 
-        self.ontology[12].is_obsolete = 'False'
+        self.ontology[12].is_obsolete = False
         self.ontology[12].replaced_by = 'HP:0041'
         ci2 = ci.replace_obsolete()
         self.assertEqual(
@@ -292,6 +293,7 @@ class SetInitTests(unittest.TestCase):
             len(self.ontology)
         )
 
+        self.ontology[12].Config.allow_mutation = True
         self.ontology[12].is_obsolete = True
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -409,8 +411,8 @@ class SetMetricsTests(unittest.TestCase):
     def test_information_content(self):
         i = 0
         for term in self.ci:
-            term.information_content['omim'] = i
-            term.information_content['gene'] = i*2
+            term.information_content.omim = i
+            term.information_content.gene = i*2
             i += 1
         res = self.ci.information_content()
 
@@ -781,3 +783,7 @@ class EqualityScoreTests(unittest.TestCase):
 
         res = set2._equality_score(HPOSet(self.terms[5:8]))
         self.assertEqual(res, 0.25)
+
+
+if __name__ == "__main__":
+    unittest.main()
