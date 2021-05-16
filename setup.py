@@ -39,6 +39,9 @@ setuptools.setup(
     classifiers=CLASSIFIERS,
     python_requires='>=3.6',
     include_package_data=True,
+    install_requires=[
+        'pydantic'
+    ],
     extras_require={
         'pandas': ['pandas'],
         'scipy': ['scipy'],

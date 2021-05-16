@@ -12,7 +12,7 @@ Main features
 
 It allows working on individual terms ``HPOTerm``, a set of terms ``HPOSet`` and the full ``Ontology``.
 
-Internally the ontology is represented as a branched linked list, every term contains pointers to its parent and child terms. This allows fast tree traversal functioanlity.
+Internally the ontology is represented as a branched linked list, every term contains pointers to its parent and child terms. This allows fast tree traversal functionality.
 
 The library is helpful for discovery of novel gene-disease associations and GWAS data analysis studies. At the same time, it can be used for oragnize clinical information of patients in research or diagnostic settings.
 
@@ -21,15 +21,233 @@ It provides an interface to create ``Pandas Dataframe`` from its data, allowing 
 
 HPOTerm
 -------
-An individual ``HPOTerm`` contains all info about itself as well as pointers to its parents and its children. You can access its information-content, calculate similarity scores to other terms, find the shortest or longes connection between two terms. List all associated genes or diseases, etc.
+An individual :class:`pyhpo.term.HPOTerm` contains all info about itself as well as pointers to its parents and its children. You can access its information-content, calculate similarity scores to other terms, find the shortest or longes connection between two terms. List all associated genes or diseases, etc.
 
-HPOSet
-------
-An ``HPOSet`` can be used to represent e.g. a patient's clinical information. It allows some basic filtering and comparisons to other ``HPOSet`` s.
+Examples:
+^^^^^^^^^
+
+Basic functionalities of an HPO-Term
+
+.. code:: python
+
+    from pyhpo import Ontology
+
+    # initilize the Ontology ()
+    _ = Ontology()
+
+    # Retrieve a term e.g. via its HPO-ID
+    term = Ontology.get_hpo_object('Scoliosis')
+
+    print(term)
+    #> HP:0002650 | Scoliosis
+
+    # Get information content from Term <--> Omim associations
+    term.information_content['omim']
+    #> 2.39
+
+    # Show how many genes are associated to the term
+    # (Note that this includes indirect associations, associations
+    # from children terms to genes.)
+    len(term.genes)
+    #> 947
+
+    # Show how many Omim Diseases are associated to the term
+    # (Note that this includes indirect associations, associations
+    # from children terms to diseases.)
+    len(term.omim_diseases)
+    #> 730
+
+    # Get a list of all parent terms
+    for p in term.parents:
+        print(p)
+    #> HP:0010674 | Abnormality of the curvature of the vertebral column
+
+    # Get a list of all children terms
+    for p in term.children:
+        print(p)
+    """
+    HP:0002943 | Thoracic scoliosis
+    HP:0008458 | Progressive congenital scoliosis
+    HP:0100884 | Compensatory scoliosis
+    HP:0002944 | Thoracolumbar scoliosis
+    HP:0002751 | Kyphoscoliosis
+    """
+
+*(This script is complete, it should run "as is")*
+
+
+Some basic functionality, working with more than one term
+
+.. code:: python
+
+    from pyhpo import Ontology
+    _ = Ontology()
+    term = Ontology.get_hpo_object('Scoliosis')
+
+    # Let's get a second term, this time using it HPO-ID
+    term_2 = Ontology.get_hpo_object('HP:0009121')
+
+    print(term_2)
+    #> HP:0009121 | Abnormal axial skeleton morphology
+
+    # Check if the Scoliosis is a direct or indirect child
+    # of Abnormal axial skeleton morphology
+
+    term.child_of(term_2)
+    #> True
+
+    # or vice versa
+    term_2.parent_of(term)
+    #> True
+
+    # show all nodes between two term:
+    path = term.path_to_other(term_2)
+    for t in path[1]:
+        print(t)
+
+    """
+    HP:0002650 | Scoliosis
+    HP:0010674 | Abnormality of the curvature of the vertebral column
+    HP:0000925 | Abnormality of the vertebral column
+    HP:0009121 | Abnormal axial skeleton morphology
+    """
+
+    print(f'Steps from Term 1 to Term 2: {path[0]}')
+    #> Steps from Term 1 to Term 2: 3
+
+
+    # Calculate the similarity between two terms
+    term.similarity_score(term_2)
+    #> 0.442
+
+*(This script is complete, it should run "as is")*
+
 
 Ontology
 --------
-The ``Ontology`` represents all HPO terms and their connections and associations. It also contains pointers to associated genes and disease.
+The ``Ontology`` contains all HPO terms, their connections to each other and associations to genes and diseases.
+It provides some helper functions for ``HPOTerm`` search functionality
+
+.. note::
+
+    The Ontology is a Singleton and must only be initiated once.
+    It can be reused across several modules.
+
+.. code:: python
+
+    from pyhpo import Ontology, HPOSet
+
+    # initilize the Ontology (this must be done only once)
+    _ = Ontology()
+
+    # Get a term based on its name
+    term = Ontology.get_hpo_object('Scoliosis')
+    print(term)
+    #> HP:0002650 | Scoliosis
+
+    # ...or based on HPO-ID
+    term = Ontology.get_hpo_object('HP:0002650')
+    print(term)
+    #> HP:0002650 | Scoliosis
+
+    # ...or based on its index
+    term = Ontology.get_hpo_object(2650)
+    print(term)
+    #> HP:0002650 | Scoliosis
+
+    # shortcut to retrieve a term based on its index
+    term = Ontology[2650]
+    print(term)
+    #> HP:0002650 | Scoliosis
+
+    # Search for term
+    for term in Ontology.search('olios'):
+        print(term)
+
+    """
+    HP:0002211 | White forelock
+    HP:0002290 | Poliosis
+    HP:0002650 | Scoliosis
+    HP:0002751 | Kyphoscoliosis
+    HP:0002943 | Thoracic scoliosis
+    HP:0002944 | Thoracolumbar scoliosis
+    HP:0003423 | Thoracolumbar kyphoscoliosis
+    HP:0004619 | Lumbar kyphoscoliosis
+    HP:0004626 | Lumbar scoliosis
+    HP:0005659 | Thoracic kyphoscoliosis
+    HP:0008453 | Congenital kyphoscoliosis
+    HP:0008458 | Progressive congenital scoliosis
+    HP:0100884 | Compensatory scoliosis
+    """
+
+*(This script is complete, it should run "as is")*
+
+
+HPOSet
+------
+An ``HPOSet`` is a collection of :class:`pyhpo.term.HPOTerm`s and
+can be used to represent e.g. a patient's clinical information. It provides APIs for filtering, comparisons to other ``HPOSet``s and term/gene/disease enrichments.
+
+
+Examples:
+^^^^^^^^^
+
+.. code:: python
+
+    from pyhpo import Ontology, HPOSet
+
+    # initilize the Ontology
+    _ = Ontology()
+
+    # create HPOSets, corresponding to 
+    # e.g. the clinical information of a patient
+    # You can initiate an HPOSet using either
+    # - HPO-ID: 'HP:0002943'
+    # - HPO-Name: 'Scoliosis'
+    # - HPO-ID (int): 2943
+
+    ci_1 = HPOSet.from_queries([
+        'HP:0002943',
+        'HP:0008458',
+        'HP:0100884',
+        'HP:0002944',
+        'HP:0002751'
+    ])
+
+    ci_2 = HPOSet.from_queries([
+        'HP:0002650',
+        'HP:0010674',
+        'HP:0000925',
+        'HP:0009121'
+    ])
+
+    # Compare the similarity
+    ci_1.similarity(ci_2)
+    #> 0.7593552670152157
+
+    # Remove all non-leave nodes from a set
+    ci_leaf = ci_2.child_nodes()
+    len(ci_2)
+    #> 4
+    len(ci_leaf)
+    #> 1
+    ci_2
+    #> HPOSet.from_serialized("925+2650+9121+10674")
+    ci_leaf
+    #> HPOSet.from_serialized("2650")
+
+    # Check the information content of an HPOSet
+    ci_1.information_content()
+    """
+    {
+        'mean': 6.571224974009769,
+        'total': 32.856124870048845,
+        'max': 8.97979449089521,
+        'all': [5.98406221734122, 8.286647310335265, 8.97979449089521, 5.5458072864100645, 4.059813565067086]
+    }
+    """
+
+*(This script is complete, it should run "as is")*
 
 
 Installation / Setup

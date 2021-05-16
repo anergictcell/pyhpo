@@ -1,6 +1,9 @@
+from typing import List, Tuple
+
+import pyhpo
 from pyhpo.term import HPOTerm
 from pyhpo.ontology import Ontology
-from pyhpo.annotations import Gene, Omim
+from pyhpo.annotations import Gene, Omim, Decipher, Orpha
 
 
 """
@@ -17,7 +20,7 @@ Generates the following Ontology
 """
 
 
-def make_terms():
+def make_terms() -> Tuple[HPOTerm, ...]:
     root = HPOTerm(
         id='HP:0001',
         name='Test root'
@@ -71,7 +74,7 @@ def make_terms():
     )
 
 
-def make_ontology():
+def make_ontology() -> pyhpo.ontology.OntologyClass:
     items = make_terms()
 
     terms = Ontology(from_obo_file=False)
@@ -83,7 +86,7 @@ def make_ontology():
     return terms
 
 
-def make_ontology_with_modifiers():
+def make_ontology_with_modifiers() -> pyhpo.ontology.OntologyClass:
     items = make_terms()
 
     terms = Ontology(from_obo_file=False)
@@ -130,7 +133,7 @@ def make_ontology_with_modifiers():
     return terms
 
 
-def make_genes(n):
+def make_genes(n) -> List[pyhpo.annotations.Annotation]:
     # Ensure to remove all items from Gene object
     Gene.clear()
     return [
@@ -139,9 +142,25 @@ def make_genes(n):
     ]
 
 
-def make_omim(n):
+def make_omim(n) -> List[pyhpo.annotations.Annotation]:
     Omim.clear()
     return [
         Omim(diseaseid=i, name='Omim{}'.format(i))
+        for i in range(n)
+    ]
+
+
+def make_decipher(n) -> List[pyhpo.annotations.Annotation]:
+    Decipher.clear()
+    return [
+        Decipher(diseaseid=i, name='Decipher{}'.format(i))
+        for i in range(n)
+    ]
+
+
+def make_orpha(n) -> List[pyhpo.annotations.Annotation]:
+    Orpha.clear()
+    return [
+        Orpha(diseaseid=i, name='Orpha{}'.format(i))
         for i in range(n)
     ]

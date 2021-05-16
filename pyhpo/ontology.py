@@ -96,7 +96,10 @@ class OntologyClass():
             if query.startswith('HP:'):
                 res = self[id_from_string(query)]
             else:
-                res = self.synonym_match(query)
+                try:
+                    res = self.synonym_match(query)
+                except RuntimeError:
+                    pass
 
         elif isinstance(query, int):
             res = self[query]

@@ -1,10 +1,11 @@
-from unittest import TestCase
+import unittest
 
 from pyhpo.parser.obo import parse_obo_section, terms_from_file
+from pyhpo.parser.generics import remove_outcommented_rows
 from pyhpo import HPOTerm
 
 
-class OboParsingTest(TestCase):
+class OboParsingTest(unittest.TestCase):
     def setUp(self):
         self.a1 = [
             'id: HP:0000001',
@@ -71,6 +72,22 @@ class OboParsingTest(TestCase):
         for term in terms_from_file('pyhpo/data'):
             # print(term['id'])
             HPOTerm(**term)
+
+
+class TestBasic(unittest.TestCase):
+    def test_skipping_outcommented_rows(self):
+        rows = [
+            '#Skip',
+            'Show',
+            '#Ignore',
+            'Show2'
+        ]
+        res = list(remove_outcommented_rows(rows))
+        assert res == ['Show', 'Show2']
+
+        res = list(remove_outcommented_rows(rows, ignorechar='#S'))
+        assert res == ['Show', '#Ignore', 'Show2']
+
 
 # print('=========== A 1 =============')
 # t1 = HPOTerm.from_obo_term_section(a1)
