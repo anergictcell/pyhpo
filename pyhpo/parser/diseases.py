@@ -76,7 +76,8 @@ def add_decipher_to_term(
     term: 'pyhpo.HPOTerm'
 ) -> None:
     """
-    Recursive function to add Gene to an HPOTerm and all its parents
+    Recursive function to add Decipher Disease
+    to an HPOTerm and all its parents
     """
     if decipher in term.decipher_diseases:
         return None
@@ -91,13 +92,14 @@ def add_negative_decipher_to_term(
     term: 'pyhpo.HPOTerm'
 ) -> None:
     """
-    Recursive function to add Gene to an HPOTerm and all its parents
+    Recursive function to add excluded Decipher Disease
+    to an HPOTerm and all its parents
     """
     if decipher in term.decipher_excluded_diseases:
         return None
     term.decipher_excluded_diseases.add(decipher)
     for child in term.children:
-        add_decipher_to_term(decipher, child)
+        add_negative_decipher_to_term(decipher, child)
     return None
 
 
@@ -106,7 +108,8 @@ def add_omim_to_term(
     term: 'pyhpo.HPOTerm'
 ) -> None:
     """
-    Recursive function to add Gene to an HPOTerm and all its parents
+    Recursive function to add OMIM Disease
+    to an HPOTerm and all its parents
     """
     if omim in term.omim_diseases:
         return None
@@ -121,13 +124,14 @@ def add_negative_omim_to_term(
     term: 'pyhpo.HPOTerm'
 ) -> None:
     """
-    Recursive function to add Gene to an HPOTerm and all its parents
+    Recursive function to add excluded OMIM Disease
+    to an HPOTerm and all its parents
     """
     if omim in term.omim_excluded_diseases:
         return None
     term.omim_excluded_diseases.add(omim)
     for child in term.children:
-        add_omim_to_term(omim, child)
+        add_negative_omim_to_term(omim, child)
     return None
 
 
@@ -136,7 +140,8 @@ def add_orpha_to_term(
     term: 'pyhpo.HPOTerm'
 ) -> None:
     """
-    Recursive function to add Gene to an HPOTerm and all its parents
+    Recursive function to add Orpha Disease
+    to an HPOTerm and all its parents
     """
     if orpha in term.orpha_diseases:
         return None
@@ -151,13 +156,14 @@ def add_negative_orpha_to_term(
     term: 'pyhpo.HPOTerm'
 ) -> None:
     """
-    Recursive function to add Gene to an HPOTerm and all its parents
+    Recursive function to add excluded Orpha Disease
+    to an HPOTerm and all its parents
     """
     if orpha in term.orpha_excluded_diseases:
         return None
     term.orpha_excluded_diseases.add(orpha)
     for child in term.children:
-        add_orpha_to_term(orpha, child)
+        add_negative_orpha_to_term(orpha, child)
     return None
 
 
