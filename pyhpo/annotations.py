@@ -8,6 +8,7 @@ class Annotation(BaseModel):
     name: str
     hpo: Set[int] = set()
     _hash: int
+    _json_keys = set(['id', 'name'])
 
     def __init__(self, **kwargs: Union[int, str]) -> None:
         super().__init__(**kwargs)
@@ -34,10 +35,12 @@ class Annotation(BaseModel):
             * **hpo** - (If ``verbose == True``):
               set of :class:`pyhpo.term.HPOTerm`
         """
+        res = {}
+        for key in self._json_keys:
+            res[key] = self.__getattribute__(key)
         if verbose:
-            return self.dict()
-        else:
-            return self.dict(exclude={'hpo'})
+            res['hpo'] = self.hpo
+        return res
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, int):
@@ -46,13 +49,7 @@ class Annotation(BaseModel):
         if isinstance(other, str):
             return self.name == other
 
-        try:
-            return bool(
-                (self.id and self.id == other.id) or
-                (self.name and self.name == other.name)
-            )
-        except AttributeError:
-            return False
+        return hash(self) == hash(other)
 
     def __hash__(self) -> int:
         return self._hash
@@ -96,6 +93,8 @@ class GeneSingleton(Annotation):
     name: str
         HGNC gene synbol
     """
+    _json_keys = set(['id', 'name', 'symbol'])
+
     @property
     def symbol(self) -> str:
         return self.name
