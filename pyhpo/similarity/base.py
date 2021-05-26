@@ -1,9 +1,11 @@
 from typing import Dict, List, Optional, Type
 
+from pydantic import BaseModel
+
 import pyhpo
 
 
-class _Similarity:
+class _Similarity(BaseModel):
     dispatch: Dict['str', 'SimilarityBase'] = {}
     kind = 'omim'
     method = 'graphic'
