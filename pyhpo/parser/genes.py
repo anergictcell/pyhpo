@@ -30,7 +30,8 @@ def _parse_phenotype_to_gene_file(path: str) -> None:
 
 
 def _add_genes_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
-    for gene in all_genes():
+    ontology._genes = all_genes()
+    for gene in ontology._genes:
         for term_id in gene.hpo:
             add_gene_to_term(gene, ontology[term_id])
 

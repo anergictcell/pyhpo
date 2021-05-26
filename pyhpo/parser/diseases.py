@@ -48,7 +48,8 @@ def _parse_phenotype_hpoa_file(path: str) -> None:
 
 
 def _add_decipher_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
-    for decipher in Decipher.keys():
+    ontology._decipher_diseases = all_decipher_diseases()
+    for decipher in ontology._decipher_diseases:
         for term_id in decipher.hpo:
             add_decipher_to_term(decipher, ontology[term_id])
         for term_id in decipher.negative_hpo:
@@ -56,7 +57,8 @@ def _add_decipher_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
 
 
 def _add_omim_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
-    for omim in Omim.keys():
+    ontology._omim_diseases = all_omim_diseases()
+    for omim in ontology._omim_diseases:
         for term_id in omim.hpo:
             add_omim_to_term(omim, ontology[term_id])
         for term_id in omim.negative_hpo:
@@ -64,7 +66,8 @@ def _add_omim_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
 
 
 def _add_orpha_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
-    for orpha in Orpha.keys():
+    ontology._orpha_diseases = all_orpha_diseases()
+    for orpha in ontology._orpha_diseases:
         for term_id in orpha.hpo:
             add_orpha_to_term(orpha, ontology[term_id])
         for term_id in orpha.negative_hpo:
