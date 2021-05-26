@@ -3,7 +3,6 @@ from functools import reduce, lru_cache
 from typing import Any, List, Optional, Set, Tuple
 
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
 
 from pyhpo.config import MODIFIER_IDS
 from pyhpo.cache import cached_property
@@ -13,8 +12,7 @@ from pyhpo.annotations import OmimDisease, DecipherDisease, OrphaDisease
 from pyhpo.parser.generics import id_from_string
 
 
-@dataclass
-class InformationContent:
+class InformationContent(BaseModel):
     gene: float = 0.0
     omim: float = 0.0
     orpha: float = 0.0
@@ -463,7 +461,7 @@ class HPOTerm(BaseModel):
             res['synonym'] = self.synonym
             res['xref'] = self.xref
             res['is_a'] = self._is_a
-            res['ic'] = self.information_content
+            res['ic'] = self.information_content.dict()
 
         return res
 
