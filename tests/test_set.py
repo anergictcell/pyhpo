@@ -2,10 +2,12 @@ import unittest
 from unittest.mock import patch, call
 import warnings
 
+from pyhpo.annotations import Gene, Omim, Orpha, Decipher
 from pyhpo.set import HPOSet, BasicHPOSet
 from pyhpo.term import HPOTerm
 from pyhpo.matrix import Matrix
-from tests.mockontology import make_terms, make_ontology, make_ontology_with_modifiers
+
+from tests import mockontology as mo
 
 
 class SetMethods(unittest.TestCase):
@@ -33,7 +35,7 @@ class SetMethods(unittest.TestCase):
 
 class SetInitTests(unittest.TestCase):
     def setUp(self):
-        self.ontology = make_ontology()
+        self.ontology = mo.make_ontology()
         self.ci = HPOSet([
             term for term in self.ontology
         ])
@@ -102,7 +104,7 @@ class SetInitTests(unittest.TestCase):
         )
 
     def test_remove_modifier(self):
-        terms = make_ontology_with_modifiers()
+        terms = mo.make_ontology_with_modifiers()
 
         normal_term_ids = set(
             [1, 11, 12, 21, 31, 41, 13]
@@ -304,10 +306,18 @@ class SetInitTests(unittest.TestCase):
                 len(self.ontology)-1
             )
 
+    def test_string(self):
+        ci = HPOSet([self.ontology[11], self.ontology[12]])
+        assert str(ci) == 'HPOSet: Test child level 1-1, Test child level 1-2'
+
+    def test_repr(self):
+        ci = HPOSet([self.ontology[11], self.ontology[12]])
+        assert ci.__repr__() == 'HPOSet.from_serialized("11+12")'
+
 
 class BasicHPOSetTests(unittest.TestCase):
     def test_init(self):
-        ontology = make_ontology()
+        ontology = mo.make_ontology()
         ci = BasicHPOSet([
             term for term in ontology
         ])
@@ -317,7 +327,7 @@ class BasicHPOSetTests(unittest.TestCase):
         )
 
     def test_remove_modifiers(self):
-        ontology = make_ontology_with_modifiers()
+        ontology = mo.make_ontology_with_modifiers()
         ci = BasicHPOSet([
             term for term in ontology
         ])
@@ -327,7 +337,7 @@ class BasicHPOSetTests(unittest.TestCase):
         )
 
     def test_remove_duplicate_terms(self):
-        ontology = make_ontology()
+        ontology = mo.make_ontology()
         ci = BasicHPOSet([
             term for term in ontology
         ] + [ontology[41]])
@@ -336,10 +346,19 @@ class BasicHPOSetTests(unittest.TestCase):
             set([ontology[41], ontology[13]])
         )
 
+    def test_add_parent_term(self):
+        ontology = mo.make_ontology()
+        ci = BasicHPOSet([
+            ontology[11],
+            ontology[21],
+            ontology[1]
+        ])
+        assert ci == set([ontology[21]])
+
 
 class SetMetricsTests(unittest.TestCase):
     def setUp(self):
-        self.ontology = make_ontology()
+        self.ontology = mo.make_ontology()
         self.ci = HPOSet([
             term for term in self.ontology
         ])
@@ -434,7 +453,7 @@ class SetMetricsTests(unittest.TestCase):
 
 class SimilarityTests(unittest.TestCase):
     def setUp(self):
-        self.terms = make_terms()
+        self.terms = mo.make_terms()
 
     def test_simsilarity_arg_forwarding(self):
         with patch.object(
@@ -603,7 +622,7 @@ class SimilarityTests(unittest.TestCase):
 
 class SimScoreTests(unittest.TestCase):
     def setUp(self):
-        self.terms = make_terms()
+        self.terms = mo.make_terms()
 
     def test_empty_sim_score(self):
         with patch.object(
@@ -758,7 +777,7 @@ class SimScoreTests(unittest.TestCase):
 
 class EqualityScoreTests(unittest.TestCase):
     def setUp(self):
-        self.terms = make_terms()
+        self.terms = mo.make_terms()
 
     def test_empty_sets(self):
         set1 = HPOSet([])
@@ -783,6 +802,46 @@ class EqualityScoreTests(unittest.TestCase):
 
         res = set2._equality_score(HPOSet(self.terms[5:8]))
         self.assertEqual(res, 0.25)
+
+
+class TestSetAnnotations(unittest.TestCase):
+    def setUp(self):
+        self.ontology = mo.make_ontology_with_annotation()
+
+    def tearDown(self):
+        Gene.clear()
+        Omim.clear()
+        Orpha.clear()
+        Decipher.clear()
+
+    def test_set_with_all_annotations(self):
+        ci = HPOSet([
+            self.ontology[11],
+            self.ontology[12],
+            self.ontology[41]
+        ])
+        
+        assert len(ci.all_genes()) == 2
+        assert len(ci.omim_diseases()) == 2
+        assert len(ci.orpha_diseases()) == 2
+        assert len(ci.decipher_diseases()) == 2
+
+    def test_set_with_one_annotation(self):
+        ci = HPOSet([
+            self.ontology[11],
+            self.ontology[13],
+            self.ontology[31]
+        ])
+        
+        assert len(ci.all_genes()) == 1
+        assert len(ci.omim_diseases()) == 1
+        assert len(ci.orpha_diseases()) == 1
+        assert len(ci.decipher_diseases()) == 1
+
+        assert ci.all_genes() == set([Gene.get(0)])
+        assert ci.omim_diseases() == set([Omim.get(0)])
+        assert ci.orpha_diseases() == set([Orpha.get(0)])
+        assert ci.decipher_diseases() == set([Decipher.get(0)])
 
 
 if __name__ == "__main__":

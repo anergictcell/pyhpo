@@ -3,17 +3,9 @@ from unittest.mock import patch, MagicMock
 
 import pyhpo
 from pyhpo.ontology import Ontology
-from tests.mockontology import make_terms
-
-
-class MockPrint:
-    def __init__(self):
-        self.counter = 0
-        self.strings = []
-
-    def __call__(self, string):
-        self.counter += 1
-        self.strings.append(string)
+from tests.mockontology import make_terms, tearDown
+from tests.mockontology import make_ontology_with_annotation
+from tests.mockontology import make_ontology
 
 
 class MockOntology:
@@ -496,20 +488,6 @@ class TestOntologyTreeTraversal(unittest.TestCase):
             "HPOTerm(id='HP:0001', name='Test root', is_a=[])"
         )
 
-    @unittest.skip('Deprecating print_hierarchy')
-    def test_hierarchy_printing(self):
-        pyhpo.term.print = MockPrint()
-
-        self.child_3.print_hierarchy()
-        assert pyhpo.term.print.counter == 6
-        assert pyhpo.term.print.strings[0] == '-Test child level 3'
-        assert pyhpo.term.print.strings[1].endswith('-Test child level 2-1')
-        assert pyhpo.term.print.strings[2].endswith('-Test child level 1-1')
-        assert pyhpo.term.print.strings[3].endswith('-Test root')
-        assert pyhpo.term.print.strings[4].endswith('-Test child level 1-2')
-        assert pyhpo.term.print.strings[5].endswith('-Test root')
-        pyhpo.term.print = print
-
 
 class TestOntologyQueries(unittest.TestCase):
     def setUp(self):
@@ -708,13 +686,16 @@ class TestOntologyQueries(unittest.TestCase):
             self.child_1_1
         )
 
-    @unittest.skip('TODO')
     def test_common_ancestors(self):
-        pass
+        ontology = make_ontology()
 
-    @unittest.skip('TODO')
-    def test_annotations(self):
-        pass
+        ca = ontology[31].common_ancestors(ontology[41])
+        assert ontology[12] in ca
+        assert ontology[21] in ca
+        assert ontology[11] in ca
+        assert ontology[1] in ca
+        assert ontology[31] in ca
+        assert len(ca) == 5
 
     @unittest.skip('TODO')
     def test_loading_from_file(self):
@@ -765,6 +746,52 @@ class TestDataframe(unittest.TestCase):
         assert isinstance(data['dBottom'][0], int)
 
         assert isinstance(res, MagicMock)
+
+
+class TestOntologyAnnotation(unittest.TestCase):
+    def setUp(self):
+        self.ontology = make_ontology_with_annotation()
+
+    def tearDown(self):
+        tearDown()
+
+    def test_genes(self):
+        assert len(self.ontology.genes) == 2, self.ontology.genes
+        assert 'Gene0' in [x.name for x in self.ontology.genes]
+        assert 'Gene1' in [x.name for x in self.ontology.genes]
+
+    def test_omim_diseases(self):
+        assert len(self.ontology.omim_diseases) == 3, self.ontology.omim_diseases
+        assert 'Omim0' in [x.name for x in self.ontology.omim_diseases]
+        assert 'Omim1' in [x.name for x in self.ontology.omim_diseases]
+        assert 'Omim2' in [x.name for x in self.ontology.omim_diseases]
+
+    def test_orpha_diseases(self):
+        assert len(self.ontology.orpha_diseases) == 3, self.ontology.orpha_diseases
+        assert 'Orpha0' in [x.name for x in self.ontology.orpha_diseases]
+        assert 'Orpha1' in [x.name for x in self.ontology.orpha_diseases]
+        assert 'Orpha2' in [x.name for x in self.ontology.orpha_diseases]
+
+    def test_decipher_diseases(self):
+        assert len(self.ontology.decipher_diseases) == 3, self.ontology.decipher_diseases
+        assert 'Decipher0' in [x.name for x in self.ontology.decipher_diseases]
+        assert 'Decipher1' in [x.name for x in self.ontology.decipher_diseases]
+        assert 'Decipher2' in [x.name for x in self.ontology.decipher_diseases]
+
+    def test_information_content(self):
+        self.ontology._add_information_content()
+
+        # all genes are linked to 1
+        assert self.ontology[1].information_content.gene == 0.0
+
+        # 2 / 3 OMIM diseases are linked to 1
+        assert int(self.ontology[1].information_content.omim * 10_000) == 4054
+
+        # 1 / 2 genes are linked to 11
+        assert int(self.ontology[11].information_content.gene * 10_000) == 6931
+        
+        # no genes associated
+        assert self.ontology[31].information_content.gene == 0.0
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ try:
 except ImportError:
     import sys
     sys.modules['scipy.stats'] = MagicMock()
-    sys.modules['scipy.stats'].hypergeom.sf = MagicMock(return_value=0.0000235)
+    sys.modules['scipy.stats'].hypergeom.sf = MagicMock(return_value=0.0000235)  # type: ignore # noqa: E501
     from pyhpo import stats
 
 from pyhpo.stats import HPOEnrichment, EnrichmentModel
@@ -124,6 +124,21 @@ class TestHPOEnrichment(unittest.TestCase):
             'The HPO term 10 is not present in the reference population',
             str(context.exception)
         )
+
+    def test_single_enrichment_wrong_method(self):
+        mocktotal = MagicMock()
+        mocktotal.total = 12
+        mocktotal.hpos = {'bar': 'foo'}
+        with self.assertRaises(NotImplementedError) as err:
+            _ = HPOEnrichment._single_enrichment(
+                mocktotal,
+                'wrongmethod',
+                'bar',
+                11,
+                13
+            )
+        
+        assert str(err.exception) == 'Enrichment method not implemented'
 
     def test_enrichment(self):
         that = MagicMock()
@@ -255,6 +270,20 @@ class TestAnnotationEnrichment(unittest.TestCase):
             'The item foo is not present in the reference population',
             str(context.exception)
         )
+
+    def test_single_enrichment_wrong_method(self):
+        that = MagicMock()
+        that.total = 12
+        that.base_count = {'bar': 'foo'}
+        with self.assertRaises(NotImplementedError) as err:
+            _ = EnrichmentModel._single_enrichment(
+                that,
+                'wrongmethod',
+                'bar',
+                11,
+                13
+            )
+        assert str(err.exception) == 'Enrichment method not implemented'
 
     def test_enrichment(self):
         that = MagicMock()

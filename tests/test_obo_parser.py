@@ -1,6 +1,7 @@
+import os
 import unittest
 
-from pyhpo.parser.obo import parse_obo_section, terms_from_file
+from pyhpo.parser.obo import parse_obo_section, terms_from_file, Converter
 from pyhpo.parser.generics import remove_outcommented_rows
 from pyhpo import HPOTerm
 
@@ -69,8 +70,12 @@ class OboParsingTest(unittest.TestCase):
         )
         
     def test_full_load(self):
-        for term in terms_from_file('pyhpo/data'):
-            # print(term['id'])
+        data_dir = os.path.join(
+            os.path.dirname(__file__),
+            '../pyhpo/data'
+        )
+        for term in terms_from_file(data_dir):
+            # just make sure it does not crash
             HPOTerm(**term)
 
 
@@ -88,62 +93,74 @@ class TestBasic(unittest.TestCase):
         res = list(remove_outcommented_rows(rows, ignorechar='#S'))
         assert res == ['Show', '#Ignore', 'Show2']
 
-
-# print('=========== A 1 =============')
-# t1 = HPOTerm.from_obo_term_section(a1)
-# print('=========== A 2 =============')
-# t2 = HPOTerm.from_obo_term_section(a2)
-# print('=========== A 3 =============')
-# t3 = HPOTerm.from_obo_term_section(a3)
-
-
-"""
-    @unittest.skip('Refactored')
     def test_synonym_parsing(self):
-        assert HPOTerm.parse_synonym(
-            '"Abnormality of body height" EXACT layperson []'
-        ) == 'Abnormality of body height'
-        assert HPOTerm.parse_synonym(
-            '"Autosomal dominant type" RELATED [HPO:skoehler]'
-        ) == 'Autosomal dominant type'
-        assert HPOTerm.parse_synonym(
-            '"Scalp hair loss" EXACT layperson [ORCID:0000-0001-5889-4463]'
-        ) == 'Scalp hair loss'
+        assert Converter.parse_synonym(
+            ['"Abnormality of body height" EXACT layperson []'],
+            'synonym',
+            []
+        ) == ['Abnormality of body height']
 
-    @unittest.skip('Refactored')
+        assert Converter.parse_synonym(
+            ['"Autosomal dominant type" RELATED [HPO:skoehler]'],
+            'synonym',
+            []
+        ) == ['Autosomal dominant type']
+        assert Converter.parse_synonym(
+            ['"Scalp hair loss" EXACT layperson [ORCID:0000-0001-5889-4463]'],
+            'synonym',
+            []
+        ) == ['Scalp hair loss']
+
     def test_synonym_parsing_newline(self):
-        assert HPOTerm.parse_synonym(
-            '"Abnormality of body height" EXACT layperson []\n'
-        ) == 'Abnormality of body height'
-        assert HPOTerm.parse_synonym(
-            '"Autosomal dominant type" RELATED [HPO:skoehler]\n'
-        ) == 'Autosomal dominant type'
-        assert HPOTerm.parse_synonym(
-            '"Scalp hair loss" EXACT layperson [ORCID:0000-0001-5889-4463]\n'
-        ) == 'Scalp hair loss'
+        assert Converter.parse_synonym(
+            ['"Abnormality of body height" EXACT layperson []\n'],
+            'synonym',
+            []
+        ) == ['Abnormality of body height']
+        assert Converter.parse_synonym(
+            ['"Autosomal dominant type" RELATED [HPO:skoehler]\n'],
+            'synonym',
+            []
+        ) == ['Autosomal dominant type']
+        assert Converter.parse_synonym(
+            ['"Scalp hair loss" EXACT layperson [ORCID:0000-0001-5889-4463]\n'],
+            'synonym',
+            []
+        ) == ['Scalp hair loss']
 
-    @unittest.skip('Refactored')
     def test_synonym_parsing_r_newline(self):
-        assert HPOTerm.parse_synonym(
-            '"Abnormality of body height" EXACT layperson []\r\n'
-        ) == 'Abnormality of body height'
-        assert HPOTerm.parse_synonym(
-            '"Autosomal dominant type" RELATED [HPO:skoehler]\r\n'
-        ) == 'Autosomal dominant type'
-        assert HPOTerm.parse_synonym(
-            '"Scalp hair loss" EXACT layperson [ORCID:0000-0001-5889-4463]\r\n'
-        ) == 'Scalp hair loss'
+        assert Converter.parse_synonym(
+            ['"Abnormality of body height" EXACT layperson []\r\n'],
+            'synonym',
+            []
+        ) == ['Abnormality of body height']
+        assert Converter.parse_synonym(
+            ['"Autosomal dominant type" RELATED [HPO:skoehler]\r\n'],
+            'synonym',
+            []
+        ) == ['Autosomal dominant type']
+        assert Converter.parse_synonym(
+            ['"Scalp hair loss" EXACT layperson [ORCID:0000-0001-5889-4463]\r\n'],
+            'synonym',
+            []
+        ) == ['Scalp hair loss']
 
-    @unittest.skip('Refactored')
     def test_synonym_parsing_errors(self):
         with self.assertRaises(IndexError) as context:
-            HPOTerm.parse_synonym('synonym: Scalp hair loss')
+            Converter.parse_synonym(
+                ['synonym: Scalp hair loss'],
+                'synonym',
+                []
+            )
         assert 'list index out of range' == str(context.exception)
 
         with self.assertRaises(AttributeError) as context:
-            HPOTerm.parse_synonym(12)
+            Converter.parse_synonym([12], 'synonym', [])
         self.assertEqual(
             "'int' object has no attribute 'split'",
             str(context.exception)
         )
-"""
+
+
+if __name__ == "__main__":
+    unittest.main()

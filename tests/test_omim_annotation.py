@@ -311,8 +311,3 @@ class TestOmimAnnotationParsing(unittest.TestCase):
         assert self.omim_diseases[0].negative_hpo == set()
         assert self.omim_diseases[1].negative_hpo == set()
         assert self.omim_diseases[2].negative_hpo == set([12])
-
-    @unittest.skip('TODO')
-    def test_load_from_file(self):
-        pass
-

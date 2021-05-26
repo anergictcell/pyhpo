@@ -215,17 +215,6 @@ class IntegrationFullTest(unittest.TestCase):
             phenoterms
         )
 
-    @unittest.skip('This test needs better specification')
-    def test_similarity_scores(self):
-        i = 0
-        for term in self.terms:
-            i += 1
-            if i > 10:
-                continue
-            for other in self.terms:
-                with self.subTest(t=term.id, c=other.id):
-                    assert term.similarity_score(other, method='resnik') >= 0
-
     def test_gene_enrichment(self):
         hposet = HPOSet.from_queries('HP:0007401,HP:0010885'.split(','))
         res = self.gene_model.enrichment('hypergeom', hposet)

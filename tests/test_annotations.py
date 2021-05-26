@@ -258,10 +258,6 @@ class TestGeneAnnotationParsing(unittest.TestCase):
         assert self.genes[0].hpo == set([31])
         assert self.genes[1].hpo == set([41])
 
-    @unittest.skip('TODO')
-    def test_load_from_file(self):
-        pass
-
 
 @unittest.skip('TODO')
 class PhenoLoading(unittest.TestCase):
@@ -273,3 +269,7 @@ class PhenoLoading(unittest.TestCase):
 
     def test_identify_negative_omim(self):
         pass
+
+
+if __name__ == "__main__":
+    unittest.main()

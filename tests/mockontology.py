@@ -5,6 +5,8 @@ from pyhpo.term import HPOTerm
 from pyhpo.ontology import Ontology
 from pyhpo.annotations import Gene, Omim, Decipher, Orpha
 
+from pyhpo.parser import diseases as ds 
+from pyhpo.parser.genes import _add_genes_to_ontology
 
 """
 Generates the following Ontology
@@ -133,7 +135,7 @@ def make_ontology_with_modifiers() -> pyhpo.ontology.OntologyClass:
     return terms
 
 
-def make_genes(n) -> List[pyhpo.annotations.Annotation]:
+def make_genes(n) -> List[pyhpo.annotations.GeneSingleton]:
     # Ensure to remove all items from Gene object
     Gene.clear()
     return [
@@ -142,7 +144,7 @@ def make_genes(n) -> List[pyhpo.annotations.Annotation]:
     ]
 
 
-def make_omim(n) -> List[pyhpo.annotations.Annotation]:
+def make_omim(n) -> List[pyhpo.annotations.DiseaseSingleton]:
     Omim.clear()
     return [
         Omim(diseaseid=i, name='Omim{}'.format(i))
@@ -150,7 +152,7 @@ def make_omim(n) -> List[pyhpo.annotations.Annotation]:
     ]
 
 
-def make_decipher(n) -> List[pyhpo.annotations.Annotation]:
+def make_decipher(n) -> List[pyhpo.annotations.DiseaseSingleton]:
     Decipher.clear()
     return [
         Decipher(diseaseid=i, name='Decipher{}'.format(i))
@@ -158,9 +160,70 @@ def make_decipher(n) -> List[pyhpo.annotations.Annotation]:
     ]
 
 
-def make_orpha(n) -> List[pyhpo.annotations.Annotation]:
+def make_orpha(n) -> List[pyhpo.annotations.DiseaseSingleton]:
     Orpha.clear()
     return [
         Orpha(diseaseid=i, name='Orpha{}'.format(i))
         for i in range(n)
     ]
+
+
+def make_ontology_with_annotation() -> pyhpo.ontology.OntologyClass:
+    """
+    Generates the following Ontology
+    - HP:0001
+        - HP:0011
+            - HP:0021               <- Gene/Disease 0 / Negative Disease 2
+                - HP:0031(*)
+        - HP:0012                   <- Gene/Disease 1
+            - HP:0031(*)
+                - HP:0041
+        - HP:0013
+
+    """
+
+    Gene.clear()
+    Omim.clear()
+    Orpha.clear()
+    Decipher.clear()
+
+    items = make_terms()
+
+    terms = Ontology(from_obo_file=False)
+    for item in items:
+        terms._append(item)
+
+    terms._connect_all()
+
+    genes = make_genes(2)
+    genes[0].hpo.add(21)
+    genes[1].hpo.add(12)
+
+    omim = make_omim(3)
+    omim[0].hpo.add(21)
+    omim[1].hpo.add(12)
+    omim[2].negative_hpo.add(21)
+
+    decipher = make_decipher(3)
+    decipher[0].hpo.add(21)
+    decipher[1].hpo.add(12)
+    decipher[2].negative_hpo.add(21)
+
+    orpha = make_orpha(3)
+    orpha[0].hpo.add(21)
+    orpha[1].hpo.add(12)
+    orpha[2].negative_hpo.add(21)
+
+    ds._add_omim_to_ontology(terms)
+    ds._add_decipher_to_ontology(terms)
+    ds._add_orpha_to_ontology(terms)
+    _add_genes_to_ontology(terms)
+
+    return terms
+
+
+def tearDown():
+    Gene.clear()
+    Omim.clear()
+    Orpha.clear()
+    Decipher.clear()
