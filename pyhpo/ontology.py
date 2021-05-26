@@ -188,7 +188,11 @@ class OntologyClass():
             Every matching HPO term instance
         """
         for term in self:
-            if query in term.name or self.synonym_search(term, query):
+            if (
+                query.lower() in term.name.lower()
+            ) or (
+                self.synonym_search(term, query)
+            ):
                 yield term
 
     def synonym_match(self, query: str) -> HPOTerm:
@@ -241,7 +245,7 @@ class OntologyClass():
         """
 
         for synonym in term.synonym:
-            if query in synonym:
+            if query.lower() in synonym.lower():
                 return True
         return False
 

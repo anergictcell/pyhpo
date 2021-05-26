@@ -190,6 +190,10 @@ Cohen syndrom is linked to ``HP:0002943 | Thoracic scoliosis`` in the HPO-Annota
     # >> False
 
 
+Term search in Ontology
+"""""""""""""""""""""""
+Searching via ``Ontology.search`` or ``Ontology.synonym_search`` is now case insensitive.
+
 
 2.7
 ---
