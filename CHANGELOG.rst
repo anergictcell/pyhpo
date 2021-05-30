@@ -6,6 +6,10 @@ Changelog
 Breaking API changes:
 ^^^^^^^^^^^^^^^^^^^^^
 
+Python version
+""""""""""""""
+Due to use of f-strings, PyHPO requires Python >= 3.6
+
 
 ``Ontology.omim_excluded_diseases``
 """""""""""""""""""""""""""""""""""
