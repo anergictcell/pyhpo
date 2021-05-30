@@ -70,6 +70,17 @@ class OntologyClass():
         HPOTerm
             A single matching HPO term instance
 
+        Raises
+        ------
+        RuntimeError
+            No HPO term is found for the provided query
+        TypeError
+            The provided query is an unsupported type and can't be properly
+            converted
+        ValueError
+            The provided HPO ID cannot be converted to the correct
+            integer representation
+
         Example
         -------
             ::
@@ -94,7 +105,12 @@ class OntologyClass():
         res: Optional[HPOTerm] = None
         if isinstance(query, str):
             if query.startswith('HP:'):
-                res = self[id_from_string(query)]
+                try:
+                    res = self[id_from_string(query)]
+                except ValueError as err:
+                    raise ValueError(f'Invalid id: {query}') from err
+                except KeyError:
+                    pass
             else:
                 try:
                     res = self.synonym_match(query)
@@ -102,10 +118,13 @@ class OntologyClass():
                     pass
 
         elif isinstance(query, int):
-            res = self[query]
+            try:
+                res = self[query]
+            except KeyError:
+                pass
 
         else:
-            raise RuntimeError('Invalid type {} for parameter "query"'.format(
+            raise TypeError('Invalid type {} for parameter "query"'.format(
                 type(query)
             ))
 

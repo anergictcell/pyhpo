@@ -105,7 +105,7 @@ class HPOSet(set):
                         term.replaced_by
                     )
                     ids.add(replaced)
-                except RuntimeError:
+                except TypeError:
                     warnings.warn(
                         'The term {} is obsolete and has no replacement.'
                             .format(term),

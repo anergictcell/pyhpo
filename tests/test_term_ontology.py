@@ -285,6 +285,21 @@ class TestOntologyTreeTraversal(unittest.TestCase):
             'HP:0041 is not a parent of HP:0012'
         )
 
+    @patch('pyhpo.term.sorted')
+    def test_the_impossible(self, mock_sorted):
+        """
+        I was not able to figure out an actual test case
+        to test the exception handling in shortest_path_to_parent.
+        So I made this contrived test case here.
+        """
+        mock_sorted.return_value = []
+        with self.assertRaises(RuntimeError) as err:
+            _ = self.child_1_1.shortest_path_to_parent(self.root)
+        self.assertEqual(
+            str(err.exception),
+            'Unable to determine path to parent term Test root'
+        )
+
     def test_path_to_other(self):
 
         path = self.child_1_1.path_to_other(self.root)
@@ -523,7 +538,7 @@ class TestOntologyQueries(unittest.TestCase):
             self.terms.get_hpo_object(12),
             self.child_1_2
         )
-        with self.assertRaises(RuntimeError) as err:
+        with self.assertRaises(TypeError) as err:
             self.terms.get_hpo_object([1, 2, 3])
         assert 'Invalid type' in str(err.exception)
 
@@ -531,6 +546,18 @@ class TestOntologyQueries(unittest.TestCase):
             self.terms.get_hpo_object('Some invalid term')
             # The error is 
         assert 'Unknown HPO term' == str(err.exception)
+
+        with self.assertRaises(ValueError) as err:
+            self.terms.get_hpo_object('HP:123foobar')
+        assert str(err.exception) == 'Invalid id: HP:123foobar'
+
+        with self.assertRaises(RuntimeError) as err:
+            self.terms.get_hpo_object('HP:666666')
+        assert str(err.exception) == 'Unknown HPO term'
+
+        with self.assertRaises(RuntimeError) as err:
+            self.terms.get_hpo_object(666666)
+        assert str(err.exception) == 'Unknown HPO term'
 
     def test_matching(self):
         self.assertEqual(
