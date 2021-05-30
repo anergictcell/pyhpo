@@ -23,6 +23,8 @@ sdist/
 *.egg-info/
 *.egg
 MANIFEST
+*.sublime-project
+*.sublime-workspace
 
 # Tests
 .tox/

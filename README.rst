@@ -10,18 +10,117 @@ Visit the `PyHPO Documentation`_ for a more detailed overview of all the functio
 Main features
 =============
 
-It allows working on individual terms ``HPOTerm``, a set of terms ``HPOSet`` and the full ``Ontology``.
+- Identify patient cohorts based on clinical features
+- Cluster patients or other clinical information for GWAS
+- Phenotype to Genotype studies
+- HPO similarity analysis
+- Graph based analysis of phenotypes, genes and diseases
 
-Internally the ontology is represented as a branched linked list, every term contains pointers to its parent and child terms. This allows fast tree traversal functionality.
+
+**PyHPO** allows working on individual terms ``HPOTerm``, a set of terms ``HPOSet`` and the full ``Ontology``.
 
 The library is helpful for discovery of novel gene-disease associations and GWAS data analysis studies. At the same time, it can be used for oragnize clinical information of patients in research or diagnostic settings.
 
+Internally the ontology is represented as a branched linked list, every term contains pointers to its parent and child terms. This allows fast tree traversal functionality.
+
 It provides an interface to create ``Pandas Dataframe`` from its data, allowing integration in already existing data anlysis tools.
 
+Examples
+--------
+
+How similar are the phenotypes of two patients
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    from pyhpo import Ontology
+
+    # initilize the Ontology ()
+    _ = Ontology()
+
+    # Declare the clinical information of the patients
+    patient_1 = HPOSet.from_queries([
+        'HP:0002943',
+        'HP:0008458',
+        'HP:0100884',
+        'HP:0002944',
+        'HP:0002751'
+    ])
+
+    patient_2 = HPOSet.from_queries([
+        'HP:0002650',
+        'HP:0010674',
+        'HP:0000925',
+        'HP:0009121'
+    ])
+
+    # and compare their similarity
+    patient_1.similarity(patient_2)
+    #> 0.7594183905785477
+
+
+How close are two HPO terms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    from pyhpo import Ontology
+
+    # initilize the Ontology ()
+    _ = Ontology()
+
+    term_1 = Ontology.get_hpo_object('Scoliosis')
+    term_2 = Ontology.get_hpo_object('Abnormal axial skeleton morphology')
+
+    path = term_1.path_to_other(term_2)
+    for t in path[1]:
+        print(t)
+
+    """
+    HP:0002650 | Scoliosis
+    HP:0010674 | Abnormality of the curvature of the vertebral column
+    HP:0000925 | Abnormality of the vertebral column
+    HP:0009121 | Abnormal axial skeleton morphology
+    """
+
+
+Getting started
+===============
+
+The easiest way to install **PyHPO** is via pip
+
+.. code:: bash
+
+    pip install pyhpo
+
+or, you can additionally install optional packages for extra functionality
+
+.. code:: bash
+
+    # Include pandas during install
+    pip install pyhpo[pandas]
+
+    # Include scipy
+    pip install pyhpo[scipy]
+
+    # Include all dependencies
+    pip install pyhpo[all]
+
+.. note::
+
+    Some features of PyHPO require ``pandas`` and ``scipy``. The standard installation via pip will not include pandas or scipy and PyHPO will work just fine. (You will get a warning on the initial import though). 
+
+    Without installing ``pandas``, you won't be able to export the Ontology as a ``Dataframe``, everything else will work fine.
+
+    Without installing ``scipy``, you won't be able to use the ``stats`` module, especially the enrichment calculations.
+
+
+Usage example
+=============
 
 HPOTerm
 -------
-An individual :class:`pyhpo.term.HPOTerm` contains all info about itself as well as pointers to its parents and its children. You can access its information-content, calculate similarity scores to other terms, find the shortest or longes connection between two terms. List all associated genes or diseases, etc.
+An ``HPOTerm`` contains various metadata about the term, as well as pointers to its parents and children terms. You can access its information-content, calculate similarity scores to other terms, find the shortest or longes connection between two terms. List all associated genes or diseases, etc.
 
 Examples:
 ^^^^^^^^^
@@ -76,7 +175,7 @@ Basic functionalities of an HPO-Term
 *(This script is complete, it should run "as is")*
 
 
-Some basic functionality, working with more than one term
+Some additional functionality, working with more than one term
 
 .. code:: python
 
@@ -128,10 +227,8 @@ Ontology
 The ``Ontology`` contains all HPO terms, their connections to each other and associations to genes and diseases.
 It provides some helper functions for ``HPOTerm`` search functionality
 
-.. note::
-
-    The Ontology is a Singleton and must only be initiated once.
-    It can be reused across several modules.
+Examples
+^^^^^^^^
 
 .. code:: python
 
@@ -182,11 +279,38 @@ It provides some helper functions for ``HPOTerm`` search functionality
 
 *(This script is complete, it should run "as is")*
 
+The Ontology is a Singleton and should only be initiated once.
+It can be reused across several modules, e.g:
+
+``main.py``
+
+.. code:: python
+
+    from pyhpo import Ontology, HPOSet
+
+    import module2
+
+    # initilize the Ontology
+    _ = Ontology()
+
+    if __name__ == '__main__':
+        module2.find_term('Compensatory scoliosis')
+
+
+``module2.py``
+
+.. code:: python
+
+    from pyhpo import Ontology
+
+    def find_term(term):
+        return Ontology.get_hpo_object(term)
+
+
 
 HPOSet
 ------
-An ``HPOSet`` is a collection of :class:`pyhpo.term.HPOTerm`s and
-can be used to represent e.g. a patient's clinical information. It provides APIs for filtering, comparisons to other ``HPOSet``s and term/gene/disease enrichments.
+An ``HPOSet`` is a collection of ``HPOTerm`` and can be used to represent e.g. a patient's clinical information. It provides APIs for filtering, comparisons to other ``HPOSet`` and term/gene/disease enrichments.
 
 
 Examples:
@@ -250,181 +374,38 @@ Examples:
 *(This script is complete, it should run "as is")*
 
 
-Installation / Setup
-====================
+Get genes enriched in an ``HPOSet``
+-----------------------------------
 
-The easiest way to install PyHPO is via pip
-
-.. code:: bash
-
-    pip install pyhpo
-
-.. note::
-
-    Some features of PyHPO require ``pandas``. The standard installation via pip will not include pandas and PyHPO will work just fine. (You will get a warning on the initial import though). As long as you don't try to create a ``pandas.DataFrame``, everything should work without pandas. If you want to use all features, install ``pandas`` yourself:
-
-    .. code:: bash
-
-        pip install pandas
-
-Usage
-=====
-
-For a detailed description of how to use PyHPO, visit the `PyHPO Documentation`_.
-
-Getting started
----------------
+Examples:
+^^^^^^^^^
 
 .. code:: python
 
-    from pyhpo.ontology import Ontology
+    from pyhpo import Ontology, HPOSet
+    from pyhpo.stats import EnrichmentModel
 
-    # initilize the Ontology (you can specify config parameters if needed here)
+    # initilize the Ontology
     _ = Ontology()
-    
-    # Iterate through all HPO terms
-    for term in Ontology:
-        # do something, e.g.
-        print(term.name)
 
-There are multiple ways to retrieve a single term out of an Ontology:
-
-.. code:: python
-
-    # Retrieve a term via its HPO-ID
-    term = Ontology.get_hpo_object('HP:0002650')
-
-    # ...or via the Integer representation of the ID
-    term = Ontology.get_hpo_object(2650)
-
-    # ...or by term name
-    term = Ontology.get_hpo_object('Scoliosis')
-
-    # ...or via shortcut
-    term = Ontology[2650]
-
-You can also do substring search on term names and synonyms:
-
-.. code:: python
-
-    # Ontology.search returns an Iterator over all matches
-    for term in Ontology.search('Abn'):
-        print(term.name)
-
-Find the shortest path between two terms:
-
-.. code:: python
-
-    Ontology.path(
-        'Abnormality of the nervous system',
-        'Scoliosis'
-    )
-
-    # or use HP identifiers
-    Ontology.path(
-        'Abnormality of the nervous system',
-        'HP:0002650'
-    )
-
-Working with terms
-------------------
-
-.. code-block:: python
-
-    # Get a single HPO Term:
-    term = Ontology.get_hpo_object('HP:0002650')
-
-    # check the relationship of two terms
-    term.path_to_other(Ontology[11])
-
-    # get the information content for OMIM diseases
-    term.information_content['omim']
-
-    # ...or for genes
-    term.information_content['genes']
-
-    # compare two terms
-    term.similarity_score(term2, method='resnik', kind='gene')
-
-Working with sets
------------------
-
-.. code-block:: python
-
-    # Create a clinical information set of HPO Terms
-    clinical_info = pyhpo.HPOSet([
-        Ontology[12],
-        Ontology[14],
-        Ontology.get_hpo_object(2650)
+    ci = HPOSet.from_queries([
+        'HP:0002943',
+        'HP:0008458',
+        'HP:0100884',
+        'HP:0002944',
+        'HP:0002751'
     ])
 
-    # Extract only child nodes and leave out all parent terms
-    children = clinical_info.child_nodes()
-
-    # Remove HPO modifier terms
-    new_ci = clinical_info.remove_modifier()
-
-    # Calculate the similarity of two Sets
-    sim_score = clinical_info.similarity(other_set)
-
-Statistics
------------------
-``PyHPO`` includes some basic statics method for gene, disease and HPO-Term enrichment analysis.
-
-
-.. code-block:: python
-
-    # Let's say you have a patient with a couple of symptoms and 
-    # you want to find out the most likely affected genes 
-    # or most likely diseases
+    gene_model = EnrichmentModel('gene')
+    genes = gene_model.enrichment(method='hypergeom', hposet=ci)
     
-    from pyhpo import stats
-    from pyhpo.ontology import Ontology
-    from pyhpo.set import HPOSet, BasicHPOSet
-    _ = Ontology()
+    print(genes[0]['item'])
+    #> PAPSS2
 
-    hpo_terms = [
-        'Decreased circulating antibody level',
-        'Abnormal immunoglobulin level',
-        'Abnormality of B cell physiology',
-        'Abnormal lymphocyte physiology',
-        'Abnormality of humoral immunity',
-        'Lymphoma',
-        'Lymphopenia',
-        'Autoimmunity',
-        'Increased circulating IgG level',
-        'Abnormal lymphocyte count'
-    ]
-    
-    # you can either use a HPOSet for this
-    hposet = HPOSet.from_queries(hpo_terms)
-    
-    # or just a plain list of HPO Terms
-    hposet = [Ontology.match(q) for q in hpo_terms]
-    
-    # Initialize an Enrichment model for genes
-    gene_model = stats.EnrichmentModel('gene')
-    
-    # You can also do enrichment for diseases
-    disease_model = stats.EnrichmentModel('omim')
-    
-    # Calculate the Hypergeometric distribution test enrichment
-    gene_results = gene_model.enrichment(
-        'hypergeom',
-        hposet
-    )
-    disease_results = disease_model.enrichment(
-        'hypergeom',
-        hposet
-    )
-    
-    # and print the Top-10 results
-    for x in gene_results[0:10]:
-        print(x)
-    for x in disease_results[0:10]:
-        print(x)
+*(This script is complete, it should run "as is")*
 
-and many more examples in the `PyHPO Documentation`_
+
+For a more detailed description of how to use PyHPO, visit the `PyHPO Documentation`_.
 
 
 Contributing
