@@ -31,7 +31,7 @@ jobs:
         # Basic mypy checking
         mypy pyhpo
         # More strict mypy checking
-        mypy --disallow-untyped-defs --disallow-incomplete-defs --warn-redundant-casts --warn-unused-ignores pyhpo
+        mypy --disallow-untyped-defs --disallow-incomplete-defs --warn-redundant-casts pyhpo
     - name: Unittesting (complete-check)
       run: |
         coverage run -m unittest discover complete-check -s tests && coverage report
