@@ -3,9 +3,9 @@ from functools import reduce, lru_cache
 from typing import Any, List, Optional, Set, Tuple
 
 from pydantic import BaseModel
+from backports.cached_property import cached_property
 
 from pyhpo.config import MODIFIER_IDS
-from pyhpo.cache import cached_property
 from pyhpo.similarity import SimScore
 from pyhpo.annotations import GeneSingleton
 from pyhpo.annotations import OmimDisease, DecipherDisease, OrphaDisease
@@ -396,7 +396,7 @@ class HPOTerm(BaseModel):
         """
         return SimScore(self, other, kind, method)
 
-    @lru_cache
+    @lru_cache(maxsize=128)
     def cached_similarity_score(
         self,
         other: 'HPOTerm',

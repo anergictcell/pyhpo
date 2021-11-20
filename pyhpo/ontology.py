@@ -381,7 +381,7 @@ class OntologyClass():
             self._append(HPOTerm(**term))
 
         self._connect_all()
-        build_ontology_annotations(data_folder, self)
+        build_ontology_annotations(data_folder, self)  # type: ignore
         self._add_information_content()
 
     def _append(self, item: HPOTerm) -> None:
@@ -461,4 +461,4 @@ class OntologyClass():
         return len(self._map.keys())
 
 
-Ontology = OntologyClass()
+Ontology: OntologyClass = OntologyClass()

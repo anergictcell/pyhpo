@@ -1,11 +1,11 @@
+import pyhpo
 from pyhpo.parser import diseases
 from pyhpo.parser import genes
-import pyhpo
 
 
 def build_ontology_annotations(
     data_folder: str,
-    ontology: 'pyhpo.ontology.OntologyClass'
+    ontology: 'pyhpo.OntologyClass'
 ) -> None:
     """
     Builds all annotations and associated genes and diseases

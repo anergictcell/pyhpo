@@ -12,7 +12,7 @@ check:
 	@echo "Checking mypy standard"
 	mypy pyhpo
 	@echo "Checking mypy more stict"
-	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs --warn-redundant-casts --warn-unused-ignores --warn-unreachable pyhpo
+	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs --warn-redundant-casts --warn-unreachable pyhpo
 
 docs:
 	@echo "Generating documentation"

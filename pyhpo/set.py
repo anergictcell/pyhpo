@@ -2,7 +2,7 @@ import warnings
 from typing import Iterable, Set, List, Iterator, Union, Tuple
 
 import pyhpo
-from pyhpo import Ontology
+from pyhpo.ontology import Ontology
 from pyhpo.matrix import Matrix
 
 
