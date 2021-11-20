@@ -11,6 +11,7 @@ Welcome to PyHPO's documentation!
     annotations
     set
     stats
+    similarity
     matrix
     data
     parser

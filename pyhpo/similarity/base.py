@@ -41,6 +41,19 @@ class _Similarity(BaseModel):
 
 
 class SimilarityBase:
+    """
+    Base class to use for custom similarity calculations.
+
+    Custom implementation must inherit from
+    :class:`pyhpo.similarity.base.SimilarityBase` and provide a
+    ``__call__`` method with the same signature as
+    :func:`pyhpo.similarity.base.SimilarityBase.__call__`
+
+    You can also provide a list of ``dependencies`` of other
+    similarity methods that should be called beforehand. Results
+    of these calls will be passed as ``dependencies`` parameter to
+    the ``__call__`` method.
+    """
     dependencies: List[str] = []
 
     def __call__(
@@ -50,6 +63,25 @@ class SimilarityBase:
         kind: str,
         dependencies: List[float]
     ) -> float:
+        """
+        This method does the actual calculation of the similarity.
+        This method must be provided in all custom similarity classes
+
+        Parameters
+        ----------
+        term1:
+            One of the two terms to compare
+        term2:
+            The other of the two terms to compare
+        kind:
+            This can be an extra parameter, ususally ``omim`` or ``gene``
+            to specify which annotations to consider for similarity
+        depdencies:
+            A list of other calculation-results that should be calculated
+            beforehand. This is not needed at all, but helpful if your
+            implementation builds on an already existing similarity
+            calculation.
+        """
         raise NotImplementedError(
             'A similarity class requires a __call__ function'
         )
