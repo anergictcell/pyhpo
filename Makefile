@@ -22,4 +22,9 @@ build:
 	@echo "Building packages"
 	python setup.py sdist bdist_wheel
 
+coverage:
+	@echo "Running unittest coverage analysis"
+	python -m coverage run -m unittest discover tests
+	python -m coverage html --include "pyhpo/*"
+
 .PHONY: tests fulltests check docs build

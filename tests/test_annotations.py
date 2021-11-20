@@ -1,109 +1,21 @@
 import unittest
 
-from pyhpo.annotations import Gene, Omim
+from pyhpo.annotations import Gene
+from pyhpo.parser.genes import all_genes, add_gene_to_term
+from pyhpo.parser.genes import _add_genes_to_ontology
 
-
-class OmimTests(unittest.TestCase):
-    def test_omim_disease_building(self):
-        a = Omim([None, 1, 'Gaucher type I'])
-        self.assertEqual(
-            a.name,
-            'Gaucher type I'
-        )
-        self.assertEqual(
-            a.id,
-            1
-        )
-        self.assertEqual(
-            a.hpo,
-            set()
-        )
-
-    def test_singleton_handling(self):
-        d1a = Omim([None, 1, 'Gaucher'])
-        # ID present, will be used
-        d1b = Omim([None, 1, 'Fabry'])
-        # No name present, ID will be used as well
-        d1c = Omim([None, 1, None])
-
-        # New ID, new Name => New Disease
-        d2a = Omim([None, 2, 'Fabry'])
-        # ID present, Matching by ID
-        d2b = Omim([None, 2, 'Gaucher'])
-        # ID present, Matching by ID
-        d2c = Omim([None, 2, None])
-
-        # New ID but existing name => New disease
-        d3a = Omim([None, 3, 'Gaucher'])
-        # New ID, no name => New disease
-        d4a = Omim([None, 4, None])
-
-        self.assertIs(d1a, d1b)
-        self.assertIs(d1a, d1c)
-
-        self.assertIsNot(d1a, d2a)
-        self.assertIs(d2a, d2b)
-        self.assertIs(d2a, d2c)
-
-        self.assertIsNot(d1a, d3a)
-        self.assertIsNot(d2a, d3a)
-        self.assertIsNot(d1a, d4a)
-        self.assertIsNot(d2a, d4a)
-        self.assertIsNot(d3a, d4a)
-
-    def test_indexing(self):
-        def subindex_length(x):
-            return (
-                len(x.keys()),
-                len(x._indicies.keys()),
-            )
-
-        Omim.clear()
-        self.assertEqual(
-            subindex_length(Omim),
-            (0, 0)
-        )
-        _ = Omim([None, 1, 'Gaucher'])
-        self.assertEqual(
-            subindex_length(Omim),
-            (1, 1)
-        )
-        _ = Omim([None, 2, 'Fabry'])
-        self.assertEqual(
-            subindex_length(Omim),
-            (2, 2)
-        )
-        Omim.clear()
-        self.assertEqual(
-            subindex_length(Omim),
-            (0, 0)
-        )
-
-    def test_hpo_association(self):
-        pass
-
-    def test_get_omim(self):
-        Omim.clear()
-        d1 = Omim([None, 1, 'Gaucher'])
-        d2 = Omim([None, 2, 'Fabry'])
-
-        self.assertEqual(Omim.get(1), d1)
-        self.assertEqual(Omim.get(2), d2)
-        self.assertEqual(Omim.get('1'), d1)
-
-        self.assertRaises(
-            ValueError,
-            lambda: Omim.get('Fabry')
-        )
-        self.assertRaises(
-            KeyError,
-            lambda: Omim.get(12)
-        )
+from tests.mockontology import make_ontology, make_genes
 
 
 class GeneTests(unittest.TestCase):
+    def setUp(self):
+        Gene.clear()
+
+    def tearDown(self):
+        Gene.clear()
+
     def test_gene_building(self):
-        a = Gene([None, None, 1, 'EZH2'])
+        a = Gene(hgncid=1, symbol='EZH2')
         self.assertEqual(
             a.name,
             'EZH2'
@@ -122,24 +34,24 @@ class GeneTests(unittest.TestCase):
         )
 
     def test_singleton_handling(self):
-        a = Gene([None, None, 1, 'EZH2'])
+        a = Gene(hgncid=1, symbol='EZH2')
         # When no name is given, ID is used for comparison
-        b = Gene([None, None, 1, None])
+        b = Gene(hgncid=1, symbol=None)
         # EZH1 does not exist, but ID is used for comparison
-        c = Gene([None, None, 1, 'EZH1'])
+        c = Gene(hgncid=1, symbol='EZH1')
         # EZH2 exists, is used for comparison
-        d = Gene([None, None, 2, 'EZH2'])
+        d = Gene(hgncid=2, symbol='EZH2')
         # EZH2 exists, is used for comparison
-        e = Gene([None, None, None, 'EZH2'])
+        e = Gene(hgncid=None, symbol='EZH2')
 
         # EZH1 does not exist. ID does not exist => New Gene
-        f = Gene([None, None, 2, 'EZH1'])
+        f = Gene(hgncid=2, symbol='EZH1')
         # ID is used for comparison
-        g = Gene([None, None, 2, 'EZH2'])
+        g = Gene(hgncid=2, symbol='EZH2')
         # EZH1 is used for comparison
-        h = Gene([None, None, 1, 'EZH1'])
+        h = Gene(hgncid=1, symbol='EZH1')
         # EZH1 is used for comparison
-        i = Gene([None, None, None, 'EZH1'])
+        i = Gene(hgncid=None, symbol='EZH1')
 
         self.assertIs(a, b)
         self.assertIs(a, c)
@@ -207,17 +119,16 @@ class GeneTests(unittest.TestCase):
                 len(x._names.keys())
             )
 
-        Gene.clear()
         self.assertEqual(
             subindex_length(Gene),
             (0, 0, 0)
         )
-        _ = Gene([None, None, 1, 'EZH1'])
+        _ = Gene(hgncid=1, symbol='EZH1')
         self.assertEqual(
             subindex_length(Gene),
             (1, 1, 1)
         )
-        _ = Gene([None, None, 2, 'EZH2'])
+        _ = Gene(hgncid=2, symbol='EZH2')
         self.assertEqual(
             subindex_length(Gene),
             (2, 2, 2)
@@ -228,13 +139,9 @@ class GeneTests(unittest.TestCase):
             (0, 0, 0)
         )
 
-    def test_hpo_association(self):
-        pass
-
     def test_get_gene(self):
-        Gene.clear()
-        g1 = Gene([None, None, 1, 'EZH1'])
-        g2 = Gene([None, None, 2, 'EZH2'])
+        g1 = Gene(hgncid=1, symbol='EZH1')
+        g2 = Gene(hgncid=2, symbol='EZH2')
 
         self.assertEqual(Gene.get(1), g1)
         self.assertEqual(Gene.get(2), g2)
@@ -252,10 +159,104 @@ class GeneTests(unittest.TestCase):
         )
 
 
-@unittest.skip('TODO')
-class GeneLoading(unittest.TestCase):
-    def test_load_from_file(self):
-        pass
+class TestAnnotationBase(unittest.TestCase):
+    def setUp(self):
+        Gene.clear()
+
+    def tearDown(self):
+        Gene.clear()
+
+    def test_json(self):
+        g = Gene(hgncid=1, symbol='Foo')
+
+        self.assertEqual(
+            g.toJSON(),
+            {'id': 1, 'name': 'Foo', 'symbol': 'Foo'}
+        )
+
+        self.assertEqual(
+            g.toJSON(verbose=True),
+            {'id': 1, 'name': 'Foo', 'symbol': 'Foo', 'hpo': set()}
+        )
+
+    def test_equality(self):
+        g = Gene(hgncid=1, symbol='Foo')
+        self.assertEqual(g, 1)
+        self.assertEqual(g, 'Foo')
+
+    def test_string_representation(self):
+        g = Gene(hgncid=1, symbol='Foo')
+        self.assertEqual(str(g), 'Foo')
+
+
+class TestGeneAnnotationParsing(unittest.TestCase):
+    def setUp(self):
+        self.ontology = make_ontology()
+        self.genes = make_genes(5)
+
+    def tearDown(self):
+        Gene.clear()
+
+    def test_gene_global_singleton(self):
+        assert len(all_genes()) == 5
+
+    def test_annotating_hpo_terms(self):
+        assert self.ontology[1].genes == set()
+        assert self.ontology[11].genes == set()
+        assert self.ontology[21].genes == set()
+        assert self.ontology[31].genes == set()
+        assert self.ontology[12].genes == set()
+        assert self.ontology[41].genes == set()
+        assert self.ontology[13].genes == set()
+
+        add_gene_to_term(self.genes[0], self.ontology[21])
+        
+        assert self.ontology[1].genes == set([self.genes[0]])
+        assert self.ontology[11].genes == set([self.genes[0]])
+        assert self.ontology[21].genes == set([self.genes[0]])
+        assert self.ontology[31].genes == set()
+        assert self.ontology[12].genes == set()
+        assert self.ontology[41].genes == set()
+        assert self.ontology[13].genes == set()
+
+    def test_annotating_hpo_terms_multiple_parents(self):
+        add_gene_to_term(self.genes[0], self.ontology[31])
+        
+        assert self.ontology[1].genes == set([self.genes[0]])
+        assert self.ontology[11].genes == set([self.genes[0]])
+        assert self.ontology[21].genes == set([self.genes[0]])
+        assert self.ontology[31].genes == set([self.genes[0]])
+        assert self.ontology[12].genes == set([self.genes[0]])
+        assert self.ontology[41].genes == set()
+        assert self.ontology[13].genes == set()
+
+    def test_annotating_hpo_terms_mutliple_genes(self):
+        add_gene_to_term(self.genes[0], self.ontology[31])
+        add_gene_to_term(self.genes[1], self.ontology[41])
+        
+        assert self.ontology[1].genes == set([self.genes[0], self.genes[1]])
+        assert self.ontology[11].genes == set([self.genes[0], self.genes[1]])
+        assert self.ontology[21].genes == set([self.genes[0], self.genes[1]])
+        assert self.ontology[31].genes == set([self.genes[1], self.genes[0]])
+        assert self.ontology[12].genes == set([self.genes[1], self.genes[0]])
+        assert self.ontology[41].genes == set([self.genes[1]])
+        assert self.ontology[13].genes == set()
+
+    def test_full_annotation(self):
+        self.genes[0].hpo.add(31)
+        self.genes[1].hpo.add(41)
+        _add_genes_to_ontology(self.ontology)
+
+        assert self.ontology[1].genes == set([self.genes[0], self.genes[1]])
+        assert self.ontology[11].genes == set([self.genes[0], self.genes[1]])
+        assert self.ontology[21].genes == set([self.genes[0], self.genes[1]])
+        assert self.ontology[31].genes == set([self.genes[1], self.genes[0]])
+        assert self.ontology[12].genes == set([self.genes[1], self.genes[0]])
+        assert self.ontology[41].genes == set([self.genes[1]])
+        assert self.ontology[13].genes == set()
+
+        assert self.genes[0].hpo == set([31])
+        assert self.genes[1].hpo == set([41])
 
 
 @unittest.skip('TODO')
@@ -268,3 +269,7 @@ class PhenoLoading(unittest.TestCase):
 
     def test_identify_negative_omim(self):
         pass
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -50,14 +50,6 @@ path_to_other
 ------------------------
 .. automethod:: pyhpo.term.HPOTerm.path_to_other
 
-hierarchy
-----------------
-.. automethod:: pyhpo.term.HPOTerm.hierarchy
-
-print_hierarchy
-----------------
-.. automethod:: pyhpo.term.HPOTerm.print_hierarchy
-
 similarity_score
 ------------------------
 .. automethod:: pyhpo.term.HPOTerm.similarity_score
@@ -65,15 +57,3 @@ similarity_score
 toJSON
 ------------------------
 .. automethod:: pyhpo.term.HPOTerm.toJSON
-
-Class methods
-************************
-
-id_from_string
-------------------------
-.. automethod:: pyhpo.term.HPOTerm.id_from_string
-
-parse_synonym
-------------------------
-.. automethod:: pyhpo.term.HPOTerm.parse_synonym
-

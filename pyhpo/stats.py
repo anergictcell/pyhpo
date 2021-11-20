@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple
+from typing import Callable, Dict, List, Union, Tuple
 
 try:
     from scipy.stats import hypergeom  # type: ignore[import]
@@ -13,7 +13,6 @@ except ImportError:
 
 import pyhpo
 from pyhpo import Ontology
-from pyhpo import annotations
 from pyhpo import HPOSet
 
 
@@ -45,12 +44,12 @@ def hypergeom_test(
         The hypergeometic enrichment score
 
     """
-    return hypergeom.sf(
+    return float(hypergeom.sf(
         positive_samples-1,  # likelyhood of more than X, #see https://blog.alexlenail.me/understanding-and-implementing-the-hypergeometric-test-in-python-a7db688a7458  # noqa: 501
         total,
         positive_total,
         samples
-    )
+    ))
 
 
 class HPOEnrichment():
@@ -229,22 +228,15 @@ class EnrichmentModel():
         * **decipher**
 
     """
-    attribute_lookup = {
+    attribute_lookup: Dict[str, Callable] = {
         'gene': lambda x: x.genes,
         'omim': lambda x: x.omim_diseases,
         'orpha': lambda x: x.orpha_diseases,
         'decipher': lambda x: x.decipher_diseases
     }
-    base_lookup = {
-        'gene': lambda x: annotations.Gene([None, None, x, None]),
-        'omim': lambda x: annotations.Omim([None, x, None]),
-        'orpha': lambda x: annotations.Orpha([None, x, None]),
-        'decipher': lambda x: annotations.Decipher([None, x, None])
-    }
 
     def __init__(self, category: str) -> None:
         self.attribute = self.attribute_lookup[category]
-        self.base = self.base_lookup[category]
         self.base_count, self.total = self._population_count(HPOSet(Ontology))
 
     def enrichment(

@@ -6,7 +6,7 @@ try:
 except ImportError:
     import sys
     sys.modules['scipy.stats'] = MagicMock()
-    sys.modules['scipy.stats'].hypergeom.sf = MagicMock(return_value=0.0000235)
+    sys.modules['scipy.stats'].hypergeom.sf = MagicMock(return_value=0.0000235)  # type: ignore # noqa: E501
     from pyhpo import stats
 
 from pyhpo.stats import HPOEnrichment, EnrichmentModel
@@ -31,18 +31,18 @@ class TestHPOEnrichment(unittest.TestCase):
     def setUp(self):
         self.ontology = make_ontology()
         genes = make_genes(4)
-        genes[0].hpo = self.ontology[1]
-        genes[0].hpo = self.ontology[11]
-        genes[1].hpo = self.ontology[1]
-        genes[2].hpo = self.ontology[11]
-        genes[3].hpo = self.ontology[31]
+        genes[0].hpo.add(self.ontology[1].index)
+        genes[0].hpo.add(self.ontology[11].index)
+        genes[1].hpo.add(self.ontology[1].index)
+        genes[2].hpo.add(self.ontology[11].index)
+        genes[3].hpo.add(self.ontology[31].index)
         omim = make_omim(5)
-        omim[0].hpo = self.ontology[1]
-        omim[0].hpo = self.ontology[11]
-        omim[1].hpo = self.ontology[1]
-        omim[2].hpo = self.ontology[11]
-        omim[3].hpo = self.ontology[31]
-        omim[4].hpo = self.ontology[41]
+        omim[0].hpo.add(self.ontology[1].index)
+        omim[0].hpo.add(self.ontology[11].index)
+        omim[1].hpo.add(self.ontology[1].index)
+        omim[2].hpo.add(self.ontology[11].index)
+        omim[3].hpo.add(self.ontology[31].index)
+        omim[4].hpo.add(self.ontology[41].index)
         self.ontology._genes = set(genes)
         self.ontology._omim_diseases = set(omim)
 
@@ -71,9 +71,9 @@ class TestHPOEnrichment(unittest.TestCase):
         self.assertEqual(
             res[0],
             {
-                self.ontology[1]: 2,
-                self.ontology[11]: 2,
-                self.ontology[31]: 1
+                1: 2,
+                11: 2,
+                31: 1
             }
         )
 
@@ -85,10 +85,10 @@ class TestHPOEnrichment(unittest.TestCase):
         self.assertEqual(
             res[0],
             {
-                self.ontology[1]: 2,
-                self.ontology[11]: 2,
-                self.ontology[31]: 1,
-                self.ontology[41]: 1
+                1: 2,
+                11: 2,
+                31: 1,
+                41: 1
             }
         )
 
@@ -125,6 +125,21 @@ class TestHPOEnrichment(unittest.TestCase):
             str(context.exception)
         )
 
+    def test_single_enrichment_wrong_method(self):
+        mocktotal = MagicMock()
+        mocktotal.total = 12
+        mocktotal.hpos = {'bar': 'foo'}
+        with self.assertRaises(NotImplementedError) as err:
+            _ = HPOEnrichment._single_enrichment(
+                mocktotal,
+                'wrongmethod',
+                'bar',
+                11,
+                13
+            )
+        
+        assert str(err.exception) == 'Enrichment method not implemented'
+
     def test_enrichment(self):
         that = MagicMock()
         that._hpo_count = MagicMock(return_value=[{
@@ -158,18 +173,18 @@ class TestAnnotationEnrichment(unittest.TestCase):
     def setUp(self):
         self.ontology = make_ontology()
         genes = make_genes(4)
-        genes[0].hpo = self.ontology[1]
-        genes[0].hpo = self.ontology[11]
-        genes[1].hpo = self.ontology[1]
-        genes[2].hpo = self.ontology[11]
-        genes[3].hpo = self.ontology[31]
+        genes[0].hpo.add(self.ontology[1].index)
+        genes[0].hpo.add(self.ontology[11].index)
+        genes[1].hpo.add(self.ontology[1].index)
+        genes[2].hpo.add(self.ontology[11].index)
+        genes[3].hpo.add(self.ontology[31].index)
         omim = make_omim(5)
-        omim[0].hpo = self.ontology[1]
-        omim[0].hpo = self.ontology[11]
-        omim[1].hpo = self.ontology[1]
-        omim[2].hpo = self.ontology[11]
-        omim[3].hpo = self.ontology[31]
-        omim[4].hpo = self.ontology[41]
+        omim[0].hpo.add(self.ontology[1].index)
+        omim[0].hpo.add(self.ontology[11].index)
+        omim[1].hpo.add(self.ontology[1].index)
+        omim[2].hpo.add(self.ontology[11].index)
+        omim[3].hpo.add(self.ontology[31].index)
+        omim[4].hpo.add(self.ontology[41].index)
         self.ontology._genes = set(genes)
         self.ontology._omim_diseases = set(omim)
         self.genes = genes
@@ -188,19 +203,11 @@ class TestAnnotationEnrichment(unittest.TestCase):
                 res.attribute,
                 res.attribute_lookup['gene']
             )
-            self.assertEqual(
-                res.base,
-                res.base_lookup['gene']
-            )
 
             res = EnrichmentModel('omim')
             self.assertEqual(
                 res.attribute,
                 res.attribute_lookup['omim']
-            )
-            self.assertEqual(
-                res.base,
-                res.base_lookup['omim']
             )
 
     def test_population_count(self):
@@ -264,6 +271,20 @@ class TestAnnotationEnrichment(unittest.TestCase):
             str(context.exception)
         )
 
+    def test_single_enrichment_wrong_method(self):
+        that = MagicMock()
+        that.total = 12
+        that.base_count = {'bar': 'foo'}
+        with self.assertRaises(NotImplementedError) as err:
+            _ = EnrichmentModel._single_enrichment(
+                that,
+                'wrongmethod',
+                'bar',
+                11,
+                13
+            )
+        assert str(err.exception) == 'Enrichment method not implemented'
+
     def test_enrichment(self):
         that = MagicMock()
         that._population_count = MagicMock(return_value=[{
@@ -287,3 +308,7 @@ class TestAnnotationEnrichment(unittest.TestCase):
             res[2]['enrichment'],
             33
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

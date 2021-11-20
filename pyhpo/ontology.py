@@ -1,7 +1,7 @@
 import os
 import math
 import warnings
-from typing import Set, Tuple, Optional, Union, Dict, Iterator
+from typing import List, Set, Tuple, Optional, Union, Dict, Iterator
 
 try:
     import pandas as pd  # type: ignore
@@ -12,7 +12,9 @@ except ImportError:
 
 import pyhpo
 from pyhpo import HPOTerm
-from pyhpo.annotations import HPO_Gene, parse_pheno_file
+from pyhpo.parser import build_ontology_annotations
+from pyhpo.parser.obo import terms_from_file
+from pyhpo.parser.generics import id_from_string
 
 
 class OntologyClass():
@@ -32,148 +34,23 @@ class OntologyClass():
 
     def __call__(
         self,
-        filename: str = 'hp.obo',
-        data_folder: Optional[str] = None
+        data_folder: Optional[str] = None,
+        from_obo_file: bool = True
     ) -> 'OntologyClass':
+        self.metadata: List[str] = []
         self._map: Dict[int, HPOTerm] = {}
         self._genes: Set['pyhpo.GeneSingleton'] = set()
-        self._omim_diseases: Set['pyhpo.DiseaseSingleton'] = set()
-        self._orpha_diseases: Set['pyhpo.DiseaseSingleton'] = set()
-        self._decipher_diseases: Set['pyhpo.DiseaseSingleton'] = set()
-        self._omim_excluded_diseases: Set['pyhpo.DiseaseSingleton'] = set()
-        self._orpha_excluded_diseases: Set['pyhpo.DiseaseSingleton'] = set()
-        self._decipher_excluded_diseases: Set['pyhpo.DiseaseSingleton'] = set()
+        self._omim_diseases: Set['pyhpo.OmimDisease'] = set()
+        self._orpha_diseases: Set['pyhpo.OrphaDisease'] = set()
+        self._decipher_diseases: Set['pyhpo.DecipherDisease'] = set()
 
         if data_folder is None:
             data_folder = os.path.join(os.path.dirname(__file__), 'data')
-        self._data_folder = data_folder
 
-        if filename:
-            self._load_from_file(os.path.join(
-                data_folder,
-                filename
-            ))
+        if from_obo_file:
+            self._load_from_obo_file(data_folder)
+
         return self
-
-    def add_annotations(self, data_folder: Optional[str] = None) -> None:
-        warnings.warn(
-            'The method `ontology.add_annotations` is deprecated. '
-            'The functionality is included by default when the Ontology '
-            'is loaded from file since version 1.1.',
-            DeprecationWarning,
-            stacklevel=2
-        )
-
-    def _add_annotations(self, data_folder: Optional[str] = None) -> None:
-        """
-        Add secondary annotations to each HPO Term.
-        They currently include:
-        - Genes
-        - OMIIM diseases
-        - excluded OMIM diseases
-
-        It only works with properly named annotation files
-        from the HPO source
-
-        Parameters
-        ----------
-        data_folder: str, default ``None``
-            Path to location where annotation files are stored
-
-        Returns
-        -------
-        None
-            None
-        """
-
-        if data_folder is None:
-            data_folder = self._data_folder
-
-        genes = HPO_Gene(path=data_folder)
-        phenotypes = parse_pheno_file(path=data_folder)
-        omim_diseases = phenotypes[0]
-        omim_excluded = phenotypes[1]
-        orpha_diseases = phenotypes[2]
-        orpha_excluded = phenotypes[3]
-        decipher_diseases = phenotypes[4]
-        decipher_excluded = phenotypes[5]
-
-        for term in self:
-            if term._index in genes:
-                term.genes = genes[term._index]
-                self._genes.update(genes[term._index])
-
-            if term._index in omim_diseases:
-                term.omim_diseases = omim_diseases[term._index]
-                self._omim_diseases.update(omim_diseases[term._index])
-
-            if term._index in orpha_diseases:
-                term.orpha_diseases = orpha_diseases[term._index]
-                self._orpha_diseases.update(orpha_diseases[term._index])
-
-            if term._index in decipher_diseases:
-                term.decipher_diseases = decipher_diseases[term._index]
-                self._decipher_diseases.update(decipher_diseases[term._index])
-
-            if term._index in omim_excluded:
-                term.omim_excluded_diseases = omim_excluded[term._index]
-                self._omim_excluded_diseases.update(
-                    omim_excluded[term._index]
-                )
-            if term._index in orpha_excluded:
-                term.orpha_excluded_diseases = orpha_excluded[term._index]
-                self._orpha_excluded_diseases.update(
-                    orpha_excluded[term._index]
-                )
-            if term._index in decipher_excluded:
-                term.decipher_excluded_diseases = decipher_excluded[
-                    term._index
-                ]
-                self._decipher_excluded_diseases.update(
-                    decipher_excluded[term._index]
-                )
-
-        self._add_information_content()
-
-    def _add_information_content(self) -> None:
-        """
-        Calculates the information content for each HPO Term
-        According to Robinson et al, American Journal of Human Genetics, 2008
-        https://www.sciencedirect.com/science/article/pii/S0002929708005351
-
-        Returns
-        -------
-        None
-            None
-        """
-        total_omim_diseases = len(self.omim_diseases)
-        total_orpha_diseases = len(self.orpha_diseases)
-        total_decipher_diseases = len(self.decipher_diseases)
-        total_genes = len(self.genes)
-        for term in self:
-            p_omim = len(term.omim_diseases)/total_omim_diseases
-            p_orpha = len(term.orpha_diseases)/total_orpha_diseases
-            p_decipher = len(term.decipher_diseases)/total_decipher_diseases
-            p_gene = len(term.genes)/total_genes
-            if p_omim == 0:
-                term.information_content['omim'] = 0
-            else:
-                term.information_content['omim'] = -math.log(p_omim)
-
-            if p_orpha == 0:
-                term.information_content['orpha'] = 0
-            else:
-                term.information_content['orpha'] = -math.log(p_orpha)
-
-            if p_decipher == 0:
-                term.information_content['decipher'] = 0
-            else:
-                term.information_content['decipher'] = -math.log(p_decipher)
-
-            if p_gene == 0:
-                term.information_content['gene'] = 0
-            else:
-                term.information_content['gene'] = -math.log(p_gene)
 
     def get_hpo_object(self, query: Union[int, str]) -> HPOTerm:
         """
@@ -192,6 +69,17 @@ class OntologyClass():
         -------
         HPOTerm
             A single matching HPO term instance
+
+        Raises
+        ------
+        RuntimeError
+            No HPO term is found for the provided query
+        TypeError
+            The provided query is an unsupported type and can't be properly
+            converted
+        ValueError
+            The provided HPO ID cannot be converted to the correct
+            integer representation
 
         Example
         -------
@@ -217,15 +105,26 @@ class OntologyClass():
         res: Optional[HPOTerm] = None
         if isinstance(query, str):
             if query.startswith('HP:'):
-                res = self[HPOTerm.id_from_string(query)]
+                try:
+                    res = self[id_from_string(query)]
+                except ValueError as err:
+                    raise ValueError(f'Invalid id: {query}') from err
+                except KeyError:
+                    pass
             else:
-                res = self.synonym_match(query)
+                try:
+                    res = self.synonym_match(query)
+                except RuntimeError:
+                    pass
 
         elif isinstance(query, int):
-            res = self[query]
+            try:
+                res = self[query]
+            except KeyError:
+                pass
 
         else:
-            raise SyntaxError('Invalid type {} for parameter "query"'.format(
+            raise TypeError('Invalid type {} for parameter "query"'.format(
                 type(query)
             ))
 
@@ -308,7 +207,11 @@ class OntologyClass():
             Every matching HPO term instance
         """
         for term in self:
-            if query in term.name or self.synonym_search(term, query):
+            if (
+                query.lower() in term.name.lower()
+            ) or (
+                self.synonym_search(term, query)
+            ):
                 yield term
 
     def synonym_match(self, query: str) -> HPOTerm:
@@ -361,7 +264,7 @@ class OntologyClass():
         """
 
         for synonym in term.synonym:
-            if query in synonym:
+            if query.lower() in synonym.lower():
                 return True
         return False
 
@@ -399,7 +302,7 @@ class OntologyClass():
               OMIM diseases. Separated by ``|``
         """
 
-        data: Dict = {
+        data: Dict[str, List[Union[float, int, str]]] = {
             'id': [],
             'name': [],
             'parents': [],
@@ -424,10 +327,10 @@ class OntologyClass():
             data['name'].append(term.name)
             data['parents'].append('|'.join([x.id for x in term.parents]))
             data['children'].append('|'.join([x.id for x in term.children]))
-            data['ic_omim'].append(term.information_content['omim'])
-            data['ic_orpha'].append(term.information_content['orpha'])
-            data['ic_decipher'].append(term.information_content['decipher'])
-            data['ic_gene'].append(term.information_content['gene'])
+            data['ic_omim'].append(term.information_content.omim)
+            data['ic_orpha'].append(term.information_content.orpha)
+            data['ic_decipher'].append(term.information_content.decipher)
+            data['ic_gene'].append(term.information_content.gene)
             data['dTop_l'].append(term.longest_path_to_root())
             data['dTop_s'].append(term.shortest_path_to_root())
             data['dBottom'].append(term.longest_path_to_bottom())
@@ -449,34 +352,43 @@ class OntologyClass():
         return self._genes
 
     @property
-    def omim_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
-        return self._omim_diseases
-
-    @property
-    def omim_excluded_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
-        return self._omim_excluded_diseases
-
-    @property
-    def orpha_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
-        return self._orpha_diseases
-
-    @property
-    def orpha_excluded_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
-        return self._orpha_excluded_diseases
-
-    @property
-    def decipher_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
+    def decipher_diseases(self) -> Set['pyhpo.DecipherDisease']:
         return self._decipher_diseases
 
     @property
-    def decipher_excluded_diseases(self) -> Set['pyhpo.DiseaseSingleton']:
-        return self._decipher_excluded_diseases
+    def omim_diseases(self) -> Set['pyhpo.OmimDisease']:
+        return self._omim_diseases
+
+    @property
+    def orpha_diseases(self) -> Set['pyhpo.OrphaDisease']:
+        return self._orpha_diseases
+
+    def _load_from_obo_file(
+        self,
+        data_folder: str
+    ) -> None:
+        """
+        Reads an obo file line by line to add
+        HPO terms to the Ontology
+
+        Attributes
+        ----------
+        data_folder: str
+            Full path to folder where master data is stored
+
+        """
+        for term in terms_from_file(data_folder):
+            self._append(HPOTerm(**term))
+
+        self._connect_all()
+        build_ontology_annotations(data_folder, self)
+        self._add_information_content()
 
     def _append(self, item: HPOTerm) -> None:
         """
         Adds one HPO term to the ontology
         """
-        self._map[item._index] = item
+        self._map[item.index] = item
 
     def _connect_all(self) -> None:
         """
@@ -484,49 +396,63 @@ class OntologyClass():
         Called by default after loading the ontology from a file
         """
         for term in self._map.values():
-            for parent in term.parent_ids():
-                term.parents = self._map[parent]  # type: ignore[assignment]
-                self._map[parent].children = term  # type: ignore[assignment]
+            for parent_id in term.parent_ids():
+                parent = self[parent_id]
+                term.parents.add(parent)
+                parent.children.add(term)
 
+        # Build caches of hierarchy to speed up performance
         for term in self._map.values():
-            # Build caches of hierarchy to speed
-            # up performance
             term.all_parents
 
-    def _load_from_file(self, filename: str) -> None:
+        for term in self._map.values():
+            term.Config.allow_mutation = False
+
+    def _add_information_content(self) -> None:
         """
-        Reads an obo file line by line to add
-        HPO terms to the Ontology
+        Calculates the information content for each HPO Term
+        According to Robinson et al, American Journal of Human Genetics, 2008
+        https://www.sciencedirect.com/science/article/pii/S0002929708005351
 
-        Attributes
-        ----------
-        filename: str
-            Full path to ``obo`` file
-
+        Returns
+        -------
+        None
+            None
         """
+        total_omim_diseases = len(self.omim_diseases)
+        total_orpha_diseases = len(self.orpha_diseases)
+        total_decipher_diseases = len(self.decipher_diseases)
+        total_genes = len(self.genes)
+        for term in self:
+            p_omim = len(term.omim_diseases)/total_omim_diseases
+            p_orpha = len(term.orpha_diseases)/total_orpha_diseases
+            p_decipher = len(term.decipher_diseases)/total_decipher_diseases
+            p_gene = len(term.genes)/total_genes
+            if p_omim == 0:
+                term.information_content.omim = 0
+            else:
+                term.information_content.omim = -math.log(p_omim)
 
-        term = None
-        with open(filename) as fh:
-            for line in fh:
-                line = line.strip()
-                if line == '[Term]':
-                    if term is not None:
-                        self._append(term)
-                    term = HPOTerm()
-                    continue
-                if not term:
-                    continue
-                term.add_line(line)
-            assert term
-            self._append(term)
-        self._connect_all()
-        self._add_annotations()
+            if p_orpha == 0:
+                term.information_content.orpha = 0
+            else:
+                term.information_content.orpha = -math.log(p_orpha)
 
-    def __getitem__(self, key: int) -> Optional[HPOTerm]:
-        if key in self._map:
+            if p_decipher == 0:
+                term.information_content.decipher = 0
+            else:
+                term.information_content.decipher = -math.log(p_decipher)
+
+            if p_gene == 0:
+                term.information_content.gene = 0
+            else:
+                term.information_content.gene = -math.log(p_gene)
+
+    def __getitem__(self, key: int) -> HPOTerm:
+        try:
             return self._map[key]
-        else:
-            return None
+        except KeyError as e:
+            raise KeyError('No HPOTerm for index {}'.format(key)) from e
 
     def __iter__(self) -> Iterator[HPOTerm]:
         return iter(self._map.values())

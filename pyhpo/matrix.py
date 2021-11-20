@@ -4,6 +4,7 @@ from typing import Iterable, Any, Optional, List, Union, Tuple
 class Matrix:
     """
     # noqa: E501
+
     Poor man's implementation of a DataFrame/Matrix
 
     This is used to calculate similarities between HPO sets
