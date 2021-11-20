@@ -9,25 +9,25 @@ from pyhpo import annotations as an
 
 # Number of terms in HPO Ontology
 # grep "^\[Term\]$" pyhpo/data/hp.obo | wc -l
-N_TERMS = 16083
+N_TERMS = 16601
 
 # Number of genes in the annotation dataset
 # cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | sort -u | wc -l
-N_GENES = 4531
+N_GENES = 4707
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_OMIM = 7941
+N_OMIM = 8120
 # Number of excluded OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
-N_OMIM_EXL = 663
+N_OMIM_EXL = 679
 
 # Number of ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_ORPHA = 4094
+N_ORPHA = 4200
 # Number of excluded ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
-N_ORPHA_EXL = 272
+N_ORPHA_EXL = 318
 
 # Number of DECIPHER diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^DECIPHER" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
@@ -180,7 +180,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert 4 < df.ic_omim.mean() < 5, df.ic_omim.mean()
         assert 3 < df.ic_orpha.mean() < 4, df.ic_orpha.mean()
         assert 0 < df.ic_decipher.mean() < 1, df.ic_decipher.mean()
-        assert 3.5 < df.ic_gene.mean() < 3.7, df.ic_gene.mean()
+        assert 3.5 < df.ic_gene.mean() < 3.8, df.ic_gene.mean()
         assert 7.5 < df.dTop_l.mean() < 8.0, df.dTop_l.mean()
         assert 6 < df.dTop_s.mean() < 7, df.dTop_s.mean()
         assert 0.6 < df.dBottom.mean() < 0.7, df.dBottom.mean()
