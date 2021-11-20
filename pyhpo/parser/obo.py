@@ -91,9 +91,9 @@ def terms_from_file(data_folder: str) -> Iterator[dict]:
     Reads an obo file line by line to yield
     a dict for building an HPOTerm
 
-    Attributes
+    Parameters
     ----------
-    filename: str
+    data_folder:
         Full path to ``obo`` file
 
     """
@@ -122,6 +122,14 @@ def terms_from_file(data_folder: str) -> Iterator[dict]:
 
 
 def parse_obo_section(term_section: List[str]) -> dict:
+    """
+    Parses the section of an OBO file for one single HPO term
+
+    Parameters
+    ----------
+    term_section:
+        Lines of the ``obo`` file that describe the HPO term
+    """
     term_data = {}
     for line in term_section:
         if line == '':

@@ -13,6 +13,7 @@ Welcome to PyHPO's documentation!
     stats
     matrix
     data
+    parser
 
 *************
 Introduction:

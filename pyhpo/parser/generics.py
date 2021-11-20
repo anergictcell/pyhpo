@@ -12,7 +12,7 @@ def id_from_string(hpo_string: str) -> int:
 
     Parameters
     ----------
-    hpo_string: str
+    hpo_string:
         HPO term ID.
 
         (e.g.: HP:000001)
@@ -39,13 +39,13 @@ def remove_outcommented_rows(
 
     Parameters
     ----------
-    fh: iterator
+    fh:
         any object which supports the iterator protocol and
         returns a string each time its __next__() method is
         called — file objects and list objects are both suitable
 
-    ignorechar: str, defaults: ``#``
-        All lines starting with this character will be ignored
+    ignorechar:
+        All lines starting with this character(s) will be ignored
 
     Yields
     ------

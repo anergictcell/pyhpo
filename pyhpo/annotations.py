@@ -171,6 +171,17 @@ class GeneDict(dict):
         return gene
 
     def clear(self) -> None:
+        """
+        Removes all Genes to start with blank state.
+
+        There are almot zero use-cases to ever call this method in
+        client-side code. If you use code, that modifies the ``GeneDict``
+        class a lot, you might use this. Under normal circumstences,
+        this should not be needed.
+
+        Currently, the primary use case is to clean up the state for
+        unittests.
+        """
         self._indicies.clear()
         self._names.clear()
         dict.clear(self)
@@ -324,6 +335,17 @@ class DiseaseDict(dict):
         return disease
 
     def clear(self) -> None:
+        """
+        Removes all Diseases to start with blank state.
+
+        There are almot zero use-cases to ever call this method in
+        client-side code. If you use code, that modifies the ``DiseaseDict``
+        class a lot, you might use this. Under normal circumstences,
+        this should not be needed.
+
+        Currently, the primary use case is to clean up the state for
+        unittests.
+        """
         self._indicies.clear()
         dict.clear(self)
 

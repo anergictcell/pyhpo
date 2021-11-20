@@ -48,21 +48,3 @@ Instance of :class:`pyhpo.annotations.DiseaseDict` to handle Orphanet diseases. 
 Decipher
 ********
 Instance of :class:`pyhpo.annotations.DiseaseDict` to handle Decipher diseases. Ensures that diseases are not duplicated through use of Singletons.
-
-``HPO_Gene`` class
-******************
-.. autoclass:: pyhpo.annotations.HPO_Gene
-   :no-private-members:
-   :no-special-members:
-
-
-Methods
-*******
-
-parse_pheno_file
-----------------
-.. autofunction:: pyhpo.annotations.parse_pheno_file
-
-remove_outcommented_rows
-------------------------
-.. autofunction:: pyhpo.annotations.remove_outcommented_rows

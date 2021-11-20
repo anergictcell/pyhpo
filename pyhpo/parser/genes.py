@@ -42,6 +42,13 @@ def add_gene_to_term(
 ) -> None:
     """
     Recursive function to add Gene to an HPOTerm and all its parents
+
+    Parameters
+    ----------
+    gene:
+        Gene to add to term
+    term:
+        HPOTerm that is associated with the gene
     """
     if gene in term.genes:
         return None

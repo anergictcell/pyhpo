@@ -81,6 +81,13 @@ def add_decipher_to_term(
     """
     Recursive function to add Decipher Disease
     to an HPOTerm and all its parents
+
+    Parameters
+    ----------
+    decipher:
+        Disease to add to term
+    term:
+        HPOTerm that is associated with diseease
     """
     if decipher in term.decipher_diseases:
         return None
@@ -97,6 +104,13 @@ def add_negative_decipher_to_term(
     """
     Recursive function to add excluded Decipher Disease
     to an HPOTerm and all its parents
+
+    Parameters
+    ----------
+    decipher:
+        Disease to exclude from term
+    term:
+        HPOTerm that is not associated with diseease
     """
     if decipher in term.decipher_excluded_diseases:
         return None
@@ -113,6 +127,13 @@ def add_omim_to_term(
     """
     Recursive function to add OMIM Disease
     to an HPOTerm and all its parents
+
+    Parameters
+    ----------
+    omim:
+        Disease to add to term
+    term:
+        HPOTerm that is associated with diseease
     """
     if omim in term.omim_diseases:
         return None
@@ -129,7 +150,14 @@ def add_negative_omim_to_term(
     """
     Recursive function to add excluded OMIM Disease
     to an HPOTerm and all its parents
-    """
+
+    Parameters
+    ----------
+    omim:
+        Disease to exclude from term
+    term:
+        HPOTerm that is not associated with diseease
+   """
     if omim in term.omim_excluded_diseases:
         return None
     term.omim_excluded_diseases.add(omim)
@@ -145,6 +173,13 @@ def add_orpha_to_term(
     """
     Recursive function to add Orpha Disease
     to an HPOTerm and all its parents
+
+    Parameters
+    ----------
+    orpha:
+        Disease to add to term
+    term:
+        HPOTerm that is associated with diseease
     """
     if orpha in term.orpha_diseases:
         return None
@@ -161,6 +196,13 @@ def add_negative_orpha_to_term(
     """
     Recursive function to add excluded Orpha Disease
     to an HPOTerm and all its parents
+
+    Parameters
+    ----------
+    orpha:
+        Disease to exclude from term
+    term:
+        HPOTerm that is not associated with diseease
     """
     if orpha in term.orpha_excluded_diseases:
         return None
