@@ -3,6 +3,12 @@ Changelog
 
 3.0
 ---
+Refactored huge parts of the code, enabling more strict mypy type checking
+and class validation via Pydantic. This makes development much easier, but has
+a few, minor impacts on the library's API.
+
+Obviously, 3.0.0 also includes a data update to 2021-10-10.
+
 Breaking API changes:
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -28,7 +34,7 @@ removed
 
 ``HPOTerm.children`` and ``HPOTerm.parents``
 """"""""""""""""""""""""""""""""""""""""""""
-``HPOTerm.children`` and ``HPOTerm.parents`` now are ``set(HPOTerm)`` instead of ``list(HPOTerm)``. This makes more sense logically, but breks code that slices the result. I believe this to be low impact, since there is no good reason to slice a list of children or parents. In an ideal case one wants to iterate through them or check for existence of length. This behaviour is still possible:
+``HPOTerm.children`` and ``HPOTerm.parents`` now are ``set(HPOTerm)`` instead of ``list(HPOTerm)``. This makes more sense logically, but breks code that slices the result. I believe this to be low impact, since there is no good reason to slice a list of children or parents. In an ideal case one wants to iterate through them or check for existence or length. This behaviour is still possible:
 
 This code will still work
 
@@ -119,13 +125,14 @@ Changed repr to be more readable and more pythonic.
 
 ``HPOTerm.print_hierarchy``
 """""""""""""""""""""""""""
-``HPOTerm.print_hierarchy`` has been remove and is not part of the public
+``HPOTerm.print_hierarchy`` has been removed and is not part of the public
 API anymore
 
 
 ``Disease.hpo``, ``Gene.hpo``
 """""""""""""""
-There are no setter and wrapper methods around this anymore. TODO: Explain better
+There are no setter and wrapper methods around this anymore. These attributes
+should not be set by clients and should only be modified by the library itself.
 
 
 ``Ontology()``
