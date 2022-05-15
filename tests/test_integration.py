@@ -236,3 +236,13 @@ class IntegrationFullTest(unittest.TestCase):
         self.assertIsInstance(res[0]['item'], an.OmimDisease)
         self.assertIsInstance(res[0]['count'], int)
         self.assertIsInstance(res[0]['enrichment'], float)
+
+    def test_similarity_with_custom_ic(self):
+        for term in self.terms:
+            term.information_content.set_custom('testing_custom_ic', term.information_content.gene)
+
+        for term in self.terms:
+            self.assertEqual(
+                term.similarity_score(self.terms[1], kind='gene'),
+                term.similarity_score(self.terms[1], kind='testing_custom_ic')
+            )

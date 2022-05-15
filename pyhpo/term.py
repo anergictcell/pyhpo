@@ -1,8 +1,8 @@
 from operator import or_
 from functools import reduce, lru_cache
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from backports.cached_property import cached_property
 
 from pyhpo.config import MODIFIER_IDS
@@ -13,10 +13,20 @@ from pyhpo.parser.generics import id_from_string
 
 
 class InformationContent(BaseModel):
-    gene: float = 0.0
-    omim: float = 0.0
-    orpha: float = 0.0
-    decipher: float = 0.0
+    """
+    InformationContent contains automatically calculated IC based on
+    direct/indirect associations with genes, omim, orpha and decipher.
+    IC instances are created automatically and accessed through
+    :class:`pyhpo.term.HPOTerm` instances.
+
+    Users can also register and calculate custom IC scores via
+    :func:`pyhpo.term.InformationContent.set_custom`.
+    """
+    gene: float = 0.0  # Gene based IC
+    omim: float = 0.0  # OMIM based IC
+    orpha: float = 0.0  # OrphaNet based IC
+    decipher: float = 0.0  # Decipher based IC
+    custom: Dict[str, float] = Field(default_factory=dict)
 
     def __getitem__(self, key: str) -> float:
         """
@@ -30,7 +40,38 @@ class InformationContent(BaseModel):
             term.information.content[ic_kind]
 
         """
-        return float(self.__getattribute__(key))
+        try:
+            return float(self.__getattribute__(key))
+        except AttributeError as err:
+            if key in self.custom:
+                return self.custom[key]
+            else:
+                raise AttributeError from err
+
+    def set_custom(self, key: str, value: float) -> None:
+        """
+        Set the IC of a custom score
+
+        Parameters
+        ----------
+        key: str
+            The name of the information-content metric
+        value: float
+            The actual information content
+
+
+        **Example:** ::
+
+            for term in Ontology:
+                # For some reason, you want to base the information content
+                # on the depths of the Term in the ontology
+                term.setcustom('depth',  term.shortest_path_to_root())
+
+            # and now calculate similarity of two sets
+            my_similarity = term_set_1.similarity(term_set_2, kind='depth')
+
+        """
+        self.custom[key] = value
 
 
 class HPOTerm(BaseModel):
@@ -41,10 +82,19 @@ class HPOTerm(BaseModel):
 
     # Always present and mandatory
     id: str
+    """
+    The HPO identifier
+    """
     name: str
+    """
+    The name of the HPO term
+    """
 
     # Mandatory, calculated during initialization
     index: int
+    """
+    The integer representation of the HPO identifier
+    """
     _hash: int
 
     # Mandatory for HPOTerm, but not always present in input
@@ -72,6 +122,11 @@ class HPOTerm(BaseModel):
     decipher_diseases: Set[DecipherDisease] = set()
     decipher_excluded_diseases: Set[DecipherDisease] = set()
     information_content: InformationContent = InformationContent()
+    """
+    The :class:`.InformationContent` of the HPO term.
+    Multiple kinds of IC are automatically calculated,
+    others can be manually calculated.
+    """
 
     def __init__(self, **kwargs) -> None:  # type: ignore
         kwargs['index'] = id_from_string(kwargs['id'])
