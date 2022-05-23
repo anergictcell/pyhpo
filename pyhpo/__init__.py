@@ -11,7 +11,7 @@ from pyhpo import config
 
 # The following info will be used by setup.py and sphinx documentation
 __author__ = 'CENTOGENE GmbH'
-__version__ = '3.0.0'
+__version__ = '3.1.0'
 
 __all__ = (
     'Annotation',
