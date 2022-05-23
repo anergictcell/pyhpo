@@ -9,6 +9,20 @@ HPOTerm
    :no-private-members:
    :no-special-members:
 
+Attributes
+----------
+   .. autoattribute:: pyhpo.term.HPOTerm.id
+   .. autoattribute:: pyhpo.term.HPOTerm.name
+   .. autoattribute:: pyhpo.term.HPOTerm.information_content
+   .. autoattribute:: pyhpo.term.HPOTerm.comment
+   .. autoattribute:: pyhpo.term.HPOTerm.definition
+   .. autoattribute:: pyhpo.term.HPOTerm.synonym
+   .. autoattribute:: pyhpo.term.HPOTerm.parents
+   .. autoattribute:: pyhpo.term.HPOTerm.children
+   .. autoattribute:: pyhpo.term.HPOTerm.genes
+   .. autoattribute:: pyhpo.term.HPOTerm.omim_diseases
+   .. autoattribute:: pyhpo.term.HPOTerm.orpha_diseases
+   .. autoattribute:: pyhpo.term.HPOTerm.decipher_diseases
 
 parent_of
 ----------
@@ -57,3 +71,22 @@ similarity_score
 toJSON
 ------------------------
 .. automethod:: pyhpo.term.HPOTerm.toJSON
+
+
+``InformationContent``
+**********************
+.. autoclass:: pyhpo.term.InformationContent
+   :no-private-members:
+   :no-special-members:
+
+Default attributes
+------------------
+   .. autoattribute:: pyhpo.term.InformationContent.gene
+   .. autoattribute:: pyhpo.term.InformationContent.omim
+   .. autoattribute:: pyhpo.term.InformationContent.orpha
+   .. autoattribute:: pyhpo.term.InformationContent.decipher
+
+
+set_custom
+----------
+.. automethod:: pyhpo.term.InformationContent.set_custom
