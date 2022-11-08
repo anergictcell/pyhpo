@@ -10,8 +10,8 @@ from pyhpo.annotations import OmimDisease, OrphaDisease, DecipherDisease
 from pyhpo import config
 
 # The following info will be used by setup.py and sphinx documentation
-__author__ = 'CENTOGENE GmbH'
-__version__ = '3.1.2'
+__author__ = 'Jonas Marcello @ CENTOGENE GmbH'
+__version__ = '3.1.3'
 
 __all__ = (
     'Annotation',
