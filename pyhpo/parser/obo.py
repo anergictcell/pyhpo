@@ -115,6 +115,13 @@ def terms_from_file(data_folder: str) -> Iterator[dict]:
             if line == '[Term]':
                 yield parse_obo_section(term_section)
                 term_section = []
+            elif line == "[Typedef]":
+                # we're currently not parsing an Typedef section.
+                # Since they only appear at the end of the OBO file
+                # we're stopping the parsing here.
+                # TODO: Instead of break, add logic to skip all Typedef
+                # sections and continue with term parsing
+                break
             else:
                 term_section.append(line)
 
