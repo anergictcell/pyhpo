@@ -34,6 +34,7 @@ How similar are the phenotypes of two patients
 .. code:: python
 
     from pyhpo import Ontology
+    from pyhpo.set import HPOSet
 
     # initilize the Ontology ()
     _ = Ontology()
