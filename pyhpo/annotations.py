@@ -162,7 +162,7 @@ class GeneDict(dict):
         except KeyError:
             pass
 
-        gene = GeneSingleton(id=hgncid, name=symbol)
+        gene = GeneSingleton(id=hgncid, name=symbol)  # type: ignore
 
         self[gene] = gene
         self._indicies[hgncid] = gene
