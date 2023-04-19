@@ -21,7 +21,10 @@ def _parse_phenotype_hpoa_file(path: str) -> None:
     filename = os.path.join(path, FILENAME)
     with open(filename) as fh:
         reader = csv.reader(
-            remove_outcommented_rows(fh),
+            remove_outcommented_rows(
+                remove_outcommented_rows(fh),
+                ignorechar="database_id"
+            ),
             delimiter='\t'
         )
         for cols in reader:
