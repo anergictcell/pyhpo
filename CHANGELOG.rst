@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.1.5
+-----
+Data update to 2023-04-05
+
+Minor fix in parsing to account for new JAX HPO data format
+
 3.0
 ---
 Refactored huge parts of the code, enabling more strict mypy type checking

@@ -18,7 +18,10 @@ def _parse_phenotype_to_gene_file(path: str) -> None:
     filename = os.path.join(path, FILENAME)
     with open(filename) as fh:
         reader = csv.reader(
-            remove_outcommented_rows(fh),
+            remove_outcommented_rows(
+                remove_outcommented_rows(fh),
+                ignorechar="hpo_id"
+            ),
             delimiter='\t'
         )
         for cols in reader:
