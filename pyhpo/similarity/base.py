@@ -6,9 +6,9 @@ import pyhpo
 
 
 class _Similarity(BaseModel):
-    dispatch: Dict['str', 'SimilarityBase'] = {}
-    kind = 'omim'
-    method = 'graphic'
+    dispatch: Dict[str, 'SimilarityBase'] = {}
+    kind: str = 'omim'
+    method: str = 'graphic'
 
     def __call__(
         self,
@@ -40,7 +40,7 @@ class _Similarity(BaseModel):
         self.dispatch[name] = similarity_class()
 
 
-class SimilarityBase:
+class SimilarityBase(BaseModel):
     """
     Base class to use for custom similarity calculations.
 

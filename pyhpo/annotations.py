@@ -57,10 +57,6 @@ class Annotation(BaseModel):
     def __str__(self) -> str:
         return self.name
 
-    class Config:
-        allow_mutation = True
-        underscore_attrs_are_private = True
-
 
 class GeneSingleton(Annotation):
     """
@@ -250,20 +246,20 @@ class DiseaseSingleton(Annotation):
     name: str
         Disease name
     """
-    diseasetype = 'Undefined'
+    diseasetype: str = 'Undefined'
     negative_hpo: Set[int] = set()
 
 
 class OmimDisease(DiseaseSingleton):
-    diseasetype = 'Omim'
+    diseasetype: str = 'Omim'
 
 
 class OrphaDisease(DiseaseSingleton):
-    diseasetype = 'Orpha'
+    diseasetype: str = 'Orpha'
 
 
 class DecipherDisease(DiseaseSingleton):
-    diseasetype = 'Decipher'
+    diseasetype: str = 'Decipher'
 
 
 class DiseaseDict(dict):

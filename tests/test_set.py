@@ -246,7 +246,6 @@ class SetInitTests(unittest.TestCase):
             5
         )
 
-        self.ontology[12].Config.allow_mutation = True
         self.ontology[12].is_obsolete = True
         self.ontology[12].replaced_by = 'HP:0041'
         ci2 = ci.replace_obsolete()
@@ -295,7 +294,6 @@ class SetInitTests(unittest.TestCase):
             len(self.ontology)
         )
 
-        self.ontology[12].Config.allow_mutation = True
         self.ontology[12].is_obsolete = True
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
