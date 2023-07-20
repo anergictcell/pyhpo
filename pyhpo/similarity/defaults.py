@@ -29,7 +29,7 @@ class Lin(SimilarityBase):
     """
     Based on Lin D, Proceedings of the 15th ICML, (1998)
     """
-    dependencies = ['resnik']
+    dependencies: List[str] = ['resnik']
 
     def __call__(
         self,
@@ -63,7 +63,7 @@ class JC(SimilarityBase):
         See :func:`pyhpo.term._jc_similarity_score_2`
         for an alternative way to calculate Jiang & Conrath
     """
-    dependencies = ['resnik']
+    dependencies: List[str] = ['resnik']
 
     def __call__(
         self,
@@ -96,7 +96,7 @@ class JC2(SimilarityBase):
         sim[JC](t1,t2) = 1-(IC(t1)+IC(t2)−2×IC(t[MICA]))
 
     """
-    dependencies = ['resnik']
+    dependencies: List[str] = ['resnik']
 
     def __call__(
         self,
@@ -118,7 +118,7 @@ class Relevance(SimilarityBase):
     """
     Based on Schlicker A, et.al., BMC Bioinformatics, (2006)
     """
-    dependencies = ['resnik', 'lin']
+    dependencies: List[str] = ['resnik', 'lin']
 
     def __call__(
         self,
@@ -134,7 +134,7 @@ class InformationCoefficient(SimilarityBase):
     """
     Based on Li B, et. al., arXiv, (2010)
     """
-    dependencies = ['resnik', 'lin']
+    dependencies: List[str] = ['resnik', 'lin']
 
     def __call__(
         self,

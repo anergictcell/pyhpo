@@ -706,7 +706,6 @@ class TestOntologyQueries(unittest.TestCase):
             self.child_1_2
         )
 
-        self.child_1_2.Config.allow_mutation = True
         self.child_1_2.name = 'something else'
         self.assertEqual(
             self.terms.synonym_match('Test child level 1-2'),

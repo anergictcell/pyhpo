@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.2.0
+-----
+Update Pydantic dependency to 2.0
+
+Data update to 2023-06-17
+
 3.1.5
 -----
 Data update to 2023-04-05

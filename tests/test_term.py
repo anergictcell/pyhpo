@@ -249,13 +249,10 @@ class TestTermSimilarities(unittest.TestCase):
         self.term = HPOTerm(**parse_obo_section(TEST_HPO))
 
         self.t1 = HPOTerm(id='HP:001', name='HP1')
-        self.t1.Config.allow_mutation = True
         self.t1.information_content = {'omim': 1, 'gene': 11}
         self.t2 = HPOTerm(id='HP:002', name='HP2')
-        self.t2.Config.allow_mutation = True
         self.t2.information_content = {'omim': 3, 'gene': 33}
         self.t3 = HPOTerm(id='HP:003', name='HP3')
-        self.t3.Config.allow_mutation = True
         self.t3.information_content = {'omim': 2, 'gene': 22}
 
     @patch('pyhpo.term.SimScore')

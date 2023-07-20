@@ -516,7 +516,7 @@ class HPOTerm(BaseModel):
             res['synonym'] = self.synonym
             res['xref'] = self.xref
             res['is_a'] = self._is_a
-            res['ic'] = self.information_content.dict()
+            res['ic'] = self.information_content.model_dump()
 
         return res
 
@@ -549,6 +549,4 @@ class HPOTerm(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        underscore_attrs_are_private = True
-        keep_untouched = (cached_property, )
-        allow_mutation = True
+        ignored_types = (cached_property, )

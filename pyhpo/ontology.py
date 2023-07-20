@@ -405,9 +405,6 @@ class OntologyClass():
         for term in self._map.values():
             term.all_parents
 
-        for term in self._map.values():
-            term.Config.allow_mutation = False
-
     def _add_information_content(self) -> None:
         """
         Calculates the information content for each HPO Term
