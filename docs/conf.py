@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyHPO'
-copyright = '2021, CENTOGENE GmbH'
+copyright = '2023, Jonas Marcello'
 author = pyhpo.__author__
 
 # The version info for the project you're documenting, acts as replacement for
@@ -74,7 +74,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -296,3 +296,4 @@ texinfo_documents = [
 autodoc_member_order = 'bysource'
 
 napoleon_use_param = True
+autodoc_typehints = "both"

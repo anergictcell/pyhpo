@@ -84,7 +84,8 @@ class HPOSet(set):
 
         .. warning::
 
-            Not all obsolete terms have a replacement
+            Not all obsolete terms have a replacement. Obsolete terms
+            without replacements will be removed from the set.
 
         Parameters
         ----------
@@ -370,6 +371,16 @@ class HPOSet(set):
         float
             The similarity score to the other HPOSet
 
+
+        Raises
+        ------
+        RuntimeError
+            The specified ``method`` or ``combine`` does not exist
+        NotImplementedError
+            This error can only occur with custom Similarity-Score
+            methods that do not have a ``similarity`` method defined.
+        AttributeError
+            The information content for ``kind`` does not exist
         """
         if method == 'equal':
             return self._equality_score(other)

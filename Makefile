@@ -16,7 +16,7 @@ check:
 
 docs:
 	@echo "Generating documentation"
-	sphinx-build -b html -d _build/doctrees docs _build/html/
+	sphinx-build -a -b html -d _build/doctrees docs _build/html/
 
 build:
 	@echo "Building packages"

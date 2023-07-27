@@ -6,15 +6,17 @@ A Python library to work with, analyze, filter and inspect the `Human Phenotype 
 
 Visit the `PyHPO Documentation`_ for a more detailed overview of all the functionality.
 
+.. _Human Phenotype Ontology: https://hpo.jax.org/
+.. _PyHPO Documentation: https://pyhpo.readthedocs.io/en/latest/
 
 Main features
 =============
 
-- Identify patient cohorts based on clinical features
-- Cluster patients or other clinical information for GWAS
-- Phenotype to Genotype studies
-- HPO similarity analysis
-- Graph based analysis of phenotypes, genes and diseases
+* 👫 Identify patient cohorts based on clinical features
+* 👨‍👧‍👦 Cluster patients or other clinical information for GWAS
+* 🩻→🧬 Phenotype to Genotype studies
+* 🍎🍊 HPO similarity analysis
+* 🕸️ Graph based analysis of phenotypes, genes and diseases
 
 
 **PyHPO** allows working on individual terms ``HPOTerm``, a set of terms ``HPOSet`` and the full ``Ontology``.
@@ -25,8 +27,45 @@ Internally the ontology is represented as a branched linked list, every term con
 
 It provides an interface to create ``Pandas Dataframe`` from its data, allowing integration in already existing data anlysis tools.
 
-Examples
---------
+
+Getting started
+===============
+
+The easiest way to install **PyHPO** is via pip
+
+.. code:: bash
+
+    pip install pyhpo
+
+or, you can additionally install optional packages for extra functionality
+
+.. code:: bash
+
+    # Include pandas during install
+    pip install pyhpo[pandas]
+
+    # Include scipy
+    pip install pyhpo[scipy]
+
+    # Include all dependencies
+    pip install pyhpo[all]
+
+.. note::
+
+    Some features of PyHPO require ``pandas`` and ``scipy``. The standard installation via pip will not include pandas or scipy and PyHPO will work just fine. (You will get a warning on the initial import though).
+
+    Without installing ``pandas``, you won't be able to export the Ontology as a ``Dataframe``, everything else will work fine.
+
+    Without installing ``scipy``, you won't be able to use the ``stats`` module, especially the enrichment calculations.
+
+
+Usage example
+=============
+
+Basic use cases
+---------------
+
+Some examples for basic functionality of PyHPO
 
 How similar are the phenotypes of two patients
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,40 +123,6 @@ How close are two HPO terms
     HP:0009121 | Abnormal axial skeleton morphology
     """
 
-
-Getting started
-===============
-
-The easiest way to install **PyHPO** is via pip
-
-.. code:: bash
-
-    pip install pyhpo
-
-or, you can additionally install optional packages for extra functionality
-
-.. code:: bash
-
-    # Include pandas during install
-    pip install pyhpo[pandas]
-
-    # Include scipy
-    pip install pyhpo[scipy]
-
-    # Include all dependencies
-    pip install pyhpo[all]
-
-.. note::
-
-    Some features of PyHPO require ``pandas`` and ``scipy``. The standard installation via pip will not include pandas or scipy and PyHPO will work just fine. (You will get a warning on the initial import though). 
-
-    Without installing ``pandas``, you won't be able to export the Ontology as a ``Dataframe``, everything else will work fine.
-
-    Without installing ``scipy``, you won't be able to use the ``stats`` module, especially the enrichment calculations.
-
-
-Usage example
-=============
 
 HPOTerm
 -------
@@ -308,7 +313,6 @@ It can be reused across several modules, e.g:
         return Ontology.get_hpo_object(term)
 
 
-
 HPOSet
 ------
 An ``HPOSet`` is a collection of ``HPOTerm`` and can be used to represent e.g. a patient's clinical information. It provides APIs for filtering, comparisons to other ``HPOSet`` and term/gene/disease enrichments.
@@ -406,7 +410,8 @@ Examples:
 *(This script is complete, it should run "as is")*
 
 
-For a more detailed description of how to use PyHPO, visit the `PyHPO Documentation`_.
+For a more detailed description of how to use PyHPO, visit the `PyHPO Documentation <https://pyhpo.readthedocs.io/en/latest/>`_.
+
 
 
 Contributing
@@ -424,6 +429,4 @@ PyHPO is using the Human Phenotype Ontology. Find out more at http://www.human-p
 
 Sebastian Köhler, Leigh Carmody, Nicole Vasilevsky, Julius O B Jacobsen, et al. Expansion of the Human Phenotype Ontology (HPO) knowledge base and resources. Nucleic Acids Research. (2018) doi: 10.1093/nar/gky1105
 
-.. _PyHPO Documentation: https://centogene.github.io/pyhpo/
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
-.. _Human Phenotype Ontology: https://hpo.jax.org/

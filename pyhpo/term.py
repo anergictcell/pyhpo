@@ -76,51 +76,126 @@ class InformationContent(BaseModel):
 
 class HPOTerm(BaseModel):
     """
-    An HPOTermBase instance can be build solely by itself,
-    without knowledge of the actual Ontology
+    An HPOTerm instance can be build solely by itself,
+    without knowledge of the actual Ontology. This is not recommended
+    because it would miss all ontology features, such as parents, children,
+    associated genes and diseaases etc.
+
+    An HPOTerm instance should always be derived from the :class:`pyhpo.Ontology`
     """
 
+    ###
     # Always present and mandatory
+    ###
+
     id: str
     """
-    The HPO identifier
-    """
-    name: str
-    """
-    The name of the HPO term
+    The HPO identifier, e.g. ``HP:0000118``
     """
 
+    name: str
+    """
+    The name of the HPO term, e.g. ``Abnormal axial skeleton morphology``
+    """
+
+    ###
     # Mandatory, calculated during initialization
+    ###
+
     index: int
     """
     The integer representation of the HPO identifier
     """
+
     _hash: int
 
+    ###
     # Mandatory for HPOTerm, but not always present in input
+    ###
+
     comment: str = ''
+    """
+    The comment from the OBO source file
+    """
+
     definition: str = ''
+    """
+    The definition from the OBO source file
+    """
+
     _is_a: List[str] = []
     synonym: List[str] = []
+    """
+    A list of synonymous names for the term
+    """
+
     xref: List[str] = []
     alt_id: List[str] = []
 
+    ###
     # Special logic for some obsolete terms
+    ###
+
     is_obsolete: bool = False
     replaced_by: Optional[str] = None
     consider: List[str] = []
 
+    ###
     # Computed once all HPO Terms are present in the Ontology
+    ###
+
     parents: Set['HPOTerm'] = set()
+    """
+    A set of all direct parent terms
+    """
+
     children: Set['HPOTerm'] = set()
+    """
+    A set of all direct child terms
+    """
 
     genes: Set[GeneSingleton] = set()
+    """
+    A set of all associated genes. Associated genes are inversely inherited from
+    child terms as well
+    """
+
     omim_diseases: Set[OmimDisease] = set()
+    """
+    A set of all associated Omim diseases. Associated diseases are inversely inherited from
+    child terms as well
+    """
+
     omim_excluded_diseases: Set[OmimDisease] = set()
+    """
+    A set of all explicitly non-associated Omim diseases. Non-associated diseases are inherited from
+    parent terms as well
+    """
+
     orpha_diseases: Set[OrphaDisease] = set()
+    """
+    A set of all associated Orpha diseases. Associated diseases are inversely inherited from
+    child terms as well
+    """
+
     orpha_excluded_diseases: Set[OrphaDisease] = set()
+    """
+    A set of all explicitly non-associated Orpha diseases. Non-associated diseases are inherited from
+    parent terms as well
+    """
+
     decipher_diseases: Set[DecipherDisease] = set()
+    """
+    A set of all associated Decipher diseases. Associated diseases are inversely inherited from
+    child terms as well
+    """
+
     decipher_excluded_diseases: Set[DecipherDisease] = set()
+    """
+    A set of all explicitly non-associated Decipher diseases. Non-associated diseases are inherited from
+    parent terms as well
+    """
+
     information_content: InformationContent = InformationContent()
     """
     The :class:`.InformationContent` of the HPO term.
@@ -448,6 +523,16 @@ class HPOTerm(BaseModel):
             * **dist** - Distance between terms
             * Additional methods can be registered separately (
               see :class::`pyhpo.similarity.base._Similarity`)
+
+        Raises
+        ------
+        RuntimeError
+            The specified ``method`` does not exist
+        NotImplementedError
+            This error can only occur with custom Similarity-Score
+            methods that do not have a ``similarity`` method defined.
+        AttributeError
+            The information content for ``kind`` does not exist
         """
         return SimScore(self, other, kind, method)
 

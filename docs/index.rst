@@ -1,10 +1,29 @@
-#################################
-Welcome to PyHPO's documentation!
-#################################
+###################
+PyHPO documentation
+###################
 
 .. toctree::
     :maxdepth: 1
-    :caption: API documentation:
+    :caption: 🚀 Getting started:
+
+    tutorial/installation
+    tutorial/basics
+    tutorial/data
+
+.. toctree::
+    :maxdepth: 1
+    :caption: 🖥️ Examples:
+
+    tutorial/examples
+    tutorial/terms
+    tutorial/ontology
+    tutorial/sets
+    tutorial/enrichment
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: 📄 API documentation:
 
     hpoterm
     ontology
@@ -16,17 +35,16 @@ Welcome to PyHPO's documentation!
     data
     parser
 
-*************
-Introduction:
-*************
+
 
 .. include:: ../README.rst
+    :end-before: Getting started
+
 
 ##################
 Indices and tables
 ##################
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
