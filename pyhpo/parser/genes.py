@@ -15,6 +15,7 @@ GENE_SYMBOL = 3
 
 
 def _parse_phenotype_to_gene_file(path: str) -> None:
+    Gene.clear()
     filename = os.path.join(path, FILENAME)
     with open(filename) as fh:
         reader = csv.reader(
