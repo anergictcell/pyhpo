@@ -9,7 +9,7 @@ from pyhpo.parser.generics import id_from_string, remove_outcommented_rows
 import pyhpo
 
 
-FILENAME = 'phenotype.hpoa'
+FILENAME = "phenotype.hpoa"
 # Cloumn mappings in phenotype_to_genes file
 DISEASE_ID = 0
 DISEASE_NAME = 1
@@ -25,35 +25,33 @@ def _parse_phenotype_hpoa_file(path: str) -> None:
     with open(filename) as fh:
         reader = csv.reader(
             remove_outcommented_rows(
-                remove_outcommented_rows(fh),
-                ignorechar="database_id"
+                remove_outcommented_rows(fh), ignorechar="database_id"
             ),
-            delimiter='\t'
+            delimiter="\t",
         )
         for cols in reader:
             disease_class: DiseaseDict = DiseaseDict()
-            phenotype_source, phenotype_id = cols[DISEASE_ID].split(':')
-            if phenotype_source == 'OMIM':
+            phenotype_source, phenotype_id = cols[DISEASE_ID].split(":")
+            if phenotype_source == "OMIM":
                 disease_class = Omim
-            elif phenotype_source == 'ORPHA':
+            elif phenotype_source == "ORPHA":
                 disease_class = Orpha
-            elif phenotype_source == 'DECIPHER':
+            elif phenotype_source == "DECIPHER":
                 disease_class = Decipher
             else:
                 continue
 
             disease = disease_class(
-                diseaseid=int(phenotype_id),
-                name=cols[DISEASE_NAME]
+                diseaseid=int(phenotype_id), name=cols[DISEASE_NAME]
             )
 
-            if cols[QUALIFIER] == '':
+            if cols[QUALIFIER] == "":
                 disease.hpo.add(id_from_string(cols[HPO_ID]))
-            elif cols[QUALIFIER] == 'NOT':
+            elif cols[QUALIFIER] == "NOT":
                 disease.negative_hpo.add(id_from_string(cols[HPO_ID]))
 
 
-def _add_decipher_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
+def _add_decipher_to_ontology(ontology: "pyhpo.OntologyClass") -> None:
     ontology._decipher_diseases = all_decipher_diseases()
     for decipher in ontology._decipher_diseases:
         for term_id in decipher.hpo:
@@ -62,7 +60,7 @@ def _add_decipher_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
             add_negative_decipher_to_term(decipher, ontology[term_id])
 
 
-def _add_omim_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
+def _add_omim_to_ontology(ontology: "pyhpo.OntologyClass") -> None:
     ontology._omim_diseases = all_omim_diseases()
     for omim in ontology._omim_diseases:
         for term_id in omim.hpo:
@@ -71,7 +69,7 @@ def _add_omim_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
             add_negative_omim_to_term(omim, ontology[term_id])
 
 
-def _add_orpha_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
+def _add_orpha_to_ontology(ontology: "pyhpo.OntologyClass") -> None:
     ontology._orpha_diseases = all_orpha_diseases()
     for orpha in ontology._orpha_diseases:
         for term_id in orpha.hpo:
@@ -81,8 +79,7 @@ def _add_orpha_to_ontology(ontology: 'pyhpo.OntologyClass') -> None:
 
 
 def add_decipher_to_term(
-    decipher: 'pyhpo.annotations.DecipherDisease',
-    term: 'pyhpo.HPOTerm'
+    decipher: "pyhpo.annotations.DecipherDisease", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add Decipher Disease
@@ -104,8 +101,7 @@ def add_decipher_to_term(
 
 
 def add_negative_decipher_to_term(
-    decipher: 'pyhpo.annotations.DecipherDisease',
-    term: 'pyhpo.HPOTerm'
+    decipher: "pyhpo.annotations.DecipherDisease", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add excluded Decipher Disease
@@ -127,8 +123,7 @@ def add_negative_decipher_to_term(
 
 
 def add_omim_to_term(
-    omim: 'pyhpo.annotations.OmimDisease',
-    term: 'pyhpo.HPOTerm'
+    omim: "pyhpo.annotations.OmimDisease", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add OMIM Disease
@@ -150,8 +145,7 @@ def add_omim_to_term(
 
 
 def add_negative_omim_to_term(
-    omim: 'pyhpo.annotations.OmimDisease',
-    term: 'pyhpo.HPOTerm'
+    omim: "pyhpo.annotations.OmimDisease", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add excluded OMIM Disease
@@ -163,7 +157,7 @@ def add_negative_omim_to_term(
         Disease to exclude from term
     term:
         HPOTerm that is not associated with diseease
-   """
+    """
     if omim in term.omim_excluded_diseases:
         return None
     term.omim_excluded_diseases.add(omim)
@@ -173,8 +167,7 @@ def add_negative_omim_to_term(
 
 
 def add_orpha_to_term(
-    orpha: 'pyhpo.annotations.OrphaDisease',
-    term: 'pyhpo.HPOTerm'
+    orpha: "pyhpo.annotations.OrphaDisease", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add Orpha Disease
@@ -196,8 +189,7 @@ def add_orpha_to_term(
 
 
 def add_negative_orpha_to_term(
-    orpha: 'pyhpo.annotations.OrphaDisease',
-    term: 'pyhpo.HPOTerm'
+    orpha: "pyhpo.annotations.OrphaDisease", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add excluded Orpha Disease
@@ -218,13 +210,13 @@ def add_negative_orpha_to_term(
     return None
 
 
-def all_decipher_diseases() -> Set['DecipherDisease']:
+def all_decipher_diseases() -> Set["DecipherDisease"]:
     return set(Decipher.keys())
 
 
-def all_omim_diseases() -> Set['OmimDisease']:
+def all_omim_diseases() -> Set["OmimDisease"]:
     return set(Omim.keys())
 
 
-def all_orpha_diseases() -> Set['OrphaDisease']:
+def all_orpha_diseases() -> Set["OrphaDisease"]:
     return set(Orpha.keys())

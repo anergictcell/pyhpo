@@ -98,12 +98,8 @@ class Matrix:
             >> [14, 24, 34]
 
     """
-    def __init__(
-        self,
-        rows: int,
-        cols: int,
-        data: Optional[List[Any]] = None
-    ):
+
+    def __init__(self, rows: int, cols: int, data: Optional[List[Any]] = None):
         self.n_rows = rows
         self.n_cols = cols
         self._data: List[Any]
@@ -112,55 +108,42 @@ class Matrix:
         elif len(data) == rows * cols:
             self._data = data
         else:
-            raise RuntimeError('Wrong number of data items in `data`')
+            raise RuntimeError("Wrong number of data items in `data`")
 
     def __getitem__(self, key: Tuple[Optional[int], Optional[int]]) -> Any:
         idx = self._get_key_indicies(key)
         return self._data[idx]
 
-    def __setitem__(
-        self,
-        key: Tuple[Optional[int], Optional[int]],
-        val: Any
-    ) -> None:
+    def __setitem__(self, key: Tuple[Optional[int], Optional[int]], val: Any) -> None:
         idx = self._get_key_indicies(key)
 
         if isinstance(idx, int) or len(self._data[idx]) == len(val):
             self._data[idx] = val
         else:
-            raise ValueError('Different length of matrix subset and values')
+            raise ValueError("Different length of matrix subset and values")
 
     def _get_key_indicies(
-        self,
-        key: Tuple[Optional[int], Optional[int]]
+        self, key: Tuple[Optional[int], Optional[int]]
     ) -> Union[int, slice]:
         row = key[0]
         col = key[1]
 
         if row is None and isinstance(col, int):
             # Return one column
-            return slice(
-                col,
-                self.n_rows * (self.n_cols) + col,
-                self.n_cols
-            )
+            return slice(col, self.n_rows * (self.n_cols) + col, self.n_cols)
 
         if col is None and isinstance(row, int):
             # Return one row
-            return slice(
-                row * self.n_cols,
-                row * self.n_cols + self.n_cols,
-                1
-            )
+            return slice(row * self.n_cols, row * self.n_cols + self.n_cols, 1)
 
         if isinstance(row, int) and isinstance(col, int):
             if row > self.n_rows - 1:
-                raise RuntimeError('Invalid row number: {}'.format(row))
+                raise RuntimeError("Invalid row number: {}".format(row))
             if col > self.n_cols - 1:
-                raise RuntimeError('Invalid column number: {}'.format(col))
+                raise RuntimeError("Invalid column number: {}".format(col))
             return row * self.n_cols + col
 
-        raise RuntimeError('Invalid arguments for Matrix subset')
+        raise RuntimeError("Invalid arguments for Matrix subset")
 
     @property
     def rows(self) -> Iterable[Any]:
@@ -173,26 +156,20 @@ class Matrix:
             yield self[None, x]
 
     def __str__(self) -> str:
-        maxlength = max(
-            [len(str(self.n_cols))] +
-            [len(str(x)) for x in self._data]
-        ) + 2
+        maxlength = max([len(str(self.n_cols))] + [len(str(x)) for x in self._data]) + 2
         idxlength = len(str(self.n_rows)) + 2
 
-        s = ''
+        s = ""
 
-        s += '{}||'.format(''.rjust(idxlength))
-        s += ''.join([
-            '{}|'.format(str(x).rjust(maxlength))
-            for x in range(self.n_cols)
-        ])
-        s += '\n' + '=' * len(s)
+        s += "{}||".format("".rjust(idxlength))
+        s += "".join(
+            ["{}|".format(str(x).rjust(maxlength)) for x in range(self.n_cols)]
+        )
+        s += "\n" + "=" * len(s)
 
         for idx, item in enumerate(self._data):
             if idx % self.n_cols == 0:
-                s += '\n{}||'.format(
-                    str(int(idx/self.n_cols)).ljust(idxlength)
-                )
-            s += '{}|'.format(str(item).rjust(maxlength))
+                s += "\n{}||".format(str(int(idx / self.n_cols)).ljust(idxlength))
+            s += "{}|".format(str(item).rjust(maxlength))
 
         return s

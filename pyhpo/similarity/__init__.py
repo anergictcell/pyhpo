@@ -5,6 +5,4 @@ from pyhpo.similarity.defaults import register_defaults
 register_defaults(SimScore)
 
 
-__all__ = (
-    'SimScore',
-)
+__all__ = ("SimScore",)

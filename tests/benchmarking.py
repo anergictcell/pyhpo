@@ -7,10 +7,7 @@ from pyhpo.annotations import Omim
 
 
 def diseases2basicsets(diseases):
-    return [(
-        d.name,
-        BasicHPOSet.from_queries(d.hpo)
-    ) for d in diseases]
+    return [(d.name, BasicHPOSet.from_queries(d.hpo)) for d in diseases]
 
 
 def build_ontology():
@@ -26,17 +23,17 @@ def compare_set(diseases):
     return None
 
 
-print('===== LOADING ONTOLOGY ======')
-cProfile.run('build_ontology()')
+print("===== LOADING ONTOLOGY ======")
+cProfile.run("build_ontology()")
 
-print('===== BUILDING DISEASE BasicSETS ======')
-cProfile.run('diseases2basicsets(Ontology.omim_diseases)')
+print("===== BUILDING DISEASE BasicSETS ======")
+cProfile.run("diseases2basicsets(Ontology.omim_diseases)")
 
-print('===== BUILDING GENE BasicSETS ======')
-cProfile.run('diseases2basicsets(Ontology.genes)')
+print("===== BUILDING GENE BasicSETS ======")
+cProfile.run("diseases2basicsets(Ontology.genes)")
 
-print('===== COMPARING SETS ======')
-cProfile.run('compare_set(Ontology.omim_diseases)')
+print("===== COMPARING SETS ======")
+cProfile.run("compare_set(Ontology.omim_diseases)")
 
 """
 for v in 3.9 3.10 3.11; do virtualenv -p python${v} pyhpo_${v}; done

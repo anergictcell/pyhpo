@@ -7,8 +7,9 @@ try:
     import pandas as pd  # type: ignore
 except ImportError:
     warnings.warn(
-        'Some functionality requires pandas, which is currently not available',
-        UserWarning)
+        "Some functionality requires pandas, which is currently not available",
+        UserWarning,
+    )
 
 import pyhpo
 from pyhpo import HPOTerm
@@ -17,7 +18,7 @@ from pyhpo.parser.obo import terms_from_file
 from pyhpo.parser.generics import id_from_string
 
 
-class OntologyClass():
+class OntologyClass:
     """
     A linked and indexed list of interconnected :class:`HPOTerm` s.
 
@@ -33,19 +34,17 @@ class OntologyClass():
     """
 
     def __call__(
-        self,
-        data_folder: Optional[str] = None,
-        from_obo_file: bool = True
-    ) -> 'OntologyClass':
+        self, data_folder: Optional[str] = None, from_obo_file: bool = True
+    ) -> "OntologyClass":
         self.metadata: List[str] = []
         self._map: Dict[int, HPOTerm] = {}
-        self._genes: Set['pyhpo.GeneSingleton'] = set()
-        self._omim_diseases: Set['pyhpo.OmimDisease'] = set()
-        self._orpha_diseases: Set['pyhpo.OrphaDisease'] = set()
-        self._decipher_diseases: Set['pyhpo.DecipherDisease'] = set()
+        self._genes: Set["pyhpo.GeneSingleton"] = set()
+        self._omim_diseases: Set["pyhpo.OmimDisease"] = set()
+        self._orpha_diseases: Set["pyhpo.OrphaDisease"] = set()
+        self._decipher_diseases: Set["pyhpo.DecipherDisease"] = set()
 
         if data_folder is None:
-            data_folder = os.path.join(os.path.dirname(__file__), 'data')
+            data_folder = os.path.join(os.path.dirname(__file__), "data")
 
         if from_obo_file:
             self._load_from_obo_file(data_folder)
@@ -104,11 +103,11 @@ class OntologyClass():
         """
         res: Optional[HPOTerm] = None
         if isinstance(query, str):
-            if query.startswith('HP:'):
+            if query.startswith("HP:"):
                 try:
                     res = self[id_from_string(query)]
                 except ValueError as err:
-                    raise ValueError(f'Invalid id: {query}') from err
+                    raise ValueError(f"Invalid id: {query}") from err
                 except KeyError:
                     pass
             else:
@@ -124,14 +123,12 @@ class OntologyClass():
                 pass
 
         else:
-            raise TypeError('Invalid type {} for parameter "query"'.format(
-                type(query)
-            ))
+            raise TypeError('Invalid type {} for parameter "query"'.format(type(query)))
 
         if res:
             return res
         else:
-            raise RuntimeError('Unknown HPO term')
+            raise RuntimeError("Unknown HPO term")
 
     def match(self, query: str) -> HPOTerm:
         """
@@ -152,12 +149,10 @@ class OntologyClass():
         for term in self:
             if query == term.name:
                 return term
-        raise RuntimeError('No HPO entry with name {}'.format(query))
+        raise RuntimeError("No HPO entry with name {}".format(query))
 
     def path(
-        self,
-        query1: Union[int, str],
-        query2: Union[int, str]
+        self, query1: Union[int, str], query2: Union[int, str]
     ) -> Tuple[int, Tuple[HPOTerm, ...], int, int]:
         """
         Returns the shortest connection between
@@ -207,9 +202,7 @@ class OntologyClass():
             Every matching HPO term instance
         """
         for term in self:
-            if (
-                query.lower() in term.name.lower()
-            ) or (
+            if (query.lower() in term.name.lower()) or (
                 self.synonym_search(term, query)
             ):
                 yield term
@@ -241,9 +234,7 @@ class OntologyClass():
 
         if synonym_hit:
             return synonym_hit
-        raise RuntimeError('No HPO entry with term or synonym {}'.format(
-            query)
-        )
+        raise RuntimeError("No HPO entry with term or synonym {}".format(query))
 
     def synonym_search(self, term: HPOTerm, query: str) -> bool:
         """
@@ -268,7 +259,7 @@ class OntologyClass():
                 return True
         return False
 
-    def to_dataframe(self) -> 'pd.DataFrame':
+    def to_dataframe(self) -> "pd.DataFrame":
         """
         Creates a Pandas DataFrame from the most important features
 
@@ -303,70 +294,61 @@ class OntologyClass():
         """
 
         data: Dict[str, List[Union[float, int, str]]] = {
-            'id': [],
-            'name': [],
-            'parents': [],
-            'children': [],
-            'ic_omim': [],
-            'ic_orpha': [],
-            'ic_decipher': [],
-            'ic_gene': [],
-            'dTop_l': [],
-            'dTop_s': [],
-            'dBottom': [],
-            'genes': [],
-            'omim': [],
-            'orpha': [],
-            'decipher': []
+            "id": [],
+            "name": [],
+            "parents": [],
+            "children": [],
+            "ic_omim": [],
+            "ic_orpha": [],
+            "ic_decipher": [],
+            "ic_gene": [],
+            "dTop_l": [],
+            "dTop_s": [],
+            "dBottom": [],
+            "genes": [],
+            "omim": [],
+            "orpha": [],
+            "decipher": [],
         }
 
         # This is not the most elegant way to generate a DataFrame
         # But it works
         for term in self:
-            data['id'].append(term.id)
-            data['name'].append(term.name)
-            data['parents'].append('|'.join([x.id for x in term.parents]))
-            data['children'].append('|'.join([x.id for x in term.children]))
-            data['ic_omim'].append(term.information_content.omim)
-            data['ic_orpha'].append(term.information_content.orpha)
-            data['ic_decipher'].append(term.information_content.decipher)
-            data['ic_gene'].append(term.information_content.gene)
-            data['dTop_l'].append(term.longest_path_to_root())
-            data['dTop_s'].append(term.shortest_path_to_root())
-            data['dBottom'].append(term.longest_path_to_bottom())
-            data['genes'].append('|'.join([str(x) for x in term.genes]))
-            data['omim'].append('|'.join([
-                str(x) for x in term.omim_diseases
-            ]))
-            data['orpha'].append('|'.join([
-                str(x) for x in term.omim_diseases
-            ]))
-            data['decipher'].append('|'.join([
-                str(x) for x in term.omim_diseases
-            ]))
+            data["id"].append(term.id)
+            data["name"].append(term.name)
+            data["parents"].append("|".join([x.id for x in term.parents]))
+            data["children"].append("|".join([x.id for x in term.children]))
+            data["ic_omim"].append(term.information_content.omim)
+            data["ic_orpha"].append(term.information_content.orpha)
+            data["ic_decipher"].append(term.information_content.decipher)
+            data["ic_gene"].append(term.information_content.gene)
+            data["dTop_l"].append(term.longest_path_to_root())
+            data["dTop_s"].append(term.shortest_path_to_root())
+            data["dBottom"].append(term.longest_path_to_bottom())
+            data["genes"].append("|".join([str(x) for x in term.genes]))
+            data["omim"].append("|".join([str(x) for x in term.omim_diseases]))
+            data["orpha"].append("|".join([str(x) for x in term.omim_diseases]))
+            data["decipher"].append("|".join([str(x) for x in term.omim_diseases]))
 
-        return pd.DataFrame(data).set_index('id')
+        return pd.DataFrame(data).set_index("id")
 
     @property
-    def genes(self) -> Set['pyhpo.GeneSingleton']:
+    def genes(self) -> Set["pyhpo.GeneSingleton"]:
         return self._genes
 
     @property
-    def decipher_diseases(self) -> Set['pyhpo.DecipherDisease']:
+    def decipher_diseases(self) -> Set["pyhpo.DecipherDisease"]:
         return self._decipher_diseases
 
     @property
-    def omim_diseases(self) -> Set['pyhpo.OmimDisease']:
+    def omim_diseases(self) -> Set["pyhpo.OmimDisease"]:
         return self._omim_diseases
 
     @property
-    def orpha_diseases(self) -> Set['pyhpo.OrphaDisease']:
+    def orpha_diseases(self) -> Set["pyhpo.OrphaDisease"]:
         return self._orpha_diseases
 
-    def _load_from_obo_file(
-        self,
-        data_folder: str
-    ) -> None:
+    def _load_from_obo_file(self, data_folder: str) -> None:
         """
         Reads an obo file line by line to add
         HPO terms to the Ontology
@@ -421,10 +403,10 @@ class OntologyClass():
         total_decipher_diseases = len(self.decipher_diseases)
         total_genes = len(self.genes)
         for term in self:
-            p_omim = len(term.omim_diseases)/total_omim_diseases
-            p_orpha = len(term.orpha_diseases)/total_orpha_diseases
-            p_decipher = len(term.decipher_diseases)/total_decipher_diseases
-            p_gene = len(term.genes)/total_genes
+            p_omim = len(term.omim_diseases) / total_omim_diseases
+            p_orpha = len(term.orpha_diseases) / total_orpha_diseases
+            p_decipher = len(term.decipher_diseases) / total_decipher_diseases
+            p_gene = len(term.genes) / total_genes
             if p_omim == 0:
                 term.information_content.omim = 0
             else:
@@ -449,7 +431,7 @@ class OntologyClass():
         try:
             return self._map[key]
         except KeyError as e:
-            raise KeyError('No HPOTerm for index {}'.format(key)) from e
+            raise KeyError("No HPOTerm for index {}".format(key)) from e
 
     def __iter__(self) -> Iterator[HPOTerm]:
         return iter(self._map.values())

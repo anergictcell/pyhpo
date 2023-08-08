@@ -25,14 +25,11 @@ def id_from_string(hpo_string: str) -> int:
         (e.g.: 1)
 
     """
-    idx = hpo_string.split('!')[0].strip()
-    return int(idx.split(':')[1].strip())
+    idx = hpo_string.split("!")[0].strip()
+    return int(idx.split(":")[1].strip())
 
 
-def remove_outcommented_rows(
-    fh: Iterator[str],
-    ignorechar: str = '#'
-) -> Iterator[str]:
+def remove_outcommented_rows(fh: Iterator[str], ignorechar: str = "#") -> Iterator[str]:
     """
     Removes all rows from a filereader object that start
     with a comment character

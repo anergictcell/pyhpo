@@ -6,16 +6,16 @@ import pyhpo
 
 
 class _Similarity(BaseModel):
-    dispatch: Dict[str, 'SimilarityBase'] = {}
-    kind: str = 'omim'
-    method: str = 'graphic'
+    dispatch: Dict[str, "SimilarityBase"] = {}
+    kind: str = "omim"
+    method: str = "graphic"
 
     def __call__(
         self,
-        term1: 'pyhpo.HPOTerm',
-        term2: 'pyhpo.HPOTerm',
-        kind: Optional[str] = '',
-        method: Optional[str] = ''
+        term1: "pyhpo.HPOTerm",
+        term2: "pyhpo.HPOTerm",
+        kind: Optional[str] = "",
+        method: Optional[str] = "",
     ) -> float:
         kind = kind or self.kind
         method = method or self.method
@@ -23,7 +23,7 @@ class _Similarity(BaseModel):
             similarity = self.dispatch[method]
         except KeyError as err:
             raise RuntimeError(
-                f'Unknown method {method} to calculate similarity'
+                f"Unknown method {method} to calculate similarity"
             ) from err
 
         dependencies: List[float] = [
@@ -32,11 +32,7 @@ class _Similarity(BaseModel):
 
         return similarity(term1, term2, kind, dependencies)
 
-    def register(
-        self,
-        name: str,
-        similarity_class: Type['SimilarityBase']
-    ) -> None:
+    def register(self, name: str, similarity_class: Type["SimilarityBase"]) -> None:
         self.dispatch[name] = similarity_class()
 
 
@@ -54,14 +50,15 @@ class SimilarityBase(BaseModel):
     of these calls will be passed as ``dependencies`` parameter to
     the ``__call__`` method.
     """
+
     dependencies: List[str] = []
 
     def __call__(
         self,
-        term1: 'pyhpo.HPOTerm',
-        term2: 'pyhpo.HPOTerm',
+        term1: "pyhpo.HPOTerm",
+        term2: "pyhpo.HPOTerm",
         kind: str,
-        dependencies: List[float]
+        dependencies: List[float],
     ) -> float:
         """
         This method does the actual calculation of the similarity.
@@ -82,9 +79,7 @@ class SimilarityBase(BaseModel):
             implementation builds on an already existing similarity
             calculation.
         """
-        raise NotImplementedError(
-            'A similarity class requires a __call__ function'
-        )
+        raise NotImplementedError("A similarity class requires a __call__ function")
 
 
 SimScore = _Similarity()
