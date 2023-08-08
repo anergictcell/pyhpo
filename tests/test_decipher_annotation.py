@@ -1,7 +1,9 @@
 import unittest
 
 from pyhpo.annotations import Decipher
-from pyhpo.parser.diseases import all_decipher_diseases, add_decipher_to_term, add_negative_decipher_to_term
+from pyhpo.parser.diseases import all_decipher_diseases
+from pyhpo.parser.diseases import add_decipher_to_term
+from pyhpo.parser.diseases import add_negative_decipher_to_term
 from pyhpo.parser.diseases import _add_decipher_to_ontology
 
 from tests.mockontology import make_ontology, make_decipher
@@ -34,14 +36,14 @@ class DecipherTests(unittest.TestCase):
         # ID present, will be used
         d1b = Decipher(diseaseid=1, name='Fabry')
         # No name present, ID will be used as well
-        d1c = Decipher(diseaseid=1, name=None)
+        d1c = Decipher(diseaseid=1, name='')
 
         # New ID, new Name => New Disease
         d2a = Decipher(diseaseid=2, name='Fabry')
         # ID present, Matching by ID
         d2b = Decipher(diseaseid=2, name='Gaucher')
         # ID present, Matching by ID
-        d2c = Decipher(diseaseid=2, name=None)
+        d2c = Decipher(diseaseid=2, name='')
 
         # New ID but existing name => New disease
         d3a = Decipher(diseaseid=3, name='Gaucher')

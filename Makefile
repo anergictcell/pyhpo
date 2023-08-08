@@ -8,10 +8,10 @@ fulltests:
 
 check:
 	@echo "Checking flake8"
-	flake8 pyhpo
+	ruff .
 	@echo "Checking mypy standard"
 	mypy pyhpo
-	@echo "Checking mypy more stict"
+	@echo "Checking mypy more strict"
 	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs --warn-redundant-casts --warn-unreachable pyhpo
 
 docs:

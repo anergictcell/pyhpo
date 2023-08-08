@@ -18,7 +18,10 @@ class OboParsingTest(unittest.TestCase):
         self.a2 = [
             'id: HP:0000002',
             'name: Abnormality of body height',
-            'def: "Deviation from the norm of height with respect to that which is expected according to age and gender norms." [HPO:probinson]',
+            (
+                'def: "Deviation from the norm of height with respect to that which ' +
+                'is expected according to age and gender norms." [HPO:probinson]'
+            ),
             'synonym: "Abnormality of body height" EXACT layperson []',
             'xref: UMLS:C4025901',
             'is_a: HP:0001507 ! Growth abnormality',
@@ -30,8 +33,18 @@ class OboParsingTest(unittest.TestCase):
             'id: HP:0000003',
             'name: Multicystic kidney dysplasia',
             'alt_id: HP:0004715',
-            'def: "Multicystic dysplasia of the kidney is characterized by multiple cysts of varying size in the kidney and the absence of a normal pelvicaliceal system. The condition is associated with ureteral or ureteropelvic atresia, and the affected kidney is nonfunctional." [HPO:curators]',
-            'comment: Multicystic kidney dysplasia is the result of abnormal fetal renal development in which the affected kidney is replaced by multiple cysts and has little or no residual function. The vast majority of multicystic kidneys are unilateral. Multicystic kidney can be diagnosed on prenatal ultrasound.',
+            (
+                'def: "Multicystic dysplasia of the kidney is characterized by multiple ' +
+                'cysts of varying size in the kidney and the absence of a normal pelvicaliceal ' +
+                'system. The condition is associated with ureteral or ureteropelvic atresia, ' +
+                'and the affected kidney is nonfunctional." [HPO:curators]'
+            ),
+            (
+                'comment: Multicystic kidney dysplasia is the result of abnormal fetal renal ' +
+                'development in which the affected kidney is replaced by multiple cysts and ' +
+                'has little or no residual function. The vast majority of multicystic kidneys ' +
+                'are unilateral. Multicystic kidney can be diagnosed on prenatal ultrasound.'
+            ),
             'synonym: "Multicystic dysplastic kidney" EXACT []',
             'synonym: "Multicystic kidneys" EXACT []',
             'synonym: "Multicystic renal dysplasia" EXACT []',

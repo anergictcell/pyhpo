@@ -180,8 +180,8 @@ class HPOTerm(BaseModel):
 
     orpha_excluded_diseases: Set[OrphaDisease] = set()
     """
-    A set of all explicitly non-associated Orpha diseases. Non-associated diseases are inherited from
-    parent terms as well
+    A set of all explicitly non-associated Orpha diseases.
+    Non-associated diseases are inherited from parent terms as well
     """
 
     decipher_diseases: Set[DecipherDisease] = set()
@@ -192,8 +192,8 @@ class HPOTerm(BaseModel):
 
     decipher_excluded_diseases: Set[DecipherDisease] = set()
     """
-    A set of all explicitly non-associated Decipher diseases. Non-associated diseases are inherited from
-    parent terms as well
+    A set of all explicitly non-associated Decipher diseases.
+    Non-associated diseases are inherited from parent terms as well
     """
 
     information_content: InformationContent = InformationContent()

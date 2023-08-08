@@ -1,7 +1,5 @@
 import unittest
-from unittest.mock import patch
 
-from pyhpo.ontology import HPOTerm
 from mockontology import make_terms
 
 
@@ -16,7 +14,7 @@ class informationContentTest(unittest.TestCase):
         self.assertEqual(self.root.information_content['orpha'] , 0.0)
         self.assertEqual(self.root.information_content['decipher'] , 0.0)
 
-        with self.assertRaises(AttributeError) as err:
+        with self.assertRaises(AttributeError):
             self.root.information_content['foobar']
 
     def test_setters(self):
@@ -32,8 +30,14 @@ class informationContentTest(unittest.TestCase):
 
         self.assertEqual(self.root.information_content['omim'] , self.root.information_content.omim)
         self.assertEqual(self.root.information_content['gene'] , self.root.information_content.gene)
-        self.assertEqual(self.root.information_content['orpha'] , self.root.information_content.orpha)
-        self.assertEqual(self.root.information_content['decipher'] , self.root.information_content.decipher)
+        self.assertEqual(
+            self.root.information_content['orpha'],
+            self.root.information_content.orpha
+        )
+        self.assertEqual(
+            self.root.information_content['decipher'],
+            self.root.information_content.decipher
+        )
 
         self.assertEqual(self.terms[1].information_content['omim'] , 0.0)
         self.assertEqual(self.terms[1].information_content['gene'] , 0.0)

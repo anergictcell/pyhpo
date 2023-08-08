@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-import pyhpo
 from pyhpo.ontology import Ontology
 from tests.mockontology import make_terms, tearDown
 from tests.mockontology import make_ontology_with_annotation

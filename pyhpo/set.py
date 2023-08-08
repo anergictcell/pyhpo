@@ -502,7 +502,7 @@ class HPOSet(set):
         return Matrix(len(set1), len(set2), scores)
 
     @classmethod
-    def from_queries(cls, queries: List[Union[int, str]]) -> 'HPOSet':
+    def from_queries(cls, queries: Iterable[Union[int, str]]) -> 'HPOSet':
         """
         Builds an HPO set by specifying a list of queries to run on the
         :class:`pyhpo.ontology.Ontology`

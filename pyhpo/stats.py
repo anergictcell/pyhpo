@@ -4,9 +4,9 @@ try:
     from scipy.stats import hypergeom  # type: ignore[import]
 except ImportError:
     print(
-        'The pyhpo.stats module requires that you install scipy.',
-        '\n\n#######################################################'
-        '\n\n#   ==> Please install scipy via `pip install scipy`  #'
+        'The pyhpo.stats module requires that you install scipy.' +
+        '\n\n#######################################################' +
+        '\n\n#   ==> Please install scipy via `pip install scipy`  #' +
         '\n\n#######################################################\n\n'
     )
     raise ImportError()
@@ -45,7 +45,7 @@ def hypergeom_test(
 
     """
     return float(hypergeom.sf(
-        positive_samples-1,  # likelyhood of more than X, #see https://blog.alexlenail.me/understanding-and-implementing-the-hypergeometric-test-in-python-a7db688a7458  # noqa: 501
+        positive_samples-1,  # likelyhood of more than X, #see https://blog.alexlenail.me/understanding-and-implementing-the-hypergeometric-test-in-python-a7db688a7458  # noqa: E501
         total,
         positive_total,
         samples

@@ -43,5 +43,8 @@ for v in 3.9 3.10 3.11; do virtualenv -p python${v} pyhpo_${v}; done
 
 for v in 3.9 3.10 3.11; do pyhpo_${v}/bin/pip install -r ../pyhpo/requirements.txt; done
 
-for v in 3.9 3.10 3.11; do echo ">>>>> ${v}"; PYTHONPATH=. ../venv_intel/pyhpo_${v}/bin/python tests/benchmarking.py | grep -A 1 "==="; done
+for v in 3.9 3.10 3.11;
+do echo ">>>>> ${v}";
+PYTHONPATH=. ../venv_intel/pyhpo_${v}/bin/python tests/benchmarking.py | grep -A 1 "===";
+done
 """
