@@ -27,6 +27,9 @@ Internally the ontology is represented as a branched linked list, every term con
 
 It provides an interface to create ``Pandas Dataframe`` from its data, allowing integration in already existing data anlysis tools.
 
+.. hint::
+
+    Check out `hpo3 <https://pypi.org/project/hpo3/>`_ (`Documentation <https://hpo3.readthedocs.io/en/stable/>`_) for an alternative implementation. ``hpo3`` has the exact same functionality, but is much faster 🚀 and supports multithreading for even faster large data processing.
 
 Getting started
 ===============
@@ -37,18 +40,7 @@ The easiest way to install **PyHPO** is via pip
 
     pip install pyhpo
 
-or, you can additionally install optional packages for extra functionality
-
-.. code:: bash
-
-    # Include pandas during install
-    pip install pyhpo[pandas]
-
-    # Include scipy
-    pip install pyhpo[scipy]
-
-    # Include all dependencies
-    pip install pyhpo[all]
+This will install a base version of **PyHPO** that offers most functionality.
 
 .. note::
 
@@ -57,6 +49,27 @@ or, you can additionally install optional packages for extra functionality
     Without installing ``pandas``, you won't be able to export the Ontology as a ``Dataframe``, everything else will work fine.
 
     Without installing ``scipy``, you won't be able to use the ``stats`` module, especially the enrichment calculations.
+
+
+If you want to do enrichment analysis, you must also install ``scipy``.
+
+.. code:: bash
+
+    pip install 'pyhpo[scipy]'
+
+If you want to work with **PyHPO** using ``pandas`` dataframes, you can install the ``pandas`` dependency
+
+.. code:: bash
+
+    pip install 'pyhpo[pandas]'
+
+Or simply install both together:
+
+.. code:: bash
+
+    # Include all dependencies
+    pip install 'pyhpo[all]'
+
 
 
 Usage example

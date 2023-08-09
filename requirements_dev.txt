@@ -1,6 +1,8 @@
-sphinx
+sphinx==6.2.1
 sphinx_rtd_theme
 sphinx-autodoc-typehints
 mypy
 flake8
 coverage
+black
+ruff

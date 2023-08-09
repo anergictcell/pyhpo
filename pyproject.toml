@@ -30,26 +30,35 @@ dependencies = [
     "pydantic >= 2",
     "backports.cached-property == 1.0.1",
 ]
+dynamic = ["version"]
+
+[tool.setuptools]
+packages = ["pyhpo"]
+include-package-data = true
+
 
 [project.optional-dependencies]
 pandas = ["pandas"]
 scipy = ["scipy"]
 all = ["pandas", "scipy"]
 dev = [
+    "pydantic >= 2",
+    "backports.cached-property == 1.0.1",
+    "sphinx == 6.2.1",
+    "sphinx_rtd_theme",
+    "sphinx_autodoc_typehints",
     "coverage",
+    "black",
     "ruff",
     "mypy",
-    "sphinx",
-    "sphinx_rtd_theme",
+    "pandas",
+    "scipy"
 ]
 
-
-dynamic = ["version"]
-
 [project.urls]
-Homepage = "https://github.com/Centogene/pyhpo"
-Repository = "https://github.com/Centogene/pyhpo"
-"Bug Tracker" = "https://github.com/Centogene/pyhpo/issues"
+Homepage = "https://github.com/anergictcell/pyhpo"
+Repository = "https://github.com/anergictcell/pyhpo"
+"Bug Tracker" = "https://github.com/anergictcell/pyhpo/issues"
 Documentation = "https://pyhpo.readthedocs.io/"
 
 [tool.setuptools.dynamic]

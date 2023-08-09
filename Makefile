@@ -7,7 +7,9 @@ fulltests:
 	python -m unittest discover complete-check -s tests
 
 check:
-	@echo "Checking flake8"
+	@echo "Checking black linting"
+	black --check .
+	@echo "Checking ruff"
 	ruff .
 	@echo "Checking mypy standard"
 	mypy pyhpo
