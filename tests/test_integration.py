@@ -9,22 +9,22 @@ from pyhpo import annotations as an
 
 # Number of terms in HPO Ontology
 # grep "^\[Term\]$" pyhpo/data/hp.obo | wc -l
-N_TERMS = 17654
+N_TERMS = 17875
 
 # Number of genes in the annotation dataset
 # cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | grep -v "^gene_symbol" | sort -u | wc -l  # noqa: E501
-N_GENES = 4940
+N_GENES = 5004
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_OMIM = 8111
+N_OMIM = 8180
 # Number of excluded OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_OMIM_EXL = 412
 
 # Number of ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_ORPHA = 4262
+N_ORPHA = 4240
 # Number of excluded ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_ORPHA_EXL = 0

@@ -578,7 +578,7 @@ class TestDataframe(unittest.TestCase):
         self.terms._append(self.child_1_3)
         self.terms._connect_all()
 
-    @patch("pyhpo.ontology.pandas.DataFrame")
+    @patch("pandas.DataFrame")
     def test_build_dataframe(self, mock_df):
         # mock_df = MagicMock()
         res = self.terms.to_dataframe()
