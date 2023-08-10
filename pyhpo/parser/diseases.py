@@ -18,6 +18,9 @@ HPO_ID = 3
 
 
 def _parse_phenotype_hpoa_file(path: str) -> None:
+    Omim.clear()
+    Orpha.clear()
+    Decipher.clear()
     filename = os.path.join(path, FILENAME)
     with open(filename) as fh:
         reader = csv.reader(
