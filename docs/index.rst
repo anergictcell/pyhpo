@@ -39,6 +39,7 @@ PyHPO documentation
 
 .. include:: ../README.rst
     :end-before: Getting started
+    :start-after: :target: https://pypi.org/project/pyhpo/
 
 
 ##################

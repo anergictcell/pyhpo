@@ -1,3 +1,15 @@
+.. image:: https://codecov.io/gh/anergictcell/pyhpo/branch/master/graph/badge.svg?token=33ZGNQD61W 
+    :target: https://codecov.io/gh/anergictcell/pyhpo
+
+.. image:: https://github.com/anergictcell/pyhpo/actions/workflows/test_coverage.yml/badge.svg
+    :target: https://github.com/anergictcell/pyhpo/actions/workflows/test_coverage.yml/
+
+.. image:: https://img.shields.io/pypi/dm/pyhpo.svg?label=Pypi%20downloads
+
+.. image:: https://img.shields.io/pypi/v/pyhpo?label=Latest%20Release
+    :target: https://pypi.org/project/pyhpo/
+
+
 *****
 PyHPO
 *****
