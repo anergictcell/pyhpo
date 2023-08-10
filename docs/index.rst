@@ -38,8 +38,8 @@ PyHPO documentation
 
 
 .. include:: ../README.rst
+    :start-after: :target: https://pypi.org/project/pyhpo/#history
     :end-before: Getting started
-    :start-after: :target: https://pypi.org/project/pyhpo/
 
 
 ##################

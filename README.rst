@@ -5,9 +5,10 @@
     :target: https://github.com/anergictcell/pyhpo/actions/workflows/test_coverage.yml/
 
 .. image:: https://img.shields.io/pypi/dm/pyhpo.svg?label=Pypi%20downloads
+    :target: https://pypi.org/project/pyhpo/
 
 .. image:: https://img.shields.io/pypi/v/pyhpo?label=Latest%20Release
-    :target: https://pypi.org/project/pyhpo/
+    :target: https://pypi.org/project/pyhpo/#history
 
 
 *****
