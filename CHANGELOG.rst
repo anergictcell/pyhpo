@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.2.3
+-----
+Data update to 2023-07-21
+Migrate documentations to ReadTheDocs
+Transfer repository ownership back to ``anergictcell``.
+
 3.2.0
 -----
 Update Pydantic dependency to 2.0

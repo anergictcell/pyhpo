@@ -7,7 +7,7 @@ from typing import Callable, Dict, Iterator, List
 from pyhpo.config import TRUTH
 
 
-FILENAME = 'hp.obo'
+FILENAME = "hp.obo"
 
 
 class Metadata:
@@ -21,9 +21,7 @@ class Metadata:
 
 
 class Converter:
-    key_conversion: Dict[str, str] = {
-        'def': 'definition'
-    }
+    key_conversion: Dict[str, str] = {"def": "definition"}
 
     type_conversions: Dict[str, Callable] = {}
 
@@ -32,31 +30,19 @@ class Converter:
         cls.type_conversions[key] = func
 
     @staticmethod
-    def array_to_str(
-        value: List[str],
-        key: str,
-        values: List[List[str]]
-    ) -> str:
+    def array_to_str(value: List[str], key: str, values: List[List[str]]) -> str:
         if len(value):
             return value[0]
-        return ''
+        return ""
 
     @staticmethod
-    def array_to_bool(
-        value: List[str],
-        key: str,
-        values: List[List[str]]
-    ) -> bool:
+    def array_to_bool(value: List[str], key: str, values: List[List[str]]) -> bool:
         if not len(value):
             return False
         return value[0].lower() in TRUTH
 
     @staticmethod
-    def parse_synonym(
-        value: List[str],
-        key: str,
-        values: List[List[str]]
-    ) -> List[str]:
+    def parse_synonym(value: List[str], key: str, values: List[List[str]]) -> List[str]:
         """
         Extracts the synonym from the synonym data line in the obo file format
 
@@ -77,13 +63,13 @@ class Converter:
         return [x.split('"')[1] for x in value]
 
 
-Converter.add_type_conversion('id', Converter.array_to_str)
-Converter.add_type_conversion('name', Converter.array_to_str)
-Converter.add_type_conversion('comment', Converter.array_to_str)
-Converter.add_type_conversion('definition', Converter.array_to_str)
-Converter.add_type_conversion('is_obsolete', Converter.array_to_bool)
-Converter.add_type_conversion('replaced_by', Converter.array_to_str)
-Converter.add_type_conversion('synonym', Converter.parse_synonym)
+Converter.add_type_conversion("id", Converter.array_to_str)
+Converter.add_type_conversion("name", Converter.array_to_str)
+Converter.add_type_conversion("comment", Converter.array_to_str)
+Converter.add_type_conversion("definition", Converter.array_to_str)
+Converter.add_type_conversion("is_obsolete", Converter.array_to_bool)
+Converter.add_type_conversion("replaced_by", Converter.array_to_str)
+Converter.add_type_conversion("synonym", Converter.parse_synonym)
 
 
 def terms_from_file(data_folder: str) -> Iterator[dict]:
@@ -104,7 +90,7 @@ def terms_from_file(data_folder: str) -> Iterator[dict]:
         # and thus must not be parsed as term
         for line in fh:
             line = line.strip()
-            if line == '[Term]':
+            if line == "[Term]":
                 break
             else:
                 Metadata.add_header_row(line)
@@ -112,7 +98,7 @@ def terms_from_file(data_folder: str) -> Iterator[dict]:
         term_section: List[str] = []
         for line in fh:
             line = line.strip()
-            if line == '[Term]':
+            if line == "[Term]":
                 yield parse_obo_section(term_section)
                 term_section = []
             elif line == "[Typedef]":
@@ -139,9 +125,9 @@ def parse_obo_section(term_section: List[str]) -> dict:
     """
     term_data = {}
     for line in term_section:
-        if line == '':
+        if line == "":
             continue
-        key, value = line.split(':', 1)
+        key, value = line.split(":", 1)
         if key not in term_data:
             term_data[key] = [value.strip()]
         else:
@@ -166,10 +152,6 @@ def _convert_dict_keys(term_data: dict) -> dict:
 
 def _convert_value_types(term_data: dict) -> dict:
     for key, convert in Converter.type_conversions.items():
-        term_data[key] = convert(
-            term_data.get(key, []),
-            key,
-            term_data
-        )
+        term_data[key] = convert(term_data.get(key, []), key, term_data)
 
     return term_data

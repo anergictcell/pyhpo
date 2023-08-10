@@ -1,4 +1,4 @@
 pandas
 scipy
-pydantic
+pydantic>=2
 backports.cached-property==1.0.1

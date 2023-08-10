@@ -8,7 +8,7 @@ class Annotation(BaseModel):
     name: str
     hpo: Set[int] = set()
     _hash: int
-    _json_keys = set(['id', 'name'])
+    _json_keys = set(["id", "name"])
 
     def __init__(self, **kwargs: Union[int, str]) -> None:
         super().__init__(**kwargs)
@@ -39,7 +39,7 @@ class Annotation(BaseModel):
         for key in self._json_keys:
             res[key] = self.__getattribute__(key)
         if verbose:
-            res['hpo'] = self.hpo
+            res["hpo"] = self.hpo
         return res
 
     def __eq__(self, other: Any) -> bool:
@@ -89,7 +89,8 @@ class GeneSingleton(Annotation):
     name: str
         HGNC gene synbol
     """
-    _json_keys = set(['id', 'name', 'symbol'])
+
+    _json_keys = set(["id", "name", "symbol"])
 
     @property
     def symbol(self) -> str:
@@ -139,16 +140,12 @@ class GeneDict(dict):
     -------
     :class:`.GeneSingleton`
     """
+
     def __init__(self) -> None:
         self._indicies: Dict[int, GeneSingleton] = {}
         self._names: Dict[str, GeneSingleton] = {}
 
-    def __call__(
-        self,
-        hgncid: int,
-        symbol: str
-    ) -> GeneSingleton:
-
+    def __call__(self, hgncid: int, symbol: str) -> GeneSingleton:
         try:
             return self._names[symbol]
         except KeyError:
@@ -182,11 +179,7 @@ class GeneDict(dict):
         self._names.clear()
         dict.clear(self)
 
-    def get(
-        self,
-        query: Union[int, str],
-        default: Any = None
-    ) -> GeneSingleton:
+    def get(self, query: Union[int, str], default: Any = None) -> GeneSingleton:
         """
         Allows client to query for a gene by both ID and symbol.
         This method is useful for client that do not want to add new
@@ -212,7 +205,7 @@ class GeneDict(dict):
         try:
             return self._names[str(query)]
         except KeyError:
-            raise KeyError('No gene found for query')
+            raise KeyError("No gene found for query")
 
 
 class DiseaseSingleton(Annotation):
@@ -246,20 +239,21 @@ class DiseaseSingleton(Annotation):
     name: str
         Disease name
     """
-    diseasetype: str = 'Undefined'
+
+    diseasetype: str = "Undefined"
     negative_hpo: Set[int] = set()
 
 
 class OmimDisease(DiseaseSingleton):
-    diseasetype: str = 'Omim'
+    diseasetype: str = "Omim"
 
 
 class OrphaDisease(DiseaseSingleton):
-    diseasetype: str = 'Orpha'
+    diseasetype: str = "Orpha"
 
 
 class DecipherDisease(DiseaseSingleton):
-    diseasetype: str = 'Decipher'
+    diseasetype: str = "Decipher"
 
 
 class DiseaseDict(dict):
@@ -306,17 +300,13 @@ class DiseaseDict(dict):
     -------
     :class:`.DiseaseSingleton`
     """
+
     disease_class: ClassVar = None
 
     def __init__(self) -> None:
         self._indicies: Dict[int, DiseaseSingleton] = {}
 
-    def __call__(
-        self,
-        diseaseid: int,
-        name: str
-    ) -> DiseaseSingleton:
-
+    def __call__(self, diseaseid: int, name: str) -> DiseaseSingleton:
         assert self.disease_class
         try:
             return self._indicies[diseaseid]
@@ -345,11 +335,7 @@ class DiseaseDict(dict):
         self._indicies.clear()
         dict.clear(self)
 
-    def get(
-        self,
-        query: Union[int, str],
-        default: Any = None
-    ) -> DiseaseSingleton:
+    def get(self, query: Union[int, str], default: Any = None) -> DiseaseSingleton:
         """
         Allows client to query for a disease by ID.
         This method is useful for client that do not want to add new
@@ -369,9 +355,9 @@ class DiseaseDict(dict):
             idx = int(query)
             return self._indicies[idx]
         except ValueError:
-            raise ValueError('Invalid Disease ID supplied')
+            raise ValueError("Invalid Disease ID supplied")
         except KeyError:
-            raise KeyError('No disease found for query')
+            raise KeyError("No disease found for query")
 
 
 class OmimDict(DiseaseDict):

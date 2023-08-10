@@ -15,43 +15,31 @@ class GeneTests(unittest.TestCase):
         Gene.clear()
 
     def test_gene_building(self):
-        a = Gene(hgncid=1, symbol='EZH2')
-        self.assertEqual(
-            a.name,
-            'EZH2'
-        )
-        self.assertEqual(
-            a.id,
-            1
-        )
-        self.assertEqual(
-            a.symbol,
-            'EZH2'
-        )
-        self.assertEqual(
-            a.hpo,
-            set()
-        )
+        a = Gene(hgncid=1, symbol="EZH2")
+        self.assertEqual(a.name, "EZH2")
+        self.assertEqual(a.id, 1)
+        self.assertEqual(a.symbol, "EZH2")
+        self.assertEqual(a.hpo, set())
 
     def test_singleton_handling(self):
-        a = Gene(hgncid=1, symbol='EZH2')
+        a = Gene(hgncid=1, symbol="EZH2")
         # When no name is given, ID is used for comparison
         b = Gene(hgncid=1, symbol=None)
         # EZH1 does not exist, but ID is used for comparison
-        c = Gene(hgncid=1, symbol='EZH1')
+        c = Gene(hgncid=1, symbol="EZH1")
         # EZH2 exists, is used for comparison
-        d = Gene(hgncid=2, symbol='EZH2')
+        d = Gene(hgncid=2, symbol="EZH2")
         # EZH2 exists, is used for comparison
-        e = Gene(hgncid=None, symbol='EZH2')
+        e = Gene(hgncid=None, symbol="EZH2")
 
         # EZH1 does not exist. ID does not exist => New Gene
-        f = Gene(hgncid=2, symbol='EZH1')
+        f = Gene(hgncid=2, symbol="EZH1")
         # ID is used for comparison
-        g = Gene(hgncid=2, symbol='EZH2')
+        g = Gene(hgncid=2, symbol="EZH2")
         # EZH1 is used for comparison
-        h = Gene(hgncid=1, symbol='EZH1')
+        h = Gene(hgncid=1, symbol="EZH1")
         # EZH1 is used for comparison
-        i = Gene(hgncid=None, symbol='EZH1')
+        i = Gene(hgncid=None, symbol="EZH1")
 
         self.assertIs(a, b)
         self.assertIs(a, c)
@@ -98,65 +86,34 @@ class GeneTests(unittest.TestCase):
         self.assertEqual(f, i)
         self.assertEqual(h, i)
 
-        self.assertEqual(
-            len(Gene.keys()),
-            2
-        )
-        self.assertEqual(
-            len(Gene.values()),
-            2
-        )
-        self.assertEqual(
-            len(set(Gene.values())),
-            2
-        )
+        self.assertEqual(len(Gene.keys()), 2)
+        self.assertEqual(len(Gene.values()), 2)
+        self.assertEqual(len(set(Gene.values())), 2)
 
     def test_indexing(self):
         def subindex_length(x):
-            return (
-                len(x.keys()),
-                len(x._indicies.keys()),
-                len(x._names.keys())
-            )
+            return (len(x.keys()), len(x._indicies.keys()), len(x._names.keys()))
 
-        self.assertEqual(
-            subindex_length(Gene),
-            (0, 0, 0)
-        )
-        _ = Gene(hgncid=1, symbol='EZH1')
-        self.assertEqual(
-            subindex_length(Gene),
-            (1, 1, 1)
-        )
-        _ = Gene(hgncid=2, symbol='EZH2')
-        self.assertEqual(
-            subindex_length(Gene),
-            (2, 2, 2)
-        )
+        self.assertEqual(subindex_length(Gene), (0, 0, 0))
+        _ = Gene(hgncid=1, symbol="EZH1")
+        self.assertEqual(subindex_length(Gene), (1, 1, 1))
+        _ = Gene(hgncid=2, symbol="EZH2")
+        self.assertEqual(subindex_length(Gene), (2, 2, 2))
         Gene.clear()
-        self.assertEqual(
-            subindex_length(Gene),
-            (0, 0, 0)
-        )
+        self.assertEqual(subindex_length(Gene), (0, 0, 0))
 
     def test_get_gene(self):
-        g1 = Gene(hgncid=1, symbol='EZH1')
-        g2 = Gene(hgncid=2, symbol='EZH2')
+        g1 = Gene(hgncid=1, symbol="EZH1")
+        g2 = Gene(hgncid=2, symbol="EZH2")
 
         self.assertEqual(Gene.get(1), g1)
         self.assertEqual(Gene.get(2), g2)
-        self.assertEqual(Gene.get('1'), g1)
-        self.assertEqual(Gene.get('EZH1'), g1)
-        self.assertEqual(Gene.get('EZH2'), g2)
+        self.assertEqual(Gene.get("1"), g1)
+        self.assertEqual(Gene.get("EZH1"), g1)
+        self.assertEqual(Gene.get("EZH2"), g2)
 
-        self.assertRaises(
-            KeyError,
-            lambda: Gene.get('GBA')
-        )
-        self.assertRaises(
-            KeyError,
-            lambda: Gene.get(12)
-        )
+        self.assertRaises(KeyError, lambda: Gene.get("GBA"))
+        self.assertRaises(KeyError, lambda: Gene.get(12))
 
 
 class TestAnnotationBase(unittest.TestCase):
@@ -167,26 +124,23 @@ class TestAnnotationBase(unittest.TestCase):
         Gene.clear()
 
     def test_json(self):
-        g = Gene(hgncid=1, symbol='Foo')
+        g = Gene(hgncid=1, symbol="Foo")
 
-        self.assertEqual(
-            g.toJSON(),
-            {'id': 1, 'name': 'Foo', 'symbol': 'Foo'}
-        )
+        self.assertEqual(g.toJSON(), {"id": 1, "name": "Foo", "symbol": "Foo"})
 
         self.assertEqual(
             g.toJSON(verbose=True),
-            {'id': 1, 'name': 'Foo', 'symbol': 'Foo', 'hpo': set()}
+            {"id": 1, "name": "Foo", "symbol": "Foo", "hpo": set()},
         )
 
     def test_equality(self):
-        g = Gene(hgncid=1, symbol='Foo')
+        g = Gene(hgncid=1, symbol="Foo")
         self.assertEqual(g, 1)
-        self.assertEqual(g, 'Foo')
+        self.assertEqual(g, "Foo")
 
     def test_string_representation(self):
-        g = Gene(hgncid=1, symbol='Foo')
-        self.assertEqual(str(g), 'Foo')
+        g = Gene(hgncid=1, symbol="Foo")
+        self.assertEqual(str(g), "Foo")
 
 
 class TestGeneAnnotationParsing(unittest.TestCase):
@@ -210,7 +164,7 @@ class TestGeneAnnotationParsing(unittest.TestCase):
         assert self.ontology[13].genes == set()
 
         add_gene_to_term(self.genes[0], self.ontology[21])
-        
+
         assert self.ontology[1].genes == set([self.genes[0]])
         assert self.ontology[11].genes == set([self.genes[0]])
         assert self.ontology[21].genes == set([self.genes[0]])
@@ -221,7 +175,7 @@ class TestGeneAnnotationParsing(unittest.TestCase):
 
     def test_annotating_hpo_terms_multiple_parents(self):
         add_gene_to_term(self.genes[0], self.ontology[31])
-        
+
         assert self.ontology[1].genes == set([self.genes[0]])
         assert self.ontology[11].genes == set([self.genes[0]])
         assert self.ontology[21].genes == set([self.genes[0]])
@@ -233,7 +187,7 @@ class TestGeneAnnotationParsing(unittest.TestCase):
     def test_annotating_hpo_terms_mutliple_genes(self):
         add_gene_to_term(self.genes[0], self.ontology[31])
         add_gene_to_term(self.genes[1], self.ontology[41])
-        
+
         assert self.ontology[1].genes == set([self.genes[0], self.genes[1]])
         assert self.ontology[11].genes == set([self.genes[0], self.genes[1]])
         assert self.ontology[21].genes == set([self.genes[0], self.genes[1]])
@@ -259,7 +213,7 @@ class TestGeneAnnotationParsing(unittest.TestCase):
         assert self.genes[1].hpo == set([41])
 
 
-@unittest.skip('TODO')
+@unittest.skip("TODO")
 class PhenoLoading(unittest.TestCase):
     def test_comment_skipping(self):
         pass

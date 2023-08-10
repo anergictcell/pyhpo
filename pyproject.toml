@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyhpo"
+description = "A Python package to work with the HPO Ontology"
+readme = "README.rst"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+license = {text = "MIT"}
+authors = [
+    {name = "Jonas Marcello", email = "jonas.marcello@esbme.com"}
+]
+keywords = [
+    "hpo", "phenotype", "genotype", "bioinformatics", "rare diseases"
+]
+dependencies = [
+    "pydantic >= 2",
+    "backports.cached-property == 1.0.1",
+]
+dynamic = ["version"]
+
+[tool.setuptools]
+packages = ["pyhpo"]
+include-package-data = true
+
+
+[project.optional-dependencies]
+pandas = ["pandas"]
+scipy = ["scipy"]
+all = ["pandas", "scipy"]
+dev = [
+    "pydantic >= 2",
+    "backports.cached-property == 1.0.1",
+    "sphinx == 6.2.1",
+    "sphinx_rtd_theme",
+    "sphinx_autodoc_typehints",
+    "coverage",
+    "black",
+    "ruff",
+    "mypy",
+    "pandas",
+    "scipy"
+]
+
+[project.urls]
+Homepage = "https://github.com/anergictcell/pyhpo"
+Repository = "https://github.com/anergictcell/pyhpo"
+"Bug Tracker" = "https://github.com/anergictcell/pyhpo/issues"
+Documentation = "https://pyhpo.readthedocs.io/"
+
+[tool.setuptools.dynamic]
+version = {attr = "pyhpo.__version__"}
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.mccabe]
+max-complexity = 10

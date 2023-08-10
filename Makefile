@@ -7,11 +7,13 @@ fulltests:
 	python -m unittest discover complete-check -s tests
 
 check:
-	@echo "Checking flake8"
-	flake8 pyhpo
+	@echo "Checking black linting"
+	black --check .
+	@echo "Checking ruff"
+	ruff .
 	@echo "Checking mypy standard"
 	mypy pyhpo
-	@echo "Checking mypy more stict"
+	@echo "Checking mypy more strict"
 	mypy --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs --warn-redundant-casts --warn-unreachable pyhpo
 
 docs:

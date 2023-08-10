@@ -4,8 +4,7 @@ from pyhpo.parser import genes
 
 
 def build_ontology_annotations(
-    data_folder: str,
-    ontology: 'pyhpo.OntologyClass'
+    data_folder: str, ontology: "pyhpo.OntologyClass"
 ) -> None:
     """
     Builds all annotations and associated genes and diseases

@@ -9,22 +9,22 @@ from pyhpo import annotations as an
 
 # Number of terms in HPO Ontology
 # grep "^\[Term\]$" pyhpo/data/hp.obo | wc -l
-N_TERMS = 17654
+N_TERMS = 17875
 
 # Number of genes in the annotation dataset
 # cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | grep -v "^gene_symbol" | sort -u | wc -l  # noqa: E501
-N_GENES = 4940
+N_GENES = 5004
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_OMIM = 8111
+N_OMIM = 8180
 # Number of excluded OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_OMIM_EXL = 412
 
 # Number of ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_ORPHA = 4262
+N_ORPHA = 4240
 # Number of excluded ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
 N_ORPHA_EXL = 0
@@ -37,16 +37,13 @@ N_DECIPHER = 47
 N_DECIPHER_EXL = 0
 
 
-@unittest.skipUnless(
-    'complete-check' in sys.argv,
-    'No integration test required'
-)
+@unittest.skipUnless("complete-check" in sys.argv, "No integration test required")
 class IntegrationFullTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.terms = Ontology()
-        cls.gene_model = EnrichmentModel('gene')
-        cls.omim_model = EnrichmentModel('omim')
+        cls.gene_model = EnrichmentModel("gene")
+        cls.omim_model = EnrichmentModel("omim")
 
     def test_terms_present(self):
         """
@@ -67,30 +64,21 @@ class IntegrationFullTest(unittest.TestCase):
         These test will most likely need to be updated
         after every data update
         """
-        self.assertEqual(
-            len(self.terms.omim_diseases),
-            N_OMIM
-        )
+        self.assertEqual(len(self.terms.omim_diseases), N_OMIM)
 
     def test_orpha_associated(self):
         """
         These test will most likely need to be updated
         after every data update
         """
-        self.assertEqual(
-            len(self.terms.orpha_diseases),
-            N_ORPHA
-        )
+        self.assertEqual(len(self.terms.orpha_diseases), N_ORPHA)
 
     def test_decipher_associated(self):
         """
         These test will most likely need to be updated
         after every data update
         """
-        self.assertEqual(
-            len(self.terms.decipher_diseases),
-            N_DECIPHER
-        )
+        self.assertEqual(len(self.terms.decipher_diseases), N_DECIPHER)
 
     def test_average_annotation_numbers(self):
         """
@@ -109,12 +97,13 @@ class IntegrationFullTest(unittest.TestCase):
             decipher.append(len(term.decipher_diseases))
             excluded_omim.append(len(term.omim_excluded_diseases))
 
-        assert sum(genes)/len(genes) > 36, sum(genes)/len(genes)
-        assert sum(omim)/len(omim) > 29, sum(omim)/len(omim)
-        assert sum(orpha)/len(orpha) > 24, sum(orpha)/len(orpha)
-        assert sum(decipher)/len(decipher) > 0.05, sum(decipher)/len(decipher)
-        assert sum(excluded_omim)/len(excluded_omim) > 0.05, \
-            sum(excluded_omim)/len(excluded_omim)
+        assert sum(genes) / len(genes) > 36, sum(genes) / len(genes)
+        assert sum(omim) / len(omim) > 29, sum(omim) / len(omim)
+        assert sum(orpha) / len(orpha) > 24, sum(orpha) / len(orpha)
+        assert sum(decipher) / len(decipher) > 0.05, sum(decipher) / len(decipher)
+        assert sum(excluded_omim) / len(excluded_omim) > 0.05, sum(excluded_omim) / len(
+            excluded_omim
+        )
 
     def test_annotation_inheritance(self):
         for term in self.terms:
@@ -135,16 +124,14 @@ class IntegrationFullTest(unittest.TestCase):
                     assert child.orpha_diseases.issubset(term.orpha_diseases)
 
                     assert ld >= len(child.decipher_diseases)
-                    assert child.decipher_diseases.issubset(
-                        term.decipher_diseases
-                    )
+                    assert child.decipher_diseases.issubset(term.decipher_diseases)
 
     def test_relationships(self):
         kidney = self.terms.get_hpo_object(123)
-        assert kidney.name == 'Nephritis'
+        assert kidney.name == "Nephritis"
 
-        scoliosis = self.terms.get_hpo_object('Scoliosis')
-        assert scoliosis.id == 'HP:0002650'
+        scoliosis = self.terms.get_hpo_object("Scoliosis")
+        assert scoliosis.id == "HP:0002650"
 
         assert not scoliosis.parent_of(kidney)
         assert not scoliosis.child_of(kidney)
@@ -152,11 +139,9 @@ class IntegrationFullTest(unittest.TestCase):
         assert not kidney.parent_of(scoliosis)
         assert not kidney.child_of(scoliosis)
 
-        specific_term = self.terms.get_hpo_object(
-            'Thoracic kyphoscoliosis'
-        )
+        specific_term = self.terms.get_hpo_object("Thoracic kyphoscoliosis")
         broad_term = self.terms.get_hpo_object(
-            'Abnormality of the curvature of the vertebral column'
+            "Abnormality of the curvature of the vertebral column"
         )
 
         assert specific_term.child_of(scoliosis)
@@ -166,8 +151,7 @@ class IntegrationFullTest(unittest.TestCase):
         assert broad_term.parent_of(specific_term)
 
     @unittest.skipUnless(
-        'pd' in globals() or 'pd' in dir(ont),
-        'Pandas library is not installed/loaded'
+        "pd" in globals() or "pd" in dir(ont), "Pandas library is not installed/loaded"
     )
     def test_pandas_dataframe(self):
         """
@@ -186,63 +170,48 @@ class IntegrationFullTest(unittest.TestCase):
         assert 0.5 < df.dBottom.mean() < 0.7, df.dBottom.mean()
 
     def test_set(self):
-        full_set = HPOSet.from_queries(
-            [int(x) for x in self.terms]
-        )
+        full_set = HPOSet.from_queries([int(x) for x in self.terms])
 
-        self.assertEqual(
-            len(full_set),
-            len(self.terms)
-        )
+        self.assertEqual(len(full_set), len(self.terms))
 
         phenoterms = full_set.remove_modifier()
-        self.assertLess(
-            len(phenoterms),
-            len(full_set)
-        )
-        self.assertGreater(
-            len(phenoterms),
-            0
-        )
+        self.assertLess(len(phenoterms), len(full_set))
+        self.assertGreater(len(phenoterms), 0)
 
-        self.assertIn(
-            self.terms[5],
-            full_set
-        )
+        self.assertIn(self.terms[5], full_set)
 
-        self.assertNotIn(
-            self.terms[5],
-            phenoterms
-        )
+        self.assertNotIn(self.terms[5], phenoterms)
 
     def test_gene_enrichment(self):
-        hposet = HPOSet.from_queries('HP:0007401,HP:0010885'.split(','))
-        res = self.gene_model.enrichment('hypergeom', hposet)
+        hposet = HPOSet.from_queries("HP:0007401,HP:0010885".split(","))
+        res = self.gene_model.enrichment("hypergeom", hposet)
         self.assertIsInstance(res, list)
-        self.assertIn('item', res[0])
-        self.assertIn('count', res[0])
-        self.assertIn('enrichment', res[0])
-        self.assertIsInstance(res[0]['item'], an.GeneSingleton)
-        self.assertIsInstance(res[0]['count'], int)
-        self.assertIsInstance(res[0]['enrichment'], float)
+        self.assertIn("item", res[0])
+        self.assertIn("count", res[0])
+        self.assertIn("enrichment", res[0])
+        self.assertIsInstance(res[0]["item"], an.GeneSingleton)
+        self.assertIsInstance(res[0]["count"], int)
+        self.assertIsInstance(res[0]["enrichment"], float)
 
     def test_omim_enrichment(self):
-        hposet = HPOSet.from_queries('HP:0007401,HP:0010885'.split(','))
-        res = self.omim_model.enrichment('hypergeom', hposet)
+        hposet = HPOSet.from_queries("HP:0007401,HP:0010885".split(","))
+        res = self.omim_model.enrichment("hypergeom", hposet)
         self.assertIsInstance(res, list)
-        self.assertIn('item', res[0])
-        self.assertIn('count', res[0])
-        self.assertIn('enrichment', res[0])
-        self.assertIsInstance(res[0]['item'], an.OmimDisease)
-        self.assertIsInstance(res[0]['count'], int)
-        self.assertIsInstance(res[0]['enrichment'], float)
+        self.assertIn("item", res[0])
+        self.assertIn("count", res[0])
+        self.assertIn("enrichment", res[0])
+        self.assertIsInstance(res[0]["item"], an.OmimDisease)
+        self.assertIsInstance(res[0]["count"], int)
+        self.assertIsInstance(res[0]["enrichment"], float)
 
     def test_similarity_with_custom_ic(self):
         for term in self.terms:
-            term.information_content.set_custom('testing_custom_ic', term.information_content.gene)
+            term.information_content.set_custom(
+                "testing_custom_ic", term.information_content.gene
+            )
 
         for term in self.terms:
             self.assertEqual(
-                term.similarity_score(self.terms[1], kind='gene'),
-                term.similarity_score(self.terms[1], kind='testing_custom_ic')
+                term.similarity_score(self.terms[1], kind="gene"),
+                term.similarity_score(self.terms[1], kind="testing_custom_ic"),
             )
