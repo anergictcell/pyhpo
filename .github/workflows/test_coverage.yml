@@ -35,3 +35,7 @@ jobs:
     - name: Unittesting (complete-check)
       run: |
         coverage run -m unittest discover complete-check -s tests && coverage report
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
