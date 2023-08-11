@@ -33,7 +33,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools]
-packages = ["pyhpo"]
+packages = ["pyhpo", "pyhpo.parser", "pyhpo.similarity"]
 include-package-data = true
 
 
