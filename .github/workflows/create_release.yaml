@@ -21,9 +21,11 @@ jobs:
       - name: Build project
         id: build_package
         run: |
+          sudo apt purge python3-setuptools
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install sdist wheel
+          python3 -m pip install -Uv setuptools==62.1.0
           python setup.py sdist bdist_wheel
           TARNAME=$(ls -1 dist/pyhpo*.tar.gz | head -n 1)
           echo "::set-output name=tar_filename::$TARNAME"
