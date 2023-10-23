@@ -69,3 +69,6 @@ line-length = 100
 
 [tool.ruff.mccabe]
 max-complexity = 10
+
+[tool.black]
+target-versions = ["py37", "py38", "py39", "py310"]
