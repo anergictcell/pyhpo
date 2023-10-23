@@ -1,0 +1,93 @@
+# Contributing to `PyHPO`
+
+Great to see you're interested in contributing to `PyHPO`. I welcome everyone to contribute, to add new features, fix bugs or improve the library.
+
+## Pull requests
+If you have any changes you would like to add, just [open a Pull request](https://github.com/anergictcell/pyhpo/pulls). Please explain briefly what this change is about and then I'll have a look and try to address the request as soon as possible.
+
+If you are unsure if I would be interested in a new feature, [open an Issue](https://github.com/anergictcell/pyhpo/issues/new/choose) and propose your change. In general, I'm very open to all new features and ideas.
+
+## Getting started
+Setting up a development environment for `PyHPO` is really simple and straight forward:
+
+1. Clone the repository
+```bash
+git clone https://github.com/anergictcell/pyhpo.git
+
+cd pyhpo
+```
+
+2. Create and activate a virtual environment
+```bash
+virtualenv venv
+
+source ./venv/bin/activate
+```
+
+3. Install dependencies
+```bash
+pip install -r requirements_dev.txt
+```
+
+4. Now you can use the Python REPL and simply import `pyhpo`
+```python
+from pyhpo import Ontology
+# ...
+```
+
+### Fork the repo
+
+If you plan on contributing changes, I suggest to first fork the repo into your own Github account, then clone the code from there.
+You can push changes to your repository and then create a Pull request to merge your changes into the `PyHPO` library.
+
+
+## Code formatting
+`PyHPO` uses [`black`](https://black.readthedocs.io/en/stable/) for automatted code formatting, [`ruff`](https://beta.ruff.rs/docs/) for linting and [`mypy`](https://www.mypy-lang.org/) for type checking. Please follow this procedure as well. If you have `make` installed, I suggest to run `make check` regularily.
+
+`PyHPO` uses type hints almost everywhere, so please ensure you add type hints to all methods and parameters in your code as well. I suggest to activate an `LSP` in your IDE (e.g. [`pyright`](https://microsoft.github.io/pyright/#/)), as this will greatly enhance the development experience and reduce bugs.
+
+## Unittests
+`PyHPO` has a test coverage of almost 100% and I would like to maintain this level of coverage. When you add new code, plase also contribute unittests that cover all branches and try to add tests for potential pitfalls as well.
+
+Sometimes it can be difficult to test the logic of new features, because you need to have the ontology available. Loading the full ontology takes quite some time and is not ideal for unittests. To improve this situaton, the `tests/mockontology.py` contains small versions of the ontology that can be used to test most functionality. Please have a look at this and feel free to ask if you need any help here.
+
+You can check the code coverage by running `make coverage` and then opening the `htmlcov/index.html` in your browser.
+
+## Documentation
+`PyHPO` is thoroughly documented, both for public and for private methods. The documentation is generated with [`Sphinx`](https://www.sphinx-doc.org/en/master/) using the [`sphinx.ext.napoleon`](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html) plugin to support Numpy style docstrings. Please follow this style when documenting your code as well, e.g.:
+
+```python
+def my_func(some_text: str, term: HPOTerm) -> float:
+    """
+    A single line to describe the goal of the function
+
+    Some more lines to describe the method in detail - if needed
+
+    Parameters
+    ----------
+    some_text:  str
+        Quick explanation of the paramater, optionally with ``example`` values
+    term: :class:`pyhpo.HPOTerm`
+        When parameters are types from ``PyHPO``, document them as such
+
+    Returns
+    -------
+    float
+        A brief description of the output data
+
+    Raises
+    ------
+    RuntimeError
+        List all possible exceptions that could be raised by the method
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        # Add at least one example how to use the method
+
+    """
+    # body of the method
+```
+
