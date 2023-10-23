@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.2.5
+-----
+Data update to 2023-10-09
+
+3.2.4
+-----
+Hotfix to include missing submodules during build process
+
 3.2.3
 -----
 Data update to 2023-07-21
