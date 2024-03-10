@@ -1,6 +1,7 @@
 """
 Parse the OBO flat-file
 """
+
 import os
 from typing import Callable, Dict, Iterator, List
 

@@ -10,7 +10,7 @@ check:
 	@echo "Checking black linting"
 	black --check .
 	@echo "Checking ruff"
-	ruff .
+	ruff check .
 	@echo "Checking mypy standard"
 	mypy pyhpo
 	@echo "Checking mypy more strict"
