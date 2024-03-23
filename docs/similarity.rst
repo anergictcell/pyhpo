@@ -1,6 +1,48 @@
 Similarity
 ==========
 
+Builtin Similarity algorithms
+*****************************
+
+Resnik
+------
+.. autoclass:: pyhpo.similarity.defaults.Resnik
+
+
+Lin
+---
+.. autoclass:: pyhpo.similarity.defaults.Lin
+
+
+JC (Jiang & Conrath)
+--------------------
+.. autoclass:: pyhpo.similarity.defaults.JC
+
+
+Relevance
+---------
+.. autoclass:: pyhpo.similarity.defaults.Relevance
+
+
+InformationCoefficient
+----------------------
+.. autoclass:: pyhpo.similarity.defaults.InformationCoefficient
+
+
+GraphIC
+-------
+.. autoclass:: pyhpo.similarity.defaults.GraphIC
+
+
+Distance
+--------
+.. autoclass:: pyhpo.similarity.defaults.Distance
+
+
+.. _custom-similarity-methods:
+
+Custom Similarity algorithms
+****************************
 The ``similarity`` submodule allows to create custom Similarity calculations
 for comparison of single terms or term-sets.
 
@@ -8,8 +50,6 @@ It provides a simple interface to register custom Similarity handler, so
 that they can be called directly on an :class:`pyhpo.term.HPOTerm` or an
 :class:`pyhpo.set.HPOSet`.
 
-SimilarityBase
-**************
 .. autoclass:: pyhpo.similarity.base.SimilarityBase
 
 __call__
@@ -18,7 +58,7 @@ __call__
 
 
 Examples
-********
+--------
 
 .. code:: python
 
@@ -63,3 +103,4 @@ Examples
     )
 
     assert sim_score == 1
+

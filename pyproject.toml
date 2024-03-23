@@ -67,8 +67,8 @@ version = {attr = "pyhpo.__version__"}
 [tool.ruff]
 line-length = 100
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10
 
 [tool.black]
-target-versions = ["py37", "py38", "py39", "py310"]
+target-version = ["py37", "py38", "py39", "py310"]

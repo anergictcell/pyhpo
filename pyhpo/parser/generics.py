@@ -3,6 +3,7 @@ Generic functions required for handling HPOTerms
 They used to be part of HPOTerm, but refactored out to
 have a leander HPOTerm class
 """
+
 from typing import Iterator
 
 
