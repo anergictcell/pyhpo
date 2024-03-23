@@ -107,37 +107,32 @@ class TestSimlarity_resnik_dependency(unittest.TestCase):
         assert res == 0.0, res
 
     def test_jc(self):
+        # Resnik retuns 0.9
         self.simscore.register("jc", d.JC)
         terms = make_terms()
-        terms[0].information_content.omim = 0.5
-        terms[1].information_content.omim = 0.7
-
-        # -1 / ((1 + 1.8) - 0.5 - 0.7)
+        terms[0].information_content.omim = 1.6
+        terms[1].information_content.omim = 1.2
+        # 1 / 1.6 + 1.2 - 2 x 0.9 + 1
+        # 1 / 2.8 - 1.8 + 1
+        # 1 / 2
         res = self.simscore(terms[0], terms[1], method="jc")
-        assert res == -0.625, res
+        assert int(res * 10) == 5, res
+
+        terms[0].information_content.omim = 0
+        terms[1].information_content.omim = 1.2
+        res = self.simscore(terms[0], terms[1], method="jc")
+        assert res == 0.0, res
+
+        terms[0].information_content.omim = 1.8
+        terms[1].information_content.omim = 0
+        res = self.simscore(terms[0], terms[1], method="jc")
+        assert res == 0.0, res
 
     def test_jc_identical(self):
         self.simscore.register("jc", d.JC)
 
         term = "foo"
         res = self.simscore(term, term, method="jc")
-        assert res == 1
-
-    def test_jc2(self):
-        self.simscore.register("jc2", d.JC2)
-        terms = make_terms()
-        terms[0].information_content.omim = 0.5
-        terms[1].information_content.omim = 0.7
-
-        # 1 - (0.5 + 0.7 - 1.8)
-        res = self.simscore(terms[0], terms[1], method="jc2")
-        assert res == 1.6, res
-
-    def test_jc2_identical(self):
-        self.simscore.register("jc2", d.JC2)
-
-        term = "foo"
-        res = self.simscore(term, term, method="jc2")
         assert res == 1
 
 

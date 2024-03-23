@@ -334,11 +334,11 @@ class HPOSet(set):
         kind: str, default ``''``
             Which kind of information content should be calculated.
             Options are ['omim', 'orpha', 'decipher', 'gene']
-            See :func:`pyhpo.HPOTerm.similarity_score` for options
+            See :func:`pyhpo.term.HPOTerm.similarity_score` for options
 
         method: string, default ``''``
             The method to use to calculate the similarity.
-            See :func:`pyhpo.HPOTerm.similarity_score` for options
+            See :func:`pyhpo.term.HPOTerm.similarity_score` for options
 
             Additional options:
 

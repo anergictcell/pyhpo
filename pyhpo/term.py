@@ -476,21 +476,15 @@ class HPOTerm(BaseModel):
 
             Available options:
 
-            * **resnik** - Resnik P, Proceedings of the 14th IJCAI, (1995)
-            * **lin** - Lin D, Proceedings of the 15th ICML, (1998)
-            * **jc** - Jiang J, Conrath D, ROCLING X, (1997)
-              Implementation according to R source code
-            * **jc2** - Jiang J, Conrath D, ROCLING X, (1997)
-              Implementation according to paper from R ``hposim`` library
-              Deng Y, et. al., PLoS One, (2015)
-            * **rel** - Relevance measure - Schlicker A, et.al.,
-              BMC Bioinformatics, (2006)
-            * **ic** - Information coefficient - Li B, et. al., arXiv, (2010)
-            * **graphic** - Graph based Information coefficient -
-              Deng Y, et. al., PLoS One, (2015)
-            * **dist** - Distance between terms
+            * **resnik** - :class:`pyhpo.similarity.defaults.Resnik`
+            * **lin** - :class:`pyhpo.similarity.defaults.Lin`
+            * **jc** - :class:`pyhpo.similarity.defaults.JC`
+            * **jc2** - :class:`pyhpo.similarity.defaults.JC` (**deprecated**)
+            * **rel** - :class:`pyhpo.similarity.defaults.Relevance`
+            * **ic** - :class:`pyhpo.similarity.defaults.InformationCoefficient`
+            * **dist** - :class:`pyhpo.similarity.defaults.Distance`
             * Additional methods can be registered separately (
-              see :class::`pyhpo.similarity.base._Similarity`)
+              see :ref:`custom-similarity-methods`)
 
         Raises
         ------
