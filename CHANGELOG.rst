@@ -1,6 +1,10 @@
 Changelog
 =========
 
+3.3.1
+-----
+Data update to 2024-04-26
+
 3.3.0
 -----
 Fix JC similarity algoritm (see https://github.com/anergictcell/pyhpo/issues/20 for details)
