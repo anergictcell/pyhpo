@@ -17,3 +17,11 @@ Before creating a new release, follow all the below steps:
 - [ ] Crate version tag, push tag
 - [ ] Merge into master
 
+Update data:
+1. Update ruff, black and mypy `pip install -U ruff mypy black`
+2. pull latest changes of master
+3. create new branch
+4. run black and ruff fixes
+5. Commit changes
+6. run python script to download new data
+7. Get numbers of terms, diseases etc, update integration-test

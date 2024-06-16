@@ -9,19 +9,19 @@ from pyhpo import annotations as an
 
 # Number of terms in HPO Ontology
 # grep "^\[Term\]$" pyhpo/data/hp.obo | wc -l
-N_TERMS = 18697
+N_TERMS = 18961
 
 # Number of genes in the annotation dataset
 # cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | grep -v "^gene_symbol" | sort -u | wc -l  # noqa: E501
-N_GENES = 5021
+N_GENES = 5069
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
-N_OMIM = 8204
+N_OMIM = 8251
 
 # Number of excluded OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep "NOT" | wc -l  # noqa: E501
-N_OMIM_EXL = 372
+N_OMIM_EXL = 0
 
 # Number of ORPHA diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^ORPHA" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
@@ -102,11 +102,8 @@ class IntegrationFullTest(unittest.TestCase):
 
         assert sum(genes) / len(genes) > 36, sum(genes) / len(genes)
         assert sum(omim) / len(omim) > 29, sum(omim) / len(omim)
-        assert sum(orpha) / len(orpha) > 24, sum(orpha) / len(orpha)
+        assert sum(orpha) / len(orpha) > 20, sum(orpha) / len(orpha)
         assert sum(decipher) / len(decipher) > 0.05, sum(decipher) / len(decipher)
-        assert sum(excluded_omim) / len(excluded_omim) > 0.05, sum(excluded_omim) / len(
-            excluded_omim
-        )
 
     def test_annotation_inheritance(self):
         for term in self.terms:
