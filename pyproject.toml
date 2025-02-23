@@ -71,4 +71,4 @@ line-length = 100
 max-complexity = 10
 
 [tool.black]
-target-version = ["py37", "py38", "py39", "py310"]
+target-version = ["py37", "py38", "py39", "py310", "py311", "py312", "py313"]
