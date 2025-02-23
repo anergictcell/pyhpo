@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.3.2
+-----
+Data update to 2025-01-16
+
+
 3.3.1
 -----
 Data update to 2024-04-26
