@@ -12,8 +12,8 @@ from pyhpo import annotations as an
 N_TERMS = 19484
 
 # Number of genes in the annotation dataset
-# cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | grep -v "^gene_symbol" | sort -u | wc -l  # noqa: E501
-N_GENES = 5126
+# cut -f1 pyhpo/data/genes_to_phenotype.txt | grep -v "^#" | grep -v "^ncbi_gene_id" | sort -u | wc -l  # noqa: E501
+N_GENES = 5132
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501

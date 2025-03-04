@@ -31,10 +31,17 @@ class OntologyClass:
     omim_excluded_diseases: set
         Set of all excluded OMIM-diseases associated with the HPOTerms
 
+    .. note::
+
+        Starting with `pyhpo 4.0`, the Ontology will link genes non-transitive to HPO terms.
+        This means it will be the same behavior as the `hpo3` library.
+        See https://github.com/anergictcell/hpo/issues/44 and
+        https://github.com/anergictcell/pyhpo/issues/26 for details about this.
+
     """
 
     def __call__(
-        self, data_folder: Optional[str] = None, from_obo_file: bool = True
+        self, data_folder: Optional[str] = None, from_obo_file: bool = True, transitive: bool = False
     ) -> "OntologyClass":
         self.metadata: List[str] = []
         self._map: Dict[int, HPOTerm] = {}
@@ -47,7 +54,7 @@ class OntologyClass:
             data_folder = os.path.join(os.path.dirname(__file__), "data")
 
         if from_obo_file:
-            self._load_from_obo_file(data_folder)
+            self._load_from_obo_file(data_folder, transitive)
 
         return self
 
@@ -348,7 +355,7 @@ class OntologyClass:
     def orpha_diseases(self) -> Set["pyhpo.OrphaDisease"]:
         return self._orpha_diseases
 
-    def _load_from_obo_file(self, data_folder: str) -> None:
+    def _load_from_obo_file(self, data_folder: str, transitive: bool = False) -> None:
         """
         Reads an obo file line by line to add
         HPO terms to the Ontology
@@ -357,6 +364,15 @@ class OntologyClass:
         ----------
         data_folder: str
             Full path to folder where master data is stored
+        transitive: bool
+            Indicates whether to parse gene-hpo annotations transitive. Default: `False`
+
+
+        .. note::
+
+            In version prior to `4.0`, the default value for `transitive` was `True`.
+            See https://github.com/anergictcell/hpo/issues/44 and
+            https://github.com/anergictcell/pyhpo/issues/26 for details about the issue
 
         """
         for term in terms_from_file(data_folder):

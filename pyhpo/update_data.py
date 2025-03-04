@@ -5,6 +5,7 @@ from typing import Optional
 
 from pyhpo.parser.obo import FILENAME as hpo_file
 from pyhpo.parser.genes import FILENAME as gene_file
+from pyhpo.parser.genes import FILENAME_TRANSITIVE as gene_file_transitive
 from pyhpo.parser.diseases import FILENAME as pheno_file
 
 
@@ -16,11 +17,12 @@ logger = logging.getLogger(__name__)
 
 URLS = {
     "HPO_ONTOLOGY": "http://purl.obolibrary.org/obo/hp.obo",
-    "HPO_GENE": "http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt",  # noqa: E501
+    "HPO_GENE": "http://purl.obolibrary.org/obo/hp/hpoa/genes_to_phenotype.txt",  # noqa: E501
+    "HPO_GENE_TRANSITIVE": "http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt",  # noqa: E501
     "HPO_PHENO": "http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa",
 }
 
-FILENAMES = {"HPO_ONTOLOGY": hpo_file, "HPO_GENE": gene_file, "HPO_PHENO": pheno_file}
+FILENAMES = {"HPO_ONTOLOGY": hpo_file, "HPO_GENE": gene_file, "HPO_GENE_TRANSITIVE": gene_file_transitive, "HPO_PHENO": pheno_file}
 
 
 def make_backup(filename: str) -> None:

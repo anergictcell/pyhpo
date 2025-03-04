@@ -146,6 +146,9 @@ class GeneDict(dict):
         self._names: Dict[str, GeneSingleton] = {}
 
     def __call__(self, hgncid: int, symbol: str) -> GeneSingleton:
+        if symbol == "-":
+            symbol = f"Gene {hgncid}"
+
         try:
             return self._names[symbol]
         except KeyError:
