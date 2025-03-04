@@ -41,7 +41,10 @@ class OntologyClass:
     """
 
     def __call__(
-        self, data_folder: Optional[str] = None, from_obo_file: bool = True, transitive: bool = False
+        self,
+        data_folder: Optional[str] = None,
+        from_obo_file: bool = True,
+        transitive: bool = False,
     ) -> "OntologyClass":
         self.metadata: List[str] = []
         self._map: Dict[int, HPOTerm] = {}

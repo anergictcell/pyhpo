@@ -22,7 +22,12 @@ URLS = {
     "HPO_PHENO": "http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa",
 }
 
-FILENAMES = {"HPO_ONTOLOGY": hpo_file, "HPO_GENE": gene_file, "HPO_GENE_TRANSITIVE": gene_file_transitive, "HPO_PHENO": pheno_file}
+FILENAMES = {
+    "HPO_ONTOLOGY": hpo_file,
+    "HPO_GENE": gene_file,
+    "HPO_GENE_TRANSITIVE": gene_file_transitive,
+    "HPO_PHENO": pheno_file,
+}
 
 
 def make_backup(filename: str) -> None:

@@ -122,9 +122,7 @@ def add_negative_decipher_to_term(
     return None
 
 
-def add_omim_to_term(
-    omim: "pyhpo.OmimDisease", term: "pyhpo.HPOTerm"
-) -> None:
+def add_omim_to_term(omim: "pyhpo.OmimDisease", term: "pyhpo.HPOTerm") -> None:
     """
     Recursive function to add OMIM Disease
     to an HPOTerm and all its parents
@@ -144,9 +142,7 @@ def add_omim_to_term(
     return None
 
 
-def add_negative_omim_to_term(
-    omim: "pyhpo.OmimDisease", term: "pyhpo.HPOTerm"
-) -> None:
+def add_negative_omim_to_term(omim: "pyhpo.OmimDisease", term: "pyhpo.HPOTerm") -> None:
     """
     Recursive function to add excluded OMIM Disease
     to an HPOTerm and all its parents
@@ -166,9 +162,7 @@ def add_negative_omim_to_term(
     return None
 
 
-def add_orpha_to_term(
-    orpha: "pyhpo.OrphaDisease", term: "pyhpo.HPOTerm"
-) -> None:
+def add_orpha_to_term(orpha: "pyhpo.OrphaDisease", term: "pyhpo.HPOTerm") -> None:
     """
     Recursive function to add Orpha Disease
     to an HPOTerm and all its parents

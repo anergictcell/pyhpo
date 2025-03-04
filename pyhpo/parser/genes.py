@@ -22,12 +22,15 @@ HPO_ID = 2
 HGNC_ID = 0
 GENE_SYMBOL = 1
 
+
 def _parse_genes(path: str) -> None:
     Gene.clear()
     filename = os.path.join(path, FILENAME)
     with open(filename) as fh:
         reader = csv.reader(
-            remove_outcommented_rows(remove_outcommented_rows(fh), ignorechar="ncbi_gene_id"),
+            remove_outcommented_rows(
+                remove_outcommented_rows(fh), ignorechar="ncbi_gene_id"
+            ),
             delimiter="\t",
         )
         for cols in reader:
@@ -45,7 +48,10 @@ def _parse_genes_transitive(path: str) -> None:
             delimiter="\t",
         )
         for cols in reader:
-            gene = Gene(hgncid=int(cols[HGNC_ID_TRANSITIVE]), symbol=cols[GENE_SYMBOL_TRANSITIVE])
+            gene = Gene(
+                hgncid=int(cols[HGNC_ID_TRANSITIVE]),
+                symbol=cols[GENE_SYMBOL_TRANSITIVE],
+            )
             gene.hpo.add(id_from_string(cols[HPO_ID_TRANSITIVE]))
 
 
@@ -56,9 +62,7 @@ def _add_genes_to_ontology(ontology: "pyhpo.OntologyClass") -> None:
             add_gene_to_term(gene, ontology[term_id])
 
 
-def add_gene_to_term(
-    gene: "pyhpo.GeneSingleton", term: "pyhpo.HPOTerm"
-) -> None:
+def add_gene_to_term(gene: "pyhpo.GeneSingleton", term: "pyhpo.HPOTerm") -> None:
     """
     Recursive function to add Gene to an HPOTerm and all its parents
 
