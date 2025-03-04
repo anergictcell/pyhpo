@@ -230,6 +230,7 @@ class TestOntologyTreeTraversal(unittest.TestCase):
     @patch("pyhpo.term.sorted")
     def test_the_impossible(self, mock_sorted):
         """
+        Test error during sorting path to parent
         I was not able to figure out an actual test case
         to test the exception handling in shortest_path_to_parent.
         So I made this contrived test case here.

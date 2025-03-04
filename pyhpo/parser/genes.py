@@ -35,7 +35,7 @@ def _add_genes_to_ontology(ontology: "pyhpo.OntologyClass") -> None:
 
 
 def add_gene_to_term(
-    gene: "pyhpo.annotations.GeneSingleton", term: "pyhpo.HPOTerm"
+    gene: "pyhpo.GeneSingleton", term: "pyhpo.HPOTerm"
 ) -> None:
     """
     Recursive function to add Gene to an HPOTerm and all its parents

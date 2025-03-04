@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pyhpo"
 description = "A Python package to work with the HPO Ontology"
 readme = "README.rst"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
@@ -28,7 +28,6 @@ keywords = [
 ]
 dependencies = [
     "pydantic >= 2",
-    "backports.cached-property == 1.0.1",
 ]
 dynamic = ["version"]
 
@@ -71,4 +70,4 @@ line-length = 100
 max-complexity = 10
 
 [tool.black]
-target-version = ["py37", "py38", "py39", "py310", "py311", "py312", "py313"]
+target-version = ["py38", "py39", "py310", "py311", "py312", "py313"]
