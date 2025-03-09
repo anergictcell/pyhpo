@@ -558,52 +558,6 @@ class TestOntologyQueries(unittest.TestCase):
         pass
 
 
-class TestDataframe(unittest.TestCase):
-    def setUp(self):
-        items = make_terms()
-        self.root = items[0]
-        self.child_1_1 = items[1]
-        self.child_1_2 = items[2]
-        self.child_2_1 = items[3]
-        self.child_3 = items[4]
-        self.child_4 = items[5]
-        self.child_1_3 = items[6]
-
-        self.terms = Ontology(from_obo_file=False)
-        self.terms._append(self.root)
-        self.terms._append(self.child_1_1)
-        self.terms._append(self.child_1_2)
-        self.terms._append(self.child_2_1)
-        self.terms._append(self.child_3)
-        self.terms._append(self.child_4)
-        self.terms._append(self.child_1_3)
-        self.terms._connect_all()
-
-    @patch("pandas.DataFrame")
-    def test_build_dataframe(self, mock_df):
-        # mock_df = MagicMock()
-        res = self.terms.to_dataframe()
-        data = mock_df.call_args[0][0]
-
-        assert mock_df.call_count == 1
-
-        assert "id" in data
-        assert "name" in data
-        assert "parents" in data
-        assert "children" in data
-
-        assert isinstance(data["id"][0], str)
-        assert isinstance(data["ic_omim"][0], float)
-        assert isinstance(data["ic_orpha"][0], float)
-        assert isinstance(data["ic_decipher"][0], float)
-        assert isinstance(data["ic_gene"][0], float)
-        assert isinstance(data["dTop_l"][0], int)
-        assert isinstance(data["dTop_s"][0], int)
-        assert isinstance(data["dBottom"][0], int)
-
-        assert isinstance(res, MagicMock)
-
-
 class TestOntologyAnnotation(unittest.TestCase):
     def setUp(self):
         self.ontology = make_ontology_with_annotation()

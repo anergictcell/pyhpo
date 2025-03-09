@@ -37,9 +37,8 @@ include-package-data = true
 
 
 [project.optional-dependencies]
-pandas = ["pandas"]
 scipy = ["scipy"]
-all = ["pandas", "scipy"]
+all = ["scipy"]
 dev = [
     "pydantic >= 2",
     "backports.cached-property == 1.0.1",
@@ -50,7 +49,6 @@ dev = [
     "black",
     "ruff",
     "mypy",
-    "pandas",
     "scipy"
 ]
 

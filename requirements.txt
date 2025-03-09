@@ -1,5 +1,2 @@
-pandas
 scipy
 pydantic>=2
-backports.cached-property==1.0.1
-importlib_metadata; python_version <= "3.7"
