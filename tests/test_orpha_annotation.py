@@ -266,3 +266,24 @@ class TestOrphaAnnotationParsing(unittest.TestCase):
         assert self.orpha_diseases[0].negative_hpo == set()
         assert self.orpha_diseases[1].negative_hpo == set()
         assert self.orpha_diseases[2].negative_hpo == set([12])
+
+
+class TestOrphaHpoSet(unittest.TestCase):
+    def setUp(self):
+        Orpha.clear()
+        self.ontology = make_ontology()
+        self.omim_diseases = make_orpha(1)
+        self.omim_diseases[0].hpo.add(31)
+        self.omim_diseases[0].hpo.add(41)
+        _add_orpha_to_ontology(self.ontology)
+
+    def tearDown(self):
+        Orpha.clear()
+
+    def test_hpo_set(self):
+        disease = Orpha.get(0)
+        d_set = disease.hpo_set()
+        assert len(d_set) == 2
+        assert self.ontology[31] in d_set
+        assert self.ontology[41] in d_set
+        assert self.ontology[1] not in d_set

@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
+    "sphinx_rtd_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,7 +58,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "PyHPO"
-copyright = "2023, Jonas Marcello"
+copyright = "2025, Jonas Marcello"
 author = pyhpo.__author__
 
 # The version info for the project you're documenting, acts as replacement for

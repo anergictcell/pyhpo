@@ -30,14 +30,6 @@ class OntologyClass:
         Set of all OMIM-diseases associated with the HPOTerms
     omim_excluded_diseases: set
         Set of all excluded OMIM-diseases associated with the HPOTerms
-
-    .. note::
-
-        Starting with `pyhpo 4.0`, the Ontology will link genes non-transitive to HPO terms.
-        This means it will be the same behavior as the `hpo3` library.
-        See https://github.com/anergictcell/hpo/issues/44 and
-        https://github.com/anergictcell/pyhpo/issues/26 for details about this.
-
     """
 
     def __call__(

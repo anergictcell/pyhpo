@@ -242,3 +242,24 @@ class TestOmimAnnotationParsing(unittest.TestCase):
         assert self.omim_diseases[0].negative_hpo == set()
         assert self.omim_diseases[1].negative_hpo == set()
         assert self.omim_diseases[2].negative_hpo == set([12])
+
+
+class TestOmimHpoSet(unittest.TestCase):
+    def setUp(self):
+        Omim.clear()
+        self.ontology = make_ontology()
+        self.omim_diseases = make_omim(1)
+        self.omim_diseases[0].hpo.add(31)
+        self.omim_diseases[0].hpo.add(41)
+        _add_omim_to_ontology(self.ontology)
+
+    def tearDown(self):
+        Omim.clear()
+
+    def test_hpo_set(self):
+        disease = Omim.get(0)
+        d_set = disease.hpo_set()
+        assert len(d_set) == 2
+        assert self.ontology[31] in d_set
+        assert self.ontology[41] in d_set
+        assert self.ontology[1] not in d_set

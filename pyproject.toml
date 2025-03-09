@@ -43,7 +43,7 @@ all = ["pandas", "scipy"]
 dev = [
     "pydantic >= 2",
     "backports.cached-property == 1.0.1",
-    "sphinx == 6.2.1",
+    "sphinx",
     "sphinx_rtd_theme",
     "sphinx_autodoc_typehints",
     "coverage",
