@@ -90,6 +90,15 @@ class GeneTests(unittest.TestCase):
         self.assertEqual(len(Gene.values()), 2)
         self.assertEqual(len(set(Gene.values())), 2)
 
+    def test_nonames(self):
+        a = Gene(hgncid=1, symbol="-")
+        b = Gene(hgncid=2, symbol="-")
+        c = Gene(hgncid=2, symbol="-")
+
+        self.assertIsNot(a, b)
+        self.assertIs(b, c)
+        self.assertIsNot(a, c)
+
     def test_indexing(self):
         def subindex_length(x):
             return (len(x.keys()), len(x._indicies.keys()), len(x._names.keys()))
@@ -211,6 +220,27 @@ class TestGeneAnnotationParsing(unittest.TestCase):
 
         assert self.genes[0].hpo == set([31])
         assert self.genes[1].hpo == set([41])
+
+
+class TestGeneHpoSet(unittest.TestCase):
+    def setUp(self):
+        Gene.clear()
+        self.ontology = make_ontology()
+        self.omim_diseases = make_genes(1)
+        self.omim_diseases[0].hpo.add(31)
+        self.omim_diseases[0].hpo.add(41)
+        _add_genes_to_ontology(self.ontology)
+
+    def tearDown(self):
+        Gene.clear()
+
+    def test_hpo_set(self):
+        disease = Gene.get(0)
+        d_set = disease.hpo_set()
+        assert len(d_set) == 2
+        assert self.ontology[31] in d_set
+        assert self.ontology[41] in d_set
+        assert self.ontology[1] not in d_set
 
 
 @unittest.skip("TODO")

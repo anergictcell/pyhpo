@@ -1,15 +1,6 @@
 import os
 import math
-import warnings
 from typing import List, Set, Tuple, Optional, Union, Dict, Iterator
-
-try:
-    import pandas as pd  # type: ignore
-except ImportError:
-    warnings.warn(
-        "Some functionality requires pandas, which is currently not available",
-        UserWarning,
-    )
 
 import pyhpo
 from pyhpo import HPOTerm
@@ -30,11 +21,13 @@ class OntologyClass:
         Set of all OMIM-diseases associated with the HPOTerms
     omim_excluded_diseases: set
         Set of all excluded OMIM-diseases associated with the HPOTerms
-
     """
 
     def __call__(
-        self, data_folder: Optional[str] = None, from_obo_file: bool = True
+        self,
+        data_folder: Optional[str] = None,
+        from_obo_file: bool = True,
+        transitive: bool = False,
     ) -> "OntologyClass":
         self.metadata: List[str] = []
         self._map: Dict[int, HPOTerm] = {}
@@ -47,7 +40,7 @@ class OntologyClass:
             data_folder = os.path.join(os.path.dirname(__file__), "data")
 
         if from_obo_file:
-            self._load_from_obo_file(data_folder)
+            self._load_from_obo_file(data_folder, transitive)
 
         return self
 
@@ -259,79 +252,6 @@ class OntologyClass:
                 return True
         return False
 
-    def to_dataframe(self) -> "pd.DataFrame":
-        """
-        Creates a Pandas DataFrame from the most important features
-
-        Each HPO term is one row, the features are present in columns
-
-        Returns
-        -------
-        :class:`DataFrame`
-            The DataFrame of HPO-Terms and their
-            attributes in the following columns
-
-            * **id** ``str`` The HPO Term ID "HP:0000003" (used as index)
-            * **name** ``str`` The HPO Term name "Multicystic kidney dysplasia"
-            * **parents** ``str`` Concatenated list of direct parents of
-              HPO terms. Separated by ``|``
-            * **children** ``str`` Concatenated list of direct children of
-              HPO terms. Separated by ``|``
-            * **ic_omim** ``float`` Information-content
-              (based on associated OMIM diseases)
-            * **ic_gene** ``float`` Information-content
-              (based on associated genes)
-            * **dTop_l** ``int`` Maximum distance to root term
-              (via :func:`pyhpo.term.longest_path_to_root`)
-            * **dTop_s** ``int`` Shortest distance to root term
-              (via :func:`pyhpo.term.shortest_path_to_root`)
-            * **dBottom** ``int`` Longest graph of children nodes
-              (via :func:`pyhpo.term.longest_path_to_bottom`)
-            * **genes** ``str`` Concatenated list of associated
-              genes. Separated by ``|``
-            * **diseases** ``str`` Concatenated list of associated
-              OMIM diseases. Separated by ``|``
-        """
-
-        data: Dict[str, List[Union[float, int, str]]] = {
-            "id": [],
-            "name": [],
-            "parents": [],
-            "children": [],
-            "ic_omim": [],
-            "ic_orpha": [],
-            "ic_decipher": [],
-            "ic_gene": [],
-            "dTop_l": [],
-            "dTop_s": [],
-            "dBottom": [],
-            "genes": [],
-            "omim": [],
-            "orpha": [],
-            "decipher": [],
-        }
-
-        # This is not the most elegant way to generate a DataFrame
-        # But it works
-        for term in self:
-            data["id"].append(term.id)
-            data["name"].append(term.name)
-            data["parents"].append("|".join([x.id for x in term.parents]))
-            data["children"].append("|".join([x.id for x in term.children]))
-            data["ic_omim"].append(term.information_content.omim)
-            data["ic_orpha"].append(term.information_content.orpha)
-            data["ic_decipher"].append(term.information_content.decipher)
-            data["ic_gene"].append(term.information_content.gene)
-            data["dTop_l"].append(term.longest_path_to_root())
-            data["dTop_s"].append(term.shortest_path_to_root())
-            data["dBottom"].append(term.longest_path_to_bottom())
-            data["genes"].append("|".join([str(x) for x in term.genes]))
-            data["omim"].append("|".join([str(x) for x in term.omim_diseases]))
-            data["orpha"].append("|".join([str(x) for x in term.omim_diseases]))
-            data["decipher"].append("|".join([str(x) for x in term.omim_diseases]))
-
-        return pd.DataFrame(data).set_index("id")
-
     @property
     def genes(self) -> Set["pyhpo.GeneSingleton"]:
         return self._genes
@@ -348,7 +268,7 @@ class OntologyClass:
     def orpha_diseases(self) -> Set["pyhpo.OrphaDisease"]:
         return self._orpha_diseases
 
-    def _load_from_obo_file(self, data_folder: str) -> None:
+    def _load_from_obo_file(self, data_folder: str, transitive: bool = False) -> None:
         """
         Reads an obo file line by line to add
         HPO terms to the Ontology
@@ -357,6 +277,15 @@ class OntologyClass:
         ----------
         data_folder: str
             Full path to folder where master data is stored
+        transitive: bool
+            Indicates whether to parse gene-hpo annotations transitive. Default: `False`
+
+
+        .. note::
+
+            In version prior to `4.0`, the default value for `transitive` was `True`.
+            See https://github.com/anergictcell/hpo/issues/44 and
+            https://github.com/anergictcell/pyhpo/issues/26 for details about the issue
 
         """
         for term in terms_from_file(data_folder):

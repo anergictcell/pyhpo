@@ -57,9 +57,7 @@ This will install a base version of **PyHPO** that offers most functionality.
 
 .. note::
 
-    Some features of PyHPO require ``pandas`` and ``scipy``. The standard installation via pip will not include pandas or scipy and PyHPO will work just fine. (You will get a warning on the initial import though).
-
-    Without installing ``pandas``, you won't be able to export the Ontology as a ``Dataframe``, everything else will work fine.
+    Some features of PyHPO require  ``scipy``. The standard installation via pip will not include scipy and PyHPO will work just fine. (You will get a warning on the initial import though).
 
     Without installing ``scipy``, you won't be able to use the ``stats`` module, especially the enrichment calculations.
 
@@ -70,13 +68,7 @@ If you want to do enrichment analysis, you must also install ``scipy``.
 
     pip install 'pyhpo[scipy]'
 
-If you want to work with **PyHPO** using ``pandas`` dataframes, you can install the ``pandas`` dependency
-
-.. code:: bash
-
-    pip install 'pyhpo[pandas]'
-
-Or simply install both together:
+Or simply install all optional dependencies:
 
 .. code:: bash
 

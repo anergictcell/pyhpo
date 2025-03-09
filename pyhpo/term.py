@@ -3,7 +3,7 @@ from functools import reduce, lru_cache
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from pydantic import BaseModel, Field
-from backports.cached_property import cached_property
+from functools import cached_property
 
 from pyhpo.config import MODIFIER_IDS
 from pyhpo.similarity import SimScore

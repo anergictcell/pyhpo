@@ -1,7 +1,7 @@
 import sys
+from typing import List
 import unittest
 
-from pyhpo import ontology as ont
 from pyhpo.ontology import Ontology
 from pyhpo.set import HPOSet
 from pyhpo.stats import EnrichmentModel
@@ -12,8 +12,8 @@ from pyhpo import annotations as an
 N_TERMS = 19484
 
 # Number of genes in the annotation dataset
-# cut -f4 pyhpo/data/phenotype_to_genes.txt | grep -v "^#" | grep -v "^gene_symbol" | sort -u | wc -l  # noqa: E501
-N_GENES = 5126
+# cut -f1 pyhpo/data/genes_to_phenotype.txt | grep -v "^#" | grep -v "^ncbi_gene_id" | sort -u | wc -l  # noqa: E501
+N_GENES = 5132
 
 # Number of OMIM diseases in the annotation dataset
 # cut -f1,3 pyhpo/data/phenotype.hpoa | grep "^OMIM" | sort -u | cut -f2 | grep -v "NOT" | wc -l  # noqa: E501
@@ -150,24 +150,34 @@ class IntegrationFullTest(unittest.TestCase):
         assert broad_term.parent_of(scoliosis)
         assert broad_term.parent_of(specific_term)
 
-    @unittest.skipUnless(
-        "pd" in globals() or "pd" in dir(ont), "Pandas library is not installed/loaded"
-    )
-    def test_pandas_dataframe(self):
-        """
-        These test will most likely need to be updated
-        after every data update
-        """
-        df = self.terms.to_dataframe()
+    def test_various_global_stats(self):
+        ic_omim: List[float] = []
+        ic_orpha: List[float] = []
+        ic_decipher: List[float] = []
+        ic_gene: List[float] = []
+        dTop_l: List[int] = []
+        dTop_s: List[int] = []
+        dBottom: List[int] = []
 
-        assert df.shape == (N_TERMS, 14), df.shape
-        assert 4 < df.ic_omim.mean() < 5, df.ic_omim.mean()
-        assert 3 < df.ic_orpha.mean() < 4, df.ic_orpha.mean()
-        assert 0 < df.ic_decipher.mean() < 1, df.ic_decipher.mean()
-        assert 3.5 < df.ic_gene.mean() < 4.0, df.ic_gene.mean()
-        assert 7.5 < df.dTop_l.mean() < 8.0, df.dTop_l.mean()
-        assert 6 < df.dTop_s.mean() < 7, df.dTop_s.mean()
-        assert 0.5 < df.dBottom.mean() < 0.7, df.dBottom.mean()
+        for term in self.terms:
+            ic_omim.append(term.information_content.omim)
+            ic_orpha.append(term.information_content.orpha)
+            ic_decipher.append(term.information_content.decipher)
+            ic_gene.append(term.information_content.gene)
+            dTop_l.append(term.longest_path_to_root())
+            dTop_s.append(term.shortest_path_to_root())
+            dBottom.append(term.longest_path_to_bottom())
+
+        items = len(ic_omim)
+        assert items == N_TERMS, items
+
+        assert 4 < sum(ic_omim) / items < 5, sum(ic_omim) / items
+        assert 3 < sum(ic_orpha) / items < 4, sum(ic_orpha) / items
+        assert 0 < sum(ic_decipher) / items < 1, sum(ic_decipher) / items
+        assert 3.5 < sum(ic_gene) / items < 4.0, sum(ic_gene) / items
+        assert 7.5 < sum(dTop_l) / items < 8.0, sum(dTop_l) / items
+        assert 6 < sum(dTop_s) / items < 7, sum(dTop_s) / items
+        assert 0.5 < sum(dBottom) / items < 0.7, sum(dBottom) / items
 
     def test_set(self):
         full_set = HPOSet.from_queries([int(x) for x in self.terms])

@@ -43,6 +43,7 @@ It can now be used across all modules. Imagine the following source code:
     def get_term_name(term_id: int) -> str:
         try:
             term = Ontology[term_id]
+            return term.name
         except KeyError:
             print("Term not present in Ontology")
             return ""

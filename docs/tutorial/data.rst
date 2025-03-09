@@ -3,11 +3,12 @@ Masterdata
 
 **PyHPO** ships with a full version of the HP ontology, including gene and disease associations. I try to keep this data up to date, but will frequently fall behind on the release schedule.
 
-To build the ontology, the following 3 files are needed from the HPO masterdata:
+To build the ontology, the following 4 files are needed from the HPO masterdata:
 
 * ``http://purl.obolibrary.org/obo/hp.obo``
-* ``http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt``
+* ``http://purl.obolibrary.org/obo/hp/hpoa/genes_to_phenotype.txt``
 * ``http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa``
+* ``http://purl.obolibrary.org/obo/hp/hpoa/phenotype_to_genes.txt`` (optional)
 
 
 Updating to the most recent version

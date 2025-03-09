@@ -3,4 +3,4 @@ include CHANGELOG.rst
 include pyhpo/data/phenotype_to_genes.txt
 include pyhpo/data/hp.obo
 include pyhpo/data/phenotype.hpoa
-
+include pyhpo/data/genes_to_phenotype.txt

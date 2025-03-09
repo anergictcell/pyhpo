@@ -4,7 +4,7 @@ from pyhpo.parser import genes
 
 
 def build_ontology_annotations(
-    data_folder: str, ontology: "pyhpo.OntologyClass"
+    data_folder: str, ontology: "pyhpo.OntologyClass", transitive: bool = False
 ) -> None:
     """
     Builds all annotations and associated genes and diseases
@@ -18,7 +18,11 @@ def build_ontology_annotations(
     ontology:
         The ontology of HPO terms
     """
-    genes._parse_phenotype_to_gene_file(data_folder)
+    if transitive:
+        genes._parse_genes_transitive(data_folder)
+    else:
+        genes._parse_genes(data_folder)
+
     genes._add_genes_to_ontology(ontology)
 
     diseases._parse_phenotype_hpoa_file(data_folder)

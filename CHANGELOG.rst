@@ -1,10 +1,18 @@
 Changelog
 =========
 
+4.0.0
+-----
+Removed Ontology export to dataframe and pandas dependencies
+Change logic of gene-HPO association parsing to be non-transitive by default
+Add method to convert genes or diseases to HPOSet
+Update documentation
+Update minimum Python requirement to 3.8
+Remove dependencies for backporting logic to Python 3.7
+
 3.3.2
 -----
 Data update to 2025-01-16
-
 
 3.3.1
 -----

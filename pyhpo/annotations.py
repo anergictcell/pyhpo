@@ -2,6 +2,8 @@ from typing import Any, ClassVar, Dict, Set, Union
 
 from pydantic import BaseModel
 
+import pyhpo
+
 
 class Annotation(BaseModel):
     id: int
@@ -21,18 +23,18 @@ class Annotation(BaseModel):
 
         Parameters
         ----------
-        verbose: bool, default: ``False``
+        verbose: ``bool``, default: ``False``
             Return all associated HPOTerms
 
         Returns
         -------
-        dict
+        ``dict``
             A dict with the following keys
             (additional keys might be present, depending on the class)
 
-            * **id** - The HGNC ID
-            * **name** - The gene symbol
-            * **hpo** - (If ``verbose == True``):
+            * **id** - The gene or disease ID
+            * **name** - The gene or disease name
+            * **hpo** - (If ``verbose=True``):
               set of :class:`pyhpo.term.HPOTerm`
         """
         res = {}
@@ -41,6 +43,37 @@ class Annotation(BaseModel):
         if verbose:
             res["hpo"] = self.hpo
         return res
+
+    def hpo_set(self) -> "pyhpo.HPOSet":
+        """
+        Returns an ``HPOSet`` of all associated ``HPOTerm``
+
+        Returns
+        -------
+        :class:`pyhpo.set.HPOSet`
+            An ``HPOSet`` containing all associated ``HPOTerm``
+
+        Examples
+        --------
+
+        .. code-block:: python
+
+            from pyhpo import Ontology
+            Ontology()
+
+            gene = list(Ontology.genes)[0]
+            gene.hpo_set()
+            # >> HPOSet.from_serialized(7+118+152+234+271+315, ....)
+
+            omim_disease = list(Ontology.omim_diseases)[0]
+            omim_disease.hpo_set()
+            # >> HPOSet.from_serialized(7+118+152+234+271+315, ....)
+
+            orpha_disease = list(Ontology.orpha_diseases)[0]
+            orpha_disease.hpo_set()
+            # >> HPOSet.from_serialized(7+118+152+234+271+315, ....)
+        """
+        return pyhpo.HPOSet.from_queries(self.hpo)
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, int):
@@ -108,12 +141,14 @@ class GeneDict(dict):
     This class is initilized once and genes are created by calling
     the instance of GeneDict to ensure that the same gene exists only once.
 
+    Don't instantiate Genes yourself. See the docs for explanations!
+
     For example ::
 
         Gene = GeneDict()
-        gba = Gene(symbol='GBA')
-        ezh2 = Gene(symbol='EZH2')
-        gba_2 = Gene(symbol='GBA')
+        gba = Gene(hgncid=12, symbol='GBA')
+        ezh2 = Gene(hgncid=161, symbol='EZH2')
+        gba_2 = Gene(hgncid=12, symbol='GBA')
 
         gba is ezh2
         >> False
@@ -122,15 +157,6 @@ class GeneDict(dict):
 
     Parameters
     ----------
-    cols: list, default: ``None``
-        Only used for backwards compatibility reasons.
-        Should have the following entries
-
-        * None
-        * None
-        * HGNC-ID
-        * Gene symbol
-
     hgncid: int
         The HGNC ID
     symbol: str
@@ -146,6 +172,35 @@ class GeneDict(dict):
         self._names: Dict[str, GeneSingleton] = {}
 
     def __call__(self, hgncid: int, symbol: str) -> GeneSingleton:
+        """
+        Instantiates a new :class:`GeneSingleton` or returns an already existing one.
+
+        The method will first check if the gene already exists. It does so by first searching
+        via the gene symbol and then via hgncid. If both don't exist, a new instance will be
+        created.
+
+        .. warning::
+
+            There is rarely ever any need to instantiate genes manually. All genes that are present in JAX's
+            HPO masterdata are automatically added and can be retrieved using :func:`Gene.get`.
+            ``pyhpo`` contains logic to ensure that the same gene is not instantiated multiple times and will
+            return an already existing gene instance, whenever possible.
+
+        Parameters
+        ----------
+            hgncid: ``int``
+                The gene's HGNC-ID
+            symbol: ``str``
+                The gene's HUGO gene synbol
+
+        Returns
+        -------
+        :class:`.GeneSingleton`
+            Either creates a new instance or returns an existing one, if already present
+        """
+        if symbol == "-":
+            symbol = f"Gene {hgncid}"
+
         try:
             return self._names[symbol]
         except KeyError:
@@ -179,22 +234,48 @@ class GeneDict(dict):
         self._names.clear()
         dict.clear(self)
 
-    def get(self, query: Union[int, str], default: Any = None) -> GeneSingleton:
+    def get(
+        self,
+        query: Union[int, str],
+        default: Any = None,  # `default` is added as parameter to be consistent with ``dict.get``
+    ) -> GeneSingleton:
         """
-        Allows client to query for a gene by both ID and symbol.
-        This method is useful for client that do not want to add new
-        genes
+        Get the Gene based on query parameters. This method is the fastest and safest way to
+        retrieve a single Gene instance.
 
         Parameters
         ----------
-        query: int or str
-            The (most likely user supplied) query.
-            Can be either the HGNC-ID or the gene symbol
+        query: ``str`` or ``int``
+            The gene symbol or HGNC-ID
 
         Returns
         -------
-        GeneSingleton
+        :class:`GeneSingleton`
             If a gene is found, it is returned. Otherwise an Error is raised
+
+        Raises
+        ------
+        ``KeyError``
+            The queried gene does not exist
+
+        Examples
+        --------
+
+        .. code::
+
+            from pyhpo import Ontology
+            from pyhpo.annotations import Gene
+
+            Ontology()
+
+            ezh2 = Gene.get("EZH2")
+
+            print(ezh2.id)
+            # >> 2146
+
+            print(len(ezh2.hpo))
+            # >> 99
+
         """
         try:
             idx: int = int(query)
@@ -307,6 +388,33 @@ class DiseaseDict(dict):
         self._indicies: Dict[int, DiseaseSingleton] = {}
 
     def __call__(self, diseaseid: int, name: str) -> DiseaseSingleton:
+        """
+        Instantiates a new :class:`DiseaseSingleton` or returns an already existing one.
+
+        The method will first check if the disease already exists. If it doesn't exist,
+        a new instance will be created.
+
+        .. warning::
+
+            There is rarely ever any need to instantiate diseases manually. All diseases that are
+            present in JAX's HPO masterdata are automatically added and can be retrieved using
+            the diseases ``get`` method.
+            ``pyhpo`` contains logic to ensure that the same disease  is not instantiated multiple
+            times and will return an already existing disease instance, whenever possible.
+
+        Parameters
+        ----------
+            diseaseid: ``int``
+                The ID of the disease
+            name: ``str``
+                The diseases's name
+
+        Returns
+        -------
+        :class:`.DiseaseSingleton`
+            Either creates a new instance or returns an existing one, if already present
+        """
+
         assert self.disease_class
         try:
             return self._indicies[diseaseid]
@@ -335,11 +443,14 @@ class DiseaseDict(dict):
         self._indicies.clear()
         dict.clear(self)
 
-    def get(self, query: Union[int, str], default: Any = None) -> DiseaseSingleton:
+    def get(
+        self,
+        query: int,
+        default: Any = None,  # `default` is added as parameter to be consistent with ``dict.get``
+    ) -> DiseaseSingleton:
         """
-        Allows client to query for a disease by ID.
-        This method is useful for client that do not want to add new
-        diseases
+        Get the disease based on query parameters. This method is the fastest and safest way to
+        retrieve a single disease instance.
 
         Parameters
         ----------
@@ -348,8 +459,27 @@ class DiseaseDict(dict):
 
         Returns
         -------
-        DiseaseSingleton
-            If a disease is found, it is returned. Otherwise an Error is raised
+        DiseaseSingleton (based on disease type)
+            If a disease is found, it is returned. Otherwise a ``KeyError`` is raised
+
+        Examples
+        --------
+
+        .. code::
+
+            from pyhpo import Ontology
+            from pyhpo.annotations import Omim, Orpha
+
+            Ontology()
+
+            orpha_disease = Orpha.get(77260)
+            omim_disease = Omim.get(230900)
+
+            print(orpha_disease.name)
+            # >> "Gaucher disease type 2"
+
+            print(omim_disease.name)
+            # >> "Gaucher disease, type II"
         """
         try:
             idx = int(query)
